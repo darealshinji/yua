@@ -1,10 +1,11 @@
-QT       += core gui opengl
-linux-g++-64: QT += dbus
+QT += core gui opengl dbus
 
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
+
 TARGET = yua
 TEMPLATE = app
+
 
 DEFINES += 'YUA_VERSION=\'\"6\"\''
 
@@ -61,13 +62,14 @@ HEADERS  += yua.h \
     ../common/threadsafequeue.h \
     fps_conversion.h
 
+
 INCLUDEPATH += ../common
 
 
-linux-g++-64:QMAKE_CXXFLAGS_RELEASE += -fno-caller-saves #this optimization breaks nnedi3's dotProd_m32_m16_i16_SSE2() - the vals argument is 0! (20130217)
+#this optimization breaks nnedi3's dotProd_m32_m16_i16_SSE2() - the vals argument is 0! (20130217)
+QMAKE_CXXFLAGS_RELEASE += -fno-caller-saves
 
 
-linux-g++-64 {
 SOURCES += \
 nnedi3/nnedi3_extract_m8_i16_SSE2_linux.s \
 nnedi3/nnedi3_castScale_SSE_linux.s \
@@ -77,28 +79,17 @@ nnedi3/nnedi3_e0_m16_SSE2_linux.s \
 nnedi3/nnedi3_uc2s64_SSE2_linux.s \
 nnedi3/nnedi3_weightedAvgElliottMul5_m16_SSE2_linux.s \
 nnedi3/nnedi3_processLine0_SSE2_linux.s
-}
 
-
-linux-g++-64:YUAPLATFORMNAME = linux
 
 LIBS += \
 -lavcodec \
--lavdevice \
--lavfilter \
 -lavformat \
 -lavresample \
 -lavutil \
--lpostproc \
--lswresample \
--lswscale
-
-#LIBS += -lfdk-aac -lx264
+-lswscale \
+-lz
 
 QMAKE_CXXFLAGS += -D__STDC_CONSTANT_MACROS #for libavcodec/avcodec.h
-INCLUDEPATH += ../Yua/include/$${YUAPLATFORMNAME}
-
-linux-g++-64:LIBS += -lz
 
 static {
     CONFIG += static
@@ -106,11 +97,9 @@ static {
 }
 
 
-RESOURCES += statid.qrc
-
-linux-g++-64: RESOURCES += icon.qrc
-
-linux-g++-64: RESOURCES += ffmpeg.qrc
-linux-g++-64: RESOURCES += mp4box.qrc
-
+RESOURCES += \
+statid.qrc \
+icon.qrc \
+ffmpeg.qrc \
+mp4box.qrc
 
