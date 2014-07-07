@@ -1,0 +1,303 @@
+#mac os x
+
+instdir="/Volumes/2/clanghome/shared"
+mkdir -p $instdir
+
+
+#fdk-aac
+
+brew install automake
+brew install libtool
+
+git clone --depth 1 git://github.com/mstorsjo/fdk-aac.git
+cd fdk-aac
+autoreconf -fiv
+
+CC=clang \
+CXX=clang++ \
+CFLAGS="-I$instdir/include -mmacosx-version-min=10.6" \
+LDFLAGS="-L$instdir/lib -mmacosx-version-min=10.6" \
+./configure \
+--prefix=$instdir
+
+make
+
+cp .libs/libfdk-aac.a ~/code/Yua/lib/mac/
+
+make install
+
+
+#x264
+
+brew install yasm
+
+git clone --depth 1 git://git.videolan.org/x264
+cd x264
+CC=clang CXX=clang++ ./configure \
+--prefix=$instdir \
+--extra-cflags="-I$instdir/include -mmacosx-version-min=10.6" \
+--extra-ldflags="-L$instdir/lib -mmacosx-version-min=10.6" \
+--disable-gpac \
+--disable-lavf \
+--disable-ffms \
+--enable-shared
+
+CC=clang CXX=clang++ make -j 4
+
+cp libx264.a ~/code/Yua/lib/mac/
+
+make install
+
+
+#ffmpeg
+
+git clone git://source.ffmpeg.org/ffmpeg.git ffmpeg
+cd ffmpeg
+./configure \
+--cc=clang \
+--prefix=$instdir \
+--extra-cflags="-I$instdir/include -mmacosx-version-min=10.6" \
+--extra-ldflags="-L$instdir/lib -mmacosx-version-min=10.6" \
+--enable-nonfree \
+--enable-libfdk-aac \
+--enable-runtime-cpudetect \
+--enable-avresample \
+--enable-gpl \
+--enable-version3 \
+--enable-libx264 \
+--enable-shared
+
+make -j 4
+
+find . -name \*.a -exec cp -v {} ~/code/Yua/lib/mac/ \;
+
+make install
+
+#don't forget to move the include files over manually from $instdir!
+
+
+#mp4box
+#this is incompatible with 10.5 as of 20130122 - http://stackoverflow.com/questions/12326237/libspotify-on-os-x-10-5-and-missing-symbol
+svn co https://gpac.svn.sourceforge.net/svnroot/gpac/trunk/gpac gpac
+cd gpac
+#change
+#echo "LIBTOOL=libtool" >> config.mak
+#to
+#echo "LIBTOOL=/usr/bin/libtool" >> config.mak
+#in the configure script - i had gnu libtool before bsd libtool in my $PATH and the two are incompatible
+./configure --enable-static-bin --static-mp4box
+make
+#it may error, but find . -name MP4Box
+cp ./bin/gcc/MP4Box /e/mac/Yua/mp4box
+
+
+
+
+
+#windows - in linux - don't forget to sign them using sign.bat after copying them to /e/windows/yua !
+
+#use this as a base: http://alex.jurkiewi.cz/blog/2010/cross-compiling-x264-for-win32-on-ubuntu-linux
+
+#fdk-aac
+git clone --depth 1 git://github.com/mstorsjo/fdk-aac.git
+cd fdk-aac
+autoreconf -fiv
+./configure --prefix=/home/parallels/mingw --enable-shared=no --host=i686-w64-mingw32
+make -j 12
+make install
+
+
+#x264
+git clone git://git.videolan.org/x264
+cd x264
+
+./configure \
+--cross-prefix=i686-w64-mingw32- \
+--host=i686-w64-mingw32 \
+--prefix=../.. \
+--enable-static \
+--disable-lavf \
+--disable-ffms \
+--disable-gpac \
+--enable-win32thread
+
+make -j 12
+cp libx264.a ~/code/Yua/lib/windows/
+make install
+
+
+#zlib - needed for many ffmpeg formats
+wget -qO - http://zlib.net/zlib-1.2.7.tar.gz | tar xzvf -
+cd zlib-1.2.7
+
+export CC=i686-w64-mingw32-gcc
+export CXX=i686-w64-mingw32-g++
+export CPP=i686-w64-mingw32-cpp
+export AR=i686-w64-mingw32-ar
+export RANLIB=i686-w64-mingw32-ranlib
+export ADD2LINE=i686-w64-mingw32-addr2line
+export AS=i686-w64-mingw32-as
+export LD=i686-w64-mingw32-ld
+export NM=i686-w64-mingw32-nm
+export STRIP=i686-w64-mingw32-strip
+
+./configure --prefix=../.. --static
+make -j 4
+make install
+
+
+#ffmpeg
+git clone git://source.ffmpeg.org/ffmpeg.git ffmpeg
+cd ffmpeg
+#git reset --hard n0.8-19520-g88d55b8
+
+./configure \
+--cpu=i686 \
+--cross-prefix=i686-w64-mingw32- \
+--arch=x86 \
+--target-os=mingw32 \
+--prefix=../.. \
+--enable-memalign-hack \
+--enable-gpl \
+--disable-avisynth \
+--enable-postproc \
+--enable-avresample \
+--enable-runtime-cpudetect \
+--enable-version3 \
+--enable-nonfree \
+--enable-libfdk-aac \
+--enable-libx264 \
+--enable-zlib \
+--extra-cflags=-I$HOME/mingw/include \
+--extra-ldflags=-L$HOME/mingw/lib
+
+make -j 12
+find . -name \*.a -exec cp -v {} ~/code/Yua/lib/windows/ \;
+cp ffmpeg.exe ~/code/Yua/helpers/windows/ffmpeg
+make install
+cd ~/code/Yua/helpers/windows && ../../make_qrc.sh
+
+
+#mp4box
+svn co https://gpac.svn.sourceforge.net/svnroot/gpac/trunk/gpac gpac
+
+#in the configure script, change targetos=`uname -s` to targetos="MINGW32"
+
+#comment out the conditional around the test for system zlib, something like this:
+#if test "$cross_prefix" = "" ; then
+  if $cc -o $TMPO $TMPC -lz $LDFLAGS   ; then
+      has_zlib="system"
+  fi
+#fi
+
+#comment this out:
+if test "$mingw32" = "yes" ; then
+    cross_prefix=""
+fi
+
+#change
+extralibs="$extralibs -lws2_32 -lwinmm"
+#to
+extralibs="$extralibs -lws2_32 -lwinmm -lz"
+
+../../mingw ./configure --verbose --cross-prefix="i586-mingw32msvc-" --enable-static-bin --use-js=no --use-ft=no --use-jpeg=no --use-png=no --use-faad=no --use-mad=no --use-xvid=no --use-ffmpeg=no --use-ogg=no --use-vorbis=no --use-theora=no --use-openjpeg=no --disable-ssl --disable-opengl --disable-wx --disable-oss-audio --disable-x11-shm --disable-x11-xv --disable-fragments --use-a52=no --disable-xmlrpc --disable-dvb --disable-alsa --disable-bifs --static-mp4box --extra-cflags="-I$HOME/win32-x264/include" --extra-ldflags="-L$HOME/win32-x264/lib"
+
+#there is a conflicting config.h in the include path from pthreads or something so mv ../../include/config.h config.h.bak
+
+#for large file support, in utils/os_divers.c, change the mingw file i/o equivalences
+#change:
+#elif defined(GPAC_CONFIG_WIN32)        /* mingw or cygwin */
+        return (u64) ftell(fp);
+#to this:
+#elif defined(GPAC_CONFIG_WIN32)        /* mingw or cygwin */
+        return (u64) ftello64(fp);
+
+#and this:
+#elif defined(GPAC_CONFIG_WIN32)        /* mingw or cygwin */
+        return (u64) fseek(fp, (s32) offset, whence);
+#to this:
+#elif defined(GPAC_CONFIG_WIN32)        /* mingw or cygwin */
+        return (u64) fseeko64(fp, (off64_t) offset, whence);
+
+#now ready to run make:
+make -j 4
+
+#it will fail, but bin/gcc/MP4Box.exe is ready to go
+cp bin/gcc/MP4Box.exe ~/Desktop/Parallels\ Shared\ Folders/Home/Documents/eyeassist/windows/yua/mp4box
+
+
+
+
+
+
+
+#linux
+
+sudo aptitude install zlib1g-dev libjpeg-dev libtiff4-dev libmng-dev libpng12-dev mesa-common-dev libglu1-mesa-dev libdirectfb-dev libgstreamer0.10-dev libgstreamer-plugins-base0.10-dev libpulse-dev libaudio-dev libasound2-dev libfreetype6-dev libfontconfig1-dev libts-dev libcups2-dev libdbus-1-dev libglib2.0-dev libgtk2.0-dev libx11-dev libxext-dev libxcursor-dev libxfixes-dev libxrandr-dev libxrender-dev libxv-dev libxinerama-dev libxi-dev libsm-dev libssl-dev firebird2.5-dev libmysqlclient-dev libpq-dev libsqlite0-dev libsqlite3-dev 
+
+#qt
+
+cd qt-everywhere-opensource-src-4.8.4
+./configure -opensource -static -nomake examples -nomake demos -qt-zlib -qt-libjpeg -qt-libmng -qt-libtiff -qt-libpng 
+make -j 4
+sudo make install
+
+
+#fdk-aac
+
+git clone --depth 1 git://github.com/mstorsjo/fdk-aac.git
+cd fdk-aac
+autoreconf -fiv
+./configure --disable-shared
+make -j 4
+sudo make install
+
+
+#x264
+#first install yasm from source if you don't have version 1.2.0 or later
+git clone --depth 1 git://git.videolan.org/x264
+cd x264
+./configure \
+--prefix=$HOME \
+--enable-static \
+--disable-lavf \
+--disable-ffms \
+--disable-gpac \
+--disable-opencl
+make -j 12
+cp libx264.a ~/code/Yua/lib/linux/
+make install
+
+
+#ffmpeg
+git clone git://source.ffmpeg.org/ffmpeg.git ffmpeg
+cd ffmpeg
+
+./configure \
+--prefix=$HOME \
+--enable-gpl \
+--enable-version3 \
+--enable-nonfree \
+--enable-libfdk-aac \
+--enable-libx264 \
+--enable-memalign-hack \
+--enable-runtime-cpudetect \
+--enable-avresample \
+--extra-cflags=-I$HOME/include \
+--extra-ldflags=-L$HOME/lib
+
+
+make -j 12
+find . -name \*.a -exec cp -v {} ~/code/Yua/lib/linux/ \;
+cp ffmpeg ~/code/Yua/helpers/linux/
+make install
+cd ~/code/Yua/helpers/linux && ../../make_qrc.sh
+
+
+#mp4box
+svn co https://gpac.svn.sourceforge.net/svnroot/gpac/trunk/gpac gpac
+cd gpac
+./configure --enable-static-bin --static-mp4box
+make -j 4
+#it may error, but find . -name MP4Box
+cp bin/gcc/MP4Box ../Desktop/Parallels\ Shared\ Folders/Home/Documents/eyeassist/Linux/Yua/mp4box
