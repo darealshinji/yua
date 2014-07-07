@@ -149,6 +149,7 @@ INCLUDEPATH += ../Yua/include/$${YUAPLATFORMNAME}
 mac:LIBS += -lz -lbz2 -liconv
 win32:LIBS += libws2_32 #required for ffmpeg's networking crap
 win32:LIBS += "-Wl,--large-address-aware" #so yua can use more than 1.5 gigs of ram (20130607)
+linux-g++-64:LIBS += -lz
 
 mac:LIBS += -framework CoreFoundation -framework IOKit #for Power_Management
 
@@ -162,6 +163,7 @@ RESOURCES += statid.qrc
 
 mac: RESOURCES += icon.qrc helpers/mac/helpers.qrc helpers/mac/nnedi3.qrc
 win32: RESOURCES += icon.qrc
+linux-g++-64: RESOURCES += icon.qrc
 
 linux-g++-64: {
 RESOURCES += \
