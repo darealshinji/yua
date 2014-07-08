@@ -109,12 +109,12 @@ void Video_Encoder::start(Video_Information new_video_information, QString name,
         av_dict_set(&opts, "qpmin", "4", 0);
         if (current_job_name == "MQ") { //it's a shame how gimped mq is, but then again compatibility is the best it's been since vhs was king (20130211)
                 av_dict_set(&opts, "profile", "baseline", 0);
-                //av_dict_set(&opts, "level", "1.3", 0); //from anri
+                av_dict_set(&opts, "level", "13", 0); //from anri
         } else {
                 if (video_information.colorspace == AV_PIX_FMT_YUV420P) {
                         av_dict_set(&opts, "profile", "high", 0);
                 } //otherwise it is set automatically to high422 or high444 (20130526)
-                //av_dict_set(&opts, "level", "4.1", 0); //bluray compatibility level
+                av_dict_set(&opts, "level", "41", 0); //bluray compatibility level
         }
 
         c->pix_fmt = (AVPixelFormat)video_information.colorspace;
