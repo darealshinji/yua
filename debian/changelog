@@ -1,0 +1,11 @@
+yua (6-1) trusty; urgency=low
+
+  * Use system libs instead of embedded libs
+
+ -- Marshall Banana <djcj@gmx.de>  Tue, 08 Jul 2014 17:31:49 +0200
+
+yua (6) unstable; urgency=low
+
+  * Initial release
+
+ -- Marshall Banana <djcj@gmx.de>  Tue, 08 Jul 2014 17:05:33 +0200

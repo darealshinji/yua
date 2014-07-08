@@ -1,0 +1,253 @@
+.TH YUA 1 "JULY 2014" "version 6"
+.SH NAME
+Yua \- Speedrun encoding tool
+.SH SYNOPSIS
+.B yua [\fRoptions\fB]
+
+.SH DESCRIPTION
+.B Yua
+automates the conversion process of your speedruns footage.
+The video material will be encoded to the SpeedDemosArchive (SDA)
+quality standards. See the "GLOSSARY OF TERMS" section for an
+explanation of SDA and video encoding specific terms.
+
+.SH OPTIONS
+.TP
+\fB\-\-input\fR="/path/to/your/input.avi"
+.TP
+\fB\-\-append\fR="/path/to/additional/input.avi"
+can be used multiple times
+.TP
+\fB\-\-output-basename
+e.g.: \-\-output-basename="MyRun"
+.br
+_HQ, _IQ labels and .mp4 extension will be appended automatically
+.TP
+\fB\-\-qualities
+possible values: x i h m l
+.br
+e.g.: \-\-qualities=mh
+.TP
+\fB\-\-interlaced
+.TP
+\fB\-\-progressive
+.TP
+\fB\-\-f
+e.g.: \-\-f1, \-\-f2, etc.
+.TP
+\fB\-\-d
+e.g.: \-\-d4, \-\-d1
+.TP
+\fB\-\-2d
+.TP
+\fB\-\-3d
+.TP
+\fB\-\-mono
+corresponds to "downmix to mono" option in the gui
+.TP
+\fB\-\-statid
+.TP
+\fB\-\-enables the statid checkbox
+.TP
+\fB\-\-statid\fR#
+e.g.: \-\-statid1="My Name" \-\-statid2="Metroid Prime" \-\-statid3="Single-segment [0:49]"
+.TP
+\fB\-\-bff
+bottom field first (for interlaced input)
+.TP
+\fB\-\-tff
+top field first (for interlaced input)
+.TP
+\fB\-\-standard
+force 4:3 aspect ratio
+.TP
+\fB\-\-widescreen
+force 16:9 aspect ratio
+.TP
+\fB\-\-shutdown
+shut down the computer when finished encoding
+.TP
+\fB\-\-trim
+e.g.: \-\-trim=123,1099
+.br
+trims based on frame number (not including any statid)
+.SS "interlaced d4 choices:"
+.TP
+\fB\-\-1-pixel-shift
+.TP
+\fB\-\-alternate-1-pixel-shift
+.TP
+\fB\-\-de-deflicker
+.TP
+\fB\-\-alternate-de-deflicker
+
+.SH "GLOSSARY OF TERMS"
+.TP
+\fB2D, 3D
+For our purposes, a heuristic for the presence of blinking.  It is much more
+likely for a 2D game than a 3D game to have F1 blinking effects.  Low quality
+versions of such games are encoded at F3 instead of F2 so that the blinking
+is still apparent.
+.TP
+\fBAAC, AVC
+Advanced Audio Codec and Advanced Video Codec.  Used in MP4 movies on SDA.
+.TP
+\fBAVI
+A movie container format used in the past by SDA.
+Contains DivX or XviD video and MP3 audio.
+.TP
+\fBAviSynth
+A scripting tool/frame server for editing videos.
+.TP
+\fBBlinking
+Before the 32-bit era, consoles had no ability to make sprites translucent (partially
+transparent).  Games would try to replicate the effect by flashing the sprite visible
+and invisible on alternating frames, or by doing similar things to produce other
+effects.  Blinking is an issue when the frame rate is halved to F2 as the sprite
+will then be constantly visible or invisible. See FDP, 2D, 3D.
+.TP
+\fBCapture
+To record with a capture card.
+.TP
+\fBCodec
+A way to compress video or audio.  If video was uncompressed, it would be far too
+massive to transmit over the Internet; thus, it is compressed with a codec.
+To be played back, it must be decoded with the same codec.
+.TP
+\fBD1, D4, etc
+Video dimensions.  D1 (high resolution) in NTSC is 720x480 (DVD) or 640x480 (video file);
+PAL D1 is 720x576 (DVD) or 704x576 (video file).  D4 (low resolution) in NTSC is 320x240;
+PAL is 352x288.  D2 and D3 are only relevant to DVD output.
+.TP
+\fBDeinterlace
+Movies on SDA use progressive scan, but most video captured from TV equipment
+is interlaced.  Deinterlacing is the process to turn interlaced video into
+progressive video.  If the whole video can be made by only discarding parts of
+the video (LQ/MQ), the process is quick.  Otherwise (HQ/IQ) the video must be
+analysed to recreate the missing parts of the picture, which is very slow.
+.TP
+\fBDivX
+An older video codec.  Used in AVI movies.  Also see "XviD". 
+.TP
+\fBEncode
+To compress with a codec.
+.TP
+\fBF1, F2, F3
+Video framerates.  The number is the denominator of a fraction whose numerator is always 1.
+Thus, F1 is full framerate, F2 is half framerate, and F3 is third framerate.
+F1, F2 and F3 in NTSC are 59.94, 29.97 and 19.98 FPS, respectively, while in PAL they
+are 50, 25 and 50/3 (~16.666667) FPS, respectively.
+.TP
+\fBFDP
+Framerate Decimation Paradigm.  See 2D, 3D.
+.TP
+\fBField
+An interlaced frame contains half the picture for each of two consecutive frames of video.
+Each normal frame's share of the interlaced frame is called a field.
+If the frame has 480 rows of pixels, the first field will be rows 1,3,5,...,479 and
+the second field will be rows 2,4,6,...,480.  To separate fields means to take each
+set of fields and put them in their own individual frames.
+.TP
+\fBField Blending
+A cheap method of deinterlacing in which the two fields in a frame are blurred together.
+Unacceptable for publication at SDA.
+.TP
+\fBFinalize
+A process done on DVD recorders that allows discs to be used on other equipment.
+Once you have finalized a disc, you cannot put anything else on it.
+The exception is DVD-RW, which you must format in order to write to once it has
+been finalized.  Finalization must be done on the DVD recorder that recorded the disc.
+.TP
+\fBFrame
+Rather than using true motion, videos use frames, where slightly different images are
+shown rapidly to create the illusion of motion. Each image is called a frame.
+.TP
+\fBFramerate
+The rate at which frames are displayed.  This is written as "x FPS," where x is the
+number of frames displayed each second.
+.TP
+\fBH.264
+An advanced video codec (AVC).  Used in MP4 movies on SDA.
+.TP
+\fBHQ
+High quality.  2Mb/s video, 128Kb/s audio, D1, F1
+.TP
+\fBIQ
+Insane quality.  5Mb/s video, up to 320Kb/s audio, up to 1368x768, F1
+.TP
+\fBInterlaced
+When a video signal comes one field at a time - to produce two frames "laced" together
+into one - it is said to be interlaced.  Interlacing is used in TV video to halve
+the amount of bandwidth used in the video signal, while only slightly harming the
+viewing experience.  Also see "Field".
+.TP
+\fBLQ
+Low quality.  128Kb/s video, 64Kb/s audio, D4, F2/3
+.TP
+\fBMQ
+Medium quality (same as normal quality).  512Kb/s video, 64Kb/s audio, D1/4, F1/2/3
+.TP
+\fBMP3
+An audio codec.  Used in AVI movies on SDA in the past.
+.TP
+\fBMP4
+SDA's current video container format.  Currently contains H.264 video and AAC audio.
+.TP
+\fBMP4Box
+A command-line application for working with MP4 files.  Yua uses it to mux together
+the video and audio, but it has a lot of uses (e.g. splitting movies into 10-minute chunks
+for YouTube).
+.TP
+\fBnate
+The person who handles capturing and encoding runs for SDA, as well as
+many other very important tasks.  He's also the author of Yua.
+.TP
+\fBNMF
+New Master File.  Refers to an intermediate source video file in the encoding process,
+usually one saved after deinterlacing (to avoid slow deinterlacing during each pass for
+each quality of output, and to allow it to use multiple CPU cores).  To maintain the video
+quality of the source video, the compression (if any) is lossless, meaning the NMF
+has a very, very high bitrate.
+.TP
+\fBNQ
+Normal quality (same as medium quality).
+.TP
+\fBProgressive Scan
+When a video signal comes whole frames at once, it is said to be progressive scan.
+.TP
+\fBStatID
+Station ID.  A title card appearing before and after a video posted on SDA that contains
+the SDA logo, the runner's name, the game, type of run and official time.
+It is exactly 5 seconds long.
+.TP
+\fBTranscode
+To convert from one file format to another.  Similar to "Encode", except the source
+is usually already encoded.
+.TP
+\fBx264
+The implementation of H.264 used by SDA.
+.TP
+\fBXQ
+X-TREME quality.  10Mb/s video, up to 320Kb/s audio, any resolution, F1.
+.TP
+\fBXviD
+DivX spelled backwards.  Xvid is open source and generally produces better quality
+video than DivX while remaining fully compatible.  Used in AVI movies on SDA in the past.
+
+.SH "SEE ALSO"
+Main site: \fIhttp://www.speeddemosarchive.com\fR
+.br
+Wiki:	 \fIhttps://kb.speeddemosarchive.com\fR
+.br
+Forums:	 \fIhttps://forum.speeddemosarchive.com
+
+.SH COPYRIGHT
+Copyright \(co 2014 Taiga Software LLC
+
+Your use of this software is governed by the terms of the GPL version 2
+or, at your option, any later version.
+
+AviSynth timebase reduction code by RAYMOD2 and IanB
+
+AviSynth 3.0 high quality yv12 deinterlacing code by Manao
+

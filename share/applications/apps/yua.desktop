@@ -1,0 +1,10 @@
+[Desktop Entry]
+Name=Yua
+GenericName=Speedrun encoding tool
+Comment="it's about the strength of my desire"
+Exec=yua %U
+Terminal=false
+StartupNotify=true
+Type=Application
+Categories=AudioVideo;AudioVideoEditing;
+Icon=yua

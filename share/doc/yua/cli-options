@@ -1,0 +1,43 @@
+--input="/path/to/your/input.avi"
+--append="/path/to/additional/input.avi"
+    can be used multiple times
+--output-basename
+    e.g.: --output-basename="MyRun"
+    _HQ, _IQ labels and .mp4 extension will be appended automatically
+--qualities
+    possible values: x i h m l
+    e.g.: --qualities=mh
+--interlaced
+--progressive
+--f
+    e.g.: --f1, --f2, etc.
+--d
+    e.g.: --d4, --d1
+--2d
+--3d
+--mono
+    corresponds to "downmix to mono" option in the gui
+--statid
+    enables the statid checkbox
+--statid#
+    e.g.: --statid1="My Name" --statid2="Metroid Prime" --statid3="Single-segment [0:49]"
+--bff
+    bottom field first (for interlaced input)
+--tff
+    top field first (for interlaced input)
+--standard
+    force 4:3 aspect ratio
+--widescreen
+    force 16:9 aspect ratio
+    
+interlaced d4 choices:
+--1-pixel-shift
+--alternate-1-pixel-shift
+--de-deflicker
+--alternate-de-deflicker
+
+--shutdown
+    shut down the computer when finished encoding
+--trim
+    e.g. --trim=123,1099
+    trims based on frame number (not including any statid)
