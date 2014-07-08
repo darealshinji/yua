@@ -25,6 +25,9 @@
 #include <QtConcurrent/QtConcurrent>
 #endif
 
+// needed for displayHelp() and displayVersion()
+#include <iostream>
+
 #include "webcam_display.h"
 #include "decoder_mothership.h"
 #include "deinterlacer.h"

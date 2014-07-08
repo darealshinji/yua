@@ -1,5 +1,70 @@
 #include "yua.h"
 
+#define H0 std::cout <<
+#define H1 << std::endl
+void displayHelp()
+{
+        H0 "command line options:"                                          H1;
+        H0 "    --input=\"/path/to/your/input.avi\""                        H1;
+        H0 "    --append=\"/path/to/additional/input.avi\""                 H1;
+        H0 "        can be used multiple times"                             H1;
+        H0 "    --output-basename"                                          H1;
+        H0 "        e.g.: --output-basename=\"MyRun\""                      H1;
+        H0 "        _HQ, _IQ labels and .mp4 extension will be appended automatically" H1;
+        H0 "    --qualities"                                                H1;
+        H0 "        possible values: x i h m l"                             H1;
+        H0 "        e.g.: --qualities=mh"                                   H1;
+        H0 "    --interlaced"                                               H1;
+        H0 "    --progressive"                                              H1;
+        H0 "    --f"                                                        H1;
+        H0 "        e.g.: --f1, --f2, etc."                                 H1;
+        H0 "    --d"                                                        H1;
+        H0 "        e.g.: --d4, --d1"                                       H1;
+        H0 "    --2d"                                                       H1;
+        H0 "    --3d"                                                       H1;
+        H0 "    --mono"                                                     H1;
+        H0 "        corresponds to \"downmix to mono\" option in the gui"   H1;
+        H0 "    --statid"                                                   H1;
+        H0 "        enables the statid checkbox"                            H1;
+        H0 "    --statid#"                                                  H1;
+        H0 "        e.g.: --statid1=\"My Name\" --statid2=\"Metroid Prime\" --statid3=\"Single-segment [0:49]\"" H1;
+        H0 "    --bff"                                                      H1;
+        H0 "        bottom field first (for interlaced input)"              H1;
+        H0 "    --tff"                                                      H1;
+        H0 "        top field first (for interlaced input)"                 H1;
+        H0 "    --standard"                                                 H1;
+        H0 "        force 4:3 aspect ratio"                                 H1;
+        H0 "    --widescreen"                                               H1;
+        H0 "        force 16:9 aspect ratio"                                H1;
+        H0 ""                                                               H1;
+        H0 "    interlaced d4 choices:"                                     H1;
+        H0 "    --1-pixel-shift"                                            H1;
+        H0 "    --alternate-1-pixel-shift"                                  H1;
+        H0 "    --de-deflicker"                                             H1;
+        H0 "    --alternate-de-deflicker"                                   H1;
+        H0 ""                                                               H1;
+        H0 "    --shutdown"                                                 H1;
+        H0 "        shut down the computer when finished encoding"          H1;
+        H0 "    --trim"                                                     H1;
+        H0 "        e.g. --trim=123,1099"                                   H1;
+        H0 "        trims based on frame number (not including any statid)" H1;
+        H0 ""                                                               H1;
+        H0 "    --help / -h"                                                H1;
+        H0 "        show this usage information"                            H1;
+        H0 "    --version / -v"                                             H1;
+        H0 "        display program version number"                         H1;
+    std::exit(0);
+}
+#undef H0
+#undef H1
+
+void displayVersion()
+{
+        // YUA_VERSION is defined in the .pro file
+        std::cout << YUA_VERSION << std::endl;
+        std::exit(0);
+}
+
 Yua::Yua(QWidget *parent)
     : QMainWindow(parent)
     ,currently_encoding(false)
@@ -779,6 +844,11 @@ Yua::Yua(QWidget *parent)
         QStringList args = QApplication::arguments();
         args.pop_front(); //we don't care about the invocation name (20130328)
 
+        QRegExp help_regex("-h");
+        QRegExp help_regex_long("--help");
+        QRegExp version_regex("-v");
+        QRegExp version_regex_long("--version");
+
         QRegExp q_regex("--qualities=(.+)");
         QRegExp output_basename_regex("--output-basename=(.+)");
         QRegExp interlaced_regex("--interlaced");
@@ -891,6 +961,10 @@ Yua::Yua(QWidget *parent)
                         shut_down_when_done_checkbox->setChecked(true);
                 } else if (xq_bitrate_regex.indexIn(arg) > -1) {
                         xq_bitrate_kbit = xq_bitrate_regex.cap(1).toInt();
+                } else if (help_regex.indexIn(arg) > -1 || help_regex_long.indexIn(arg) > -1) {
+                        displayHelp();
+                } else if (version_regex.indexIn(arg) > -1 || version_regex_long.indexIn(arg) > -1) {
+                        displayVersion();
                 } else {
                         qDebug() << this << "unknown command line option" << arg;
                 }
