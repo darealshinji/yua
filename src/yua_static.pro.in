@@ -63,7 +63,8 @@ HEADERS  += yua.h \
     fps_conversion.h
 
 
-INCLUDEPATH += ../common
+INCLUDEPATH += \ 
+../common
 
 
 #this optimization breaks nnedi3's dotProd_m32_m16_i16_SSE2() - the vals argument is 0! (20130217)
@@ -81,13 +82,25 @@ nnedi3/nnedi3_weightedAvgElliottMul5_m16_SSE2_linux.s \
 nnedi3/nnedi3_processLine0_SSE2_linux.s
 
 
+INCLUDEPATH += \
+../ffmpeg \
+../fdk-aac/libAACenc/include \
+../fdk-aac/libSYS/include \
+../x264
+
 LIBS += \
--lavcodec \
--lavformat \
--lavresample \
--lavutil \
--lswscale \
--lz
+../ffmpeg/libavcodec/libavcodec.a \
+../ffmpeg/libavformat/libavformat.a \
+../ffmpeg/libavresample/libavresample.a \
+../ffmpeg/libavutil/libavutil.a \
+../ffmpeg/libswscale/libswscale.a \
+../fdk-aac/.libs/libfdk-aac.a \
+../x264/libx264.a
+
+DEFINES += STATIC_YUA
+
+
+LIBS += -lz
 
 QMAKE_CXXFLAGS += -D__STDC_CONSTANT_MACROS #for libavcodec/avcodec.h
 
@@ -99,7 +112,4 @@ QMAKE_CXXFLAGS += -D__STDC_CONSTANT_MACROS #for libavcodec/avcodec.h
 
 RESOURCES += \
 statid.qrc \
-icon.qrc \
-ffmpeg.qrc \
-mp4box.qrc
-
+#icon.qrc \
