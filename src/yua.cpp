@@ -11,6 +11,8 @@ void displayHelp()
         H0 "    --output-basename"                                          H1;
         H0 "        e.g.: --output-basename=\"MyRun\""                      H1;
         H0 "        _HQ, _IQ labels and .mp4 extension will be appended automatically" H1;
+        H0 "    --output"                                                   H1;
+        H0 "        output directory where the converted videos will be saved" H1;
         H0 "    --qualities"                                                H1;
         H0 "        possible values: x i h m l"                             H1;
         H0 "        e.g.: --qualities=mh"                                   H1;
@@ -850,6 +852,7 @@ Yua::Yua(QWidget *parent)
         QRegExp version_regex_long("--version");
 
         QRegExp q_regex("--qualities=(.+)");
+        QRegExp output_regex("--output=(.+)");
         QRegExp output_basename_regex("--output-basename=(.+)");
         QRegExp interlaced_regex("--interlaced");
         QRegExp progressive_regex("--progressive");
@@ -893,6 +896,9 @@ Yua::Yua(QWidget *parent)
 
                 } else if (output_basename_regex.indexIn(arg) > -1) {
                         output_name_edit->setText(output_basename_regex.cap(1));
+
+		} else if (output_regex.indexIn(arg) > -1) {
+                        output_path = output_regex.cap(1);
 
                 } else if (interlaced_regex.indexIn(arg) > -1) {
                         cli_force_interlaced = true;
