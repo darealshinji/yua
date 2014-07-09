@@ -16,6 +16,8 @@ Compile and install: `make && make install`<br>
 Default prefix: /usr/local<br>
 Install in different prefix: `make install PREFIX=/usr`
 
+Compile a statically linked binary with embedded FFmpeg and MP4Box: `make static`
+
 Copyright (C) 2014 Taiga Software LLC
 
 Your use of this software is governed by the terms of the GPL version 2
