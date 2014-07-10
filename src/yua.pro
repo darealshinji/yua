@@ -99,7 +99,7 @@ QMAKE_CXXFLAGS += -D__STDC_CONSTANT_MACROS #for libavcodec/avcodec.h
 
 RESOURCES += \
 statid.qrc \
-icon.qrc \
+yua_icon.qrc \
 ffmpeg.qrc \
 mp4box.qrc
 

@@ -35,7 +35,7 @@ $(APP):
 static: static-deps
 	cd src && ./make_qrc.sh
 	cat src/$(APP)_static.pro.in src/helpers/qrc_list > src/$(APP)_static.pro && \
-		echo icon.qrc >> src/$(APP)_static.pro
+		echo $(APP)_icon.qrc >> src/$(APP)_static.pro
 	cd src && $(QMAKE) $(APP)_static.pro
 	cd src && $(MAKE)
 	$(CP) src/$(APP) $(APP)
