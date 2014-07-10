@@ -78,7 +78,6 @@ download: clean-download
 
 	$(WGET) http://ffmpeg.org/releases/ffmpeg-$(FFVERSION).tar.bz2
 	$(TAR) xvjf ffmpeg-$(FFVERSION).tar.bz2
-	$(RM) ffmpeg-$(FFVERSION).tar.bz2
 	$(MV) ffmpeg-$(FFVERSION) ffmpeg
 
 clean:
