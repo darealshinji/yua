@@ -899,6 +899,7 @@ Yua::Yua(QWidget *parent)
 
 		} else if (output_regex.indexIn(arg) > -1) {
                         output_path = output_regex.cap(1);
+                        set_output_path_current_label();
 
                 } else if (interlaced_regex.indexIn(arg) > -1) {
                         cli_force_interlaced = true;
