@@ -17,7 +17,7 @@ Vcs-Git: https://github.com/darealshinji/yua.git
 Vcs-Browser: https://github.com/darealshinji/yua
 
 Package: yua
-Architecture: amd64
+Architecture: any
 Depends: ${misc:Depends},
          ${shlibs:Depends},
          ffmpeg | libav-tools,

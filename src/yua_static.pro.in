@@ -9,6 +9,9 @@ TEMPLATE = app
 
 DEFINES += 'YUA_VERSION=\'\"6\"\''
 
+# deactivate interlacing on 32 bit, as the build would fail
+linux-g++-64: DEFINES += 'WITH_NNEDI3'
+
 
 SOURCES += main.cpp\
     yua.cpp \
@@ -22,8 +25,6 @@ SOURCES += main.cpp\
     job.cpp \
     audio_encoder.cpp \
     yv12toyuy2.c \
-    nnedi3.cpp \
-    nnedi3_worker.cpp \
     ../common/frame.cpp \
     scaler.cpp \
     ../common/throttle.cpp \
@@ -31,8 +32,14 @@ SOURCES += main.cpp\
     ../common/power_management.cpp \
     decoder_mothership.cpp \
     statid_generator.cpp \
-    fps_conversion.cpp \
+    fps_conversion.cpp
+
+linux-g++-64 {
+SOURCES += \
+    nnedi3.cpp \
+    nnedi3_worker.cpp \
     nnedi3_worker_step2.cpp
+}
 
 
 HEADERS  += yua.h \
@@ -48,9 +55,6 @@ HEADERS  += yua.h \
     audio_encoder.h \
     conversion.h \
     yv12toyuy2.h \
-    nnedi3.h \
-    nnedi3_worker.h \
-    nnedi3/nnedi3_constants.h \
     ../common/frame.h \
     scaler.h \
     ../common/throttle.h \
@@ -62,15 +66,22 @@ HEADERS  += yua.h \
     ../common/threadsafequeue.h \
     fps_conversion.h
 
+linux-g++-64 {
+HEADERS += \
+    nnedi3.h \
+    nnedi3_worker.h \
+    nnedi3/nnedi3_constants.h
+}
 
-INCLUDEPATH += \ 
-../common
+
+INCLUDEPATH += ../common
 
 
 #this optimization breaks nnedi3's dotProd_m32_m16_i16_SSE2() - the vals argument is 0! (20130217)
 QMAKE_CXXFLAGS_RELEASE += -fno-caller-saves
 
 
+linux-g++-64 {
 SOURCES += \
 nnedi3/nnedi3_extract_m8_i16_SSE2_linux.s \
 nnedi3/nnedi3_castScale_SSE_linux.s \
@@ -80,6 +91,7 @@ nnedi3/nnedi3_e0_m16_SSE2_linux.s \
 nnedi3/nnedi3_uc2s64_SSE2_linux.s \
 nnedi3/nnedi3_weightedAvgElliottMul5_m16_SSE2_linux.s \
 nnedi3/nnedi3_processLine0_SSE2_linux.s
+}
 
 
 INCLUDEPATH += \

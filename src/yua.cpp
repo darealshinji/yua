@@ -16,7 +16,9 @@ void displayHelp()
         H0 "    --qualities"                                                H1;
         H0 "        possible values: x i h m l"                             H1;
         H0 "        e.g.: --qualities=mh"                                   H1;
+#ifdef WITH_NNEDI3
         H0 "    --interlaced"                                               H1;
+#endif
         H0 "    --progressive"                                              H1;
         H0 "    --f"                                                        H1;
         H0 "        e.g.: --f1, --f2, etc."                                 H1;
@@ -30,10 +32,12 @@ void displayHelp()
         H0 "        enables the statid checkbox"                            H1;
         H0 "    --statid#"                                                  H1;
         H0 "        e.g.: --statid1=\"My Name\" --statid2=\"Metroid Prime\" --statid3=\"Single-segment [0:49]\"" H1;
+#ifdef WITH_NNEDI3
         H0 "    --bff"                                                      H1;
         H0 "        bottom field first (for interlaced input)"              H1;
         H0 "    --tff"                                                      H1;
         H0 "        top field first (for interlaced input)"                 H1;
+#endif
         H0 "    --standard"                                                 H1;
         H0 "        force 4:3 aspect ratio"                                 H1;
         H0 "    --widescreen"                                               H1;
@@ -97,7 +101,7 @@ Yua::Yua(QWidget *parent)
 {
         setAcceptDrops(true);
         setWindowTitle("Yua");
-        setWindowIcon(QIcon(":/yua.png"));
+        setWindowIcon(QIcon(":/yua_64x64.png"));
 
 
 
@@ -242,7 +246,9 @@ Yua::Yua(QWidget *parent)
         progressive_button = new QRadioButton(tr("Progressive scan"));
         interlaced_button = new QRadioButton(tr("Interlaced"));
         interlaced_layout->addWidget(progressive_button);
+#ifdef WITH_NNEDI3
         interlaced_layout->addWidget(interlaced_button);
+#endif
         progressive_button->setChecked(true);
         connect(progressive_button, SIGNAL(clicked()), this, SLOT(interlaced_changed()));
         connect(interlaced_button, SIGNAL(clicked()), this, SLOT(interlaced_changed()));
@@ -253,8 +259,10 @@ Yua::Yua(QWidget *parent)
         field_dominance_group_box->setToolTip(tr("In some cases, you must pick the correct field dominance, or the video will not play smoothly (it will jerk back and forth as you step through each frame)."));
         tff_button = new QRadioButton(tr("Top field first"));
         bff_button = new QRadioButton(tr("Bottom field first"));
+#ifdef WITH_NNEDI3
         field_dominance_layout->addWidget(tff_button);
         field_dominance_layout->addWidget(bff_button);
+#endif
         bff_button->setChecked(true);
         connect(tff_button, SIGNAL(clicked()), this, SLOT(field_dominance_changed()));
         connect(bff_button, SIGNAL(clicked()), this, SLOT(field_dominance_changed()));
@@ -532,7 +540,9 @@ Yua::Yua(QWidget *parent)
 
         //for vate_ui()
         buttons
+#ifdef WITH_NNEDI3
                         << tff_button << bff_button
+#endif
                         << standard_button << widescreen_button
                         << progressive_button << interlaced_button
                         << no_change_button << one_pixel_bob_button << alternate_one_pixel_bob_button << retard_bob_button << alternate_retard_bob_button
@@ -860,7 +870,9 @@ Yua::Yua(QWidget *parent)
         QRegExp q_regex("--qualities=(.+)");
         QRegExp output_regex("--output=(.+)");
         QRegExp output_basename_regex("--output-basename=(.+)");
+#ifdef WITH_NNEDI3
         QRegExp interlaced_regex("--interlaced");
+#endif
         QRegExp progressive_regex("--progressive");
         QRegExp f_regex("--f=?(\\d)");
         QRegExp d_regex("--d=?(\\d)");
@@ -869,8 +881,10 @@ Yua::Yua(QWidget *parent)
         QRegExp mono_regex("--mono");
         QRegExp statid_regex("--statid");
         QRegExp statid_line_regex("--statid(\\d)=(.+)");
+#ifdef WITH_NNEDI3
         QRegExp bff_regex("--bff");
         QRegExp tff_regex("--tff");
+#endif
         QRegExp standard_regex("--standard");
         QRegExp widescreen_regex("--widescreen");
         QRegExp one_pixel_shift_regex("--1-pixel-shift");
@@ -907,8 +921,10 @@ Yua::Yua(QWidget *parent)
                         output_path = output_regex.cap(1);
                         set_output_path_current_label();
 
+#ifdef WITH_NNEDI3
                 } else if (interlaced_regex.indexIn(arg) > -1) {
                         cli_force_interlaced = true;
+#endif
 
                 } else if (progressive_regex.indexIn(arg) > -1) {
                         cli_force_progressive = true;
@@ -951,13 +967,15 @@ Yua::Yua(QWidget *parent)
                         alternate_retard_bob_button->setChecked(true);
                 } else if (statid_regex.indexIn(arg) > -1) {
                         cli_statid = true;
-                } else if (tff_regex.indexIn(arg) > -1) {
+#ifdef WITH_NNEDI3
+		} else if (tff_regex.indexIn(arg) > -1) {
                         tff_button->setChecked(true);
                         force_field_dominance = true;
                 } else if (bff_regex.indexIn(arg) > -1) {
                         bff_button->setChecked(true);
                         force_field_dominance = true;
-                } else if (trim_regex.indexIn(arg) > -1) {
+#endif
+		} else if (trim_regex.indexIn(arg) > -1) {
                         QStringList string_list = trim_regex.cap(1).split(',');
                         if (string_list.size() == 2) {
                                 cli_trim_start_frame = string_list.at(0).toInt();

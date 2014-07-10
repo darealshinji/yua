@@ -6,7 +6,9 @@ Deinterlacer::Deinterlacer(QObject *parent) :
       ,preview_height(240)
       ,width_for_deinterlacer(0)
       ,height_for_deinterlacer(0)
+#ifdef WITH_NNEDI3
       ,nnedi3(NULL)
+#endif
 //      ,resize_img_ctx(NULL)
 //      ,input_avpicture(NULL)
 //      ,output_avpicture(NULL)
@@ -19,11 +21,13 @@ Deinterlacer::Deinterlacer(QObject *parent) :
 
 Deinterlacer::~Deinterlacer() {
 //        clean_up_ffmpeg_crap();
+#ifdef WITH_NNEDI3
         if (nnedi3_thread.isRunning()) {
                 nnedi3_thread.quit();
                 nnedi3_thread.wait();
         }
         if (nnedi3) delete nnedi3;
+#endif
 }
 
 //void Deinterlacer::clean_up_ffmpeg_crap() {
@@ -209,6 +213,7 @@ void Deinterlacer::double_height(Frame one, bool top_field) {
         if (height_for_deinterlacer != one.height() || width_for_deinterlacer != one.width()) {
                 width_for_deinterlacer = one.width();
                 height_for_deinterlacer = one.height();
+#ifdef WITH_NNEDI3
                 if (nnedi3_thread.isRunning()) {
                         nnedi3_thread.quit();
                         nnedi3_thread.wait();
@@ -220,6 +225,7 @@ void Deinterlacer::double_height(Frame one, bool top_field) {
                 connect(this, SIGNAL(double_height_deinterlace(Frame,bool)), nnedi3, SLOT(double_height(Frame,bool)));
                 connect(nnedi3, SIGNAL(height_doubled_image(Frame)), this, SLOT(height_doubled_image_ready(Frame)));
                 nnedi3_thread.start();
+#endif
         }
 
         emit double_height_deinterlace(one, top_field);
