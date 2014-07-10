@@ -173,6 +173,9 @@ private slots:
         void audio_commentary_muxer_process_error(QProcess::ProcessError error);
         void audio_commentary_muxer_process_finished(int exit_code, QProcess::ExitStatus status);
 
+        void exit_yua();
+        void save_settings_before_exiting();
+
 private:
         void closeEvent(QCloseEvent *event);
 

@@ -150,6 +150,12 @@ Yua::Yua(QWidget *parent)
         encode_action->setShortcut(tr("Ctrl+E"));
         connect(encode_action, SIGNAL(triggered()), this, SLOT(encoding_start()));
 
+        file_menu->addSeparator();
+
+        QAction *exit_action = file_menu->addAction(tr("E&xit"));
+        exit_action->setShortcut(tr("Ctrl+Q"));
+        connect(exit_action, SIGNAL(triggered()), this, SLOT(exit_yua()));
+
 
         trim_menu = menu_bar->addMenu(tr("&Trim"));
 
@@ -1016,19 +1022,7 @@ Yua::~Yua() {
         QDir().rmdir(temp_dir);
 }
 
-void Yua::closeEvent(QCloseEvent *event) {
-        if (currently_encoding) {
-                if (QMessageBox::information(this,
-                                             tr("Exit Yua"),
-                                             tr("An encode is currently in progress. Really exit Yua?"),
-                                             QMessageBox::Ok | QMessageBox::Cancel
-                                             ) == QMessageBox::Cancel) {
-                        event->ignore();
-                        return;
-                }
-        }
-
-
+void Yua::save_settings_before_exiting() {
         settings->setValue("window_location_x", pos().x());
         settings->setValue("window_location_y", pos().y());
         settings->setValue("window_size_width", width());
@@ -1045,11 +1039,39 @@ void Yua::closeEvent(QCloseEvent *event) {
         settings->setValue("output_path", output_path);
 
         settings->sync(); //why is this necessary? (20130207)
-
-
-        event->accept();
 }
 
+void Yua::exit_yua() {
+        if (currently_encoding) {
+                if (QMessageBox::information(this,
+                                             tr("Exit Yua"),
+                                             tr("An encode is currently in progress. Really exit Yua?"),
+                                             QMessageBox::Ok | QMessageBox::Cancel
+                                             ) == QMessageBox::Cancel) {
+                        return;
+                }
+        }
+
+        save_settings_before_exiting();
+        QApplication::quit();
+}
+
+
+void Yua::closeEvent(QCloseEvent *event) {
+        if (currently_encoding) {
+                if (QMessageBox::information(this,
+                                             tr("Exit Yua"),
+                                             tr("An encode is currently in progress. Really exit Yua?"),
+                                             QMessageBox::Ok | QMessageBox::Cancel
+                                             ) == QMessageBox::Cancel) {
+                        event->ignore();
+                        return;
+                }
+        }
+
+        save_settings_before_exiting();
+        event->accept();
+}
 
 
 void Yua::about() {
