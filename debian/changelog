@@ -1,11 +1,5 @@
-yua (6-1) trusty; urgency=low
+yua (6) UNRELEASED; urgency=low
 
-  * Use system libs instead of embedded libs
+  * Debianize Yua
 
- -- Marshall Banana <djcj@gmx.de>  Tue, 08 Jul 2014 17:31:49 +0200
-
-yua (6) unstable; urgency=low
-
-  * Initial release
-
- -- Marshall Banana <djcj@gmx.de>  Tue, 08 Jul 2014 17:05:33 +0200
+ -- Marshall Banana <djcj@gmx.de>  Tue, 08 Jul 2014 12:00:00 +0200
