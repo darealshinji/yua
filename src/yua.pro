@@ -9,7 +9,7 @@ TEMPLATE = app
 
 DEFINES += 'YUA_VERSION=\'\"6\"\''
 
-# deactivate interlacing on 32 bit, as the build would fail
+# deactivate deinterlacing on 32 bit, as the build would fail
 linux-g++-64: DEFINES += 'WITH_NNEDI3'
 
 
