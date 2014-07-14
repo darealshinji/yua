@@ -68,8 +68,7 @@ ffmpeg: download
 download: clean-download
 	$(GIT) clone git://git.videolan.org/x264.git
 
-	$(GIT) clone git://git.code.sf.net/p/opencore-amr/fdk-aac opencore-amr-fdk-aac
-	$(MV) opencore-amr-fdk-aac fdk-aac
+	$(GIT) clone git://git.code.sf.net/p/opencore-amr/fdk-aac
 	cd fdk-aac && git checkout v$(FDKVERSION)
 
 	$(WGET) http://archive.ubuntu.com/ubuntu/pool/universe/g/gpac/gpac_$(GPACVERSION).orig.tar.bz2
@@ -87,9 +86,7 @@ distclean: clean-download clean
 	$(RM) src/helpers src/$(APP)_static.pro src/Makefile
 
 clean-download:
-	$(RM) fdk-aac opencore-amr-fdk-aac x264 \
-		gpac gpac-$(GPACVERSION).orig gpac_$(GPACVERSION).orig.tar.bz2 \
-		ffmpeg ffmpeg-$(FFVERSION) ffmpeg-$(FFVERSION).tar.bz2
+	$(RM) fdk-aac x264 gpac* ffmpeg*
 
 install:
 	$(INSTALL_DIR) $(PREFIX)/bin
