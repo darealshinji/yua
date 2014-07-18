@@ -7,9 +7,10 @@ TARGET = yua
 TEMPLATE = app
 
 
-DEFINES += 'YUA_VERSION=\'\"6\"\''
+DEFINES += 'YUA_VERSION=\'\"6\"\'' \
+           'STATIC_YUA'
 
-# deactivate interlacing on 32 bit, as the build would fail
+# deactivate deinterlacing on 32 bit, as the build would fail
 linux-g++-64: DEFINES += 'WITH_NNEDI3'
 
 
@@ -109,17 +110,9 @@ LIBS += \
 ../fdk-aac/.libs/libfdk-aac.a \
 ../x264/libx264.a
 
-DEFINES += STATIC_YUA
-
-
 LIBS += -lz
 
 QMAKE_CXXFLAGS += -D__STDC_CONSTANT_MACROS #for libavcodec/avcodec.h
-
-#static {
-#    CONFIG += static
-#    DEFINES += STATIC
-#}
 
 
 RESOURCES += \

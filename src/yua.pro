@@ -104,11 +104,6 @@ LIBS += \
 
 QMAKE_CXXFLAGS += -D__STDC_CONSTANT_MACROS #for libavcodec/avcodec.h
 
-#static {
-#    CONFIG += static
-#    DEFINES += STATIC
-#}
-
 
 RESOURCES += \
 statid.qrc \

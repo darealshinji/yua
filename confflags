@@ -6,7 +6,8 @@ FDK_CONFFLAGS = \
 		--enable-static=yes \
 		--enable-shared=no
 
-X264_CONFFLAGS = --bit-depth=8 \
+X264_CONFFLAGS = \
+		--bit-depth=8 \
 		--chroma-format=all \
 		--disable-cli \
 		--enable-static \
@@ -22,6 +23,8 @@ X264_CONFFLAGS = --bit-depth=8 \
 FFMPEG_CONFFLAGS = \
 		--extra-cflags="-I../x264 -I../fdk-aac/libAACenc/include -I../fdk-aac/libSYS/include" \
 		--extra-ldflags="-L../x264 -L../fdk-aac/.libs" \
+		--disable-debug \
+		--disable-runtime-cpudetect \
 		--disable-bzlib \
 		--disable-ffplay \
 		--disable-ffprobe \

@@ -6,11 +6,13 @@ CP     =  cp -rfv
 RM     =  rm -rf
 MV     =  mv -v
 MKDIR  =  mkdir -p
-RMDIR  =  rmdir --ignore-fail-on-non-empty
+RMDIR  =  rmdir
+NULL   =  &> /dev/null
 
 QMAKE  =  qmake-qt4
 MAKE   =  make -j$(shell nproc)
 STRIP  =  strip
+UPX    =  upx-ucl
 
 GZIP   =  gzip -f9
 GIT    =  git
@@ -34,18 +36,21 @@ $(APP):
 
 static: static-deps
 	cd src && ./make_qrc.sh
-	cat src/$(APP)_static.pro.in src/helpers/qrc_list > src/$(APP)_static.pro && \
-		echo $(APP)_icon.qrc >> src/$(APP)_static.pro
+	cat src/$(APP)_static.pro.in src/helpers/qrc_list > src/$(APP)_static.pro
+	echo $(APP)_icon.qrc >> src/$(APP)_static.pro
 	cd src && $(QMAKE) $(APP)_static.pro
 	cd src && $(MAKE)
 	$(CP) src/$(APP) $(APP)
 	$(STRIP) $(APP)
+	$(UPX) $(APP)
 
 static-deps: fdk-aac x264 mp4box ffmpeg
 	$(MKDIR) src/helpers
 	$(CP) gpac/bin/gcc/MP4Box src/helpers/mp4box
 	$(CP) ffmpeg/ffmpeg src/helpers
 	$(STRIP) src/helpers/mp4box
+	$(UPX) src/helpers/mp4box
+	$(UPX) src/helpers/ffmpeg
 
 fdk-aac: download
 	cd fdk-aac && ./autogen.sh
@@ -103,18 +108,18 @@ uninstall:
 	$(foreach SIZE,$(SIZES),$(RM) $(PREFIX)/share/icons/hicolor/$(SIZE)x$(SIZE)/apps/$(APP).png ;)
 
 	# remove directories if they're empty
-	$(RMDIR) $(PREFIX)/bin
-	$(RMDIR) $(PREFIX)/share/applications/apps
-	$(RMDIR) $(PREFIX)/share/applications
-	$(RMDIR) $(PREFIX)/share/doc
-	$(RMDIR) $(PREFIX)/share/man/man1
-	$(RMDIR) $(PREFIX)/share/man
-	$(RMDIR) $(PREFIX)/share/pixmaps
+	$(RMDIR) $(PREFIX)/bin $(NULL)
+	$(RMDIR) $(PREFIX)/share/applications/apps $(NULL)
+	$(RMDIR) $(PREFIX)/share/applications $(NULL)
+	$(RMDIR) $(PREFIX)/share/doc $(NULL)
+	$(RMDIR) $(PREFIX)/share/man/man1 $(NULL)
+	$(RMDIR) $(PREFIX)/share/man $(NULL)
+	$(RMDIR) $(PREFIX)/share/pixmaps $(NULL)
 	$(foreach SIZE,$(SIZES),
-		$(RMDIR) $(PREFIX)/share/icons/hicolor/$(SIZE)x$(SIZE)/apps ;
-		$(RMDIR) $(PREFIX)/share/icons/hicolor/$(SIZE)x$(SIZE) ;
+		$(RMDIR) $(PREFIX)/share/icons/hicolor/$(SIZE)x$(SIZE)/apps $(NULL) ;
+		$(RMDIR) $(PREFIX)/share/icons/hicolor/$(SIZE)x$(SIZE) $(NULL) ;
 	)
-	$(RMDIR) $(PREFIX)/share/icons/hicolor
-	$(RMDIR) $(PREFIX)/share/icons
-	$(RMDIR) $(PREFIX)/share
+	$(RMDIR) $(PREFIX)/share/icons/hicolor $(NULL)
+	$(RMDIR) $(PREFIX)/share/icons $(NULL)
+	$(RMDIR) $(PREFIX)/share $(NULL)
 

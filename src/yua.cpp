@@ -1097,7 +1097,7 @@ void Yua::about() {
 
                            tr("<i>\"it's about the strength of my desire\"</i>"
 
-                              "<br><br>\n<a href=\"http://forum.speeddemosarchive.com/post/yua.html\">Yua</a> version %1 copyright %2 Taiga Software LLC"
+                              "<br><br>\n<a href=\"http://forum.speeddemosarchive.com/post/yua.html\">Yua</a> version %1 copyright 2013-%2 Taiga Software LLC"
                               "<br><br>\nYour use of this software is governed by the terms of the <a href=\"http://www.gnu.org/licenses/gpl.html\">GPL</a> version 2 or, at your option, any later version."
 #ifdef STATIC_YUA
                               "<br><br>\nThis software uses libraries and binaries from the <a href=\"http://ffmpeg.org/\">FFmpeg</a> project and the <a href=\"http://x264.nl/\">x264</a> library, released "
