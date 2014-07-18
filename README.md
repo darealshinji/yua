@@ -17,6 +17,7 @@ Default prefix: /usr/local<br>
 Install in different prefix: `make install PREFIX=/usr`
 
 Compile a statically linked binary with embedded FFmpeg and MP4Box: `make static`
+
 Build dependencies for a static build: `build-essential git libqt4-dev libqt4-opengl-dev upx-ucl zlib1g-dev`
 
 Copyright (C) 2013-2014 Taiga Software LLC
