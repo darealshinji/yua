@@ -184,8 +184,8 @@ private:
         void closeEvent(QCloseEvent *event);
 
         QMenu *trayIconMenu;
-        QAction *restoreAction;
-        QAction *quitAction;
+        QAction *restore_action;
+        QAction *exit_action;
 
         bool is_even_field();
 

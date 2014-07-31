@@ -581,18 +581,18 @@ Yua::Yua(QWidget *parent)
 
 
 //////////// tray icon ////////////
-        restoreAction = new QAction("Restore", this);
-        quitAction = new QAction("Quit", this);
-        connect (restoreAction, SIGNAL(triggered()), this, SLOT(showNormal()));
-        connect (quitAction, SIGNAL(triggered()), qApp, SLOT(quit()));
+        restore_action = new QAction("Restore", this);
+        exit_action = new QAction("Quit", this);
+        connect(restore_action, SIGNAL(triggered()), this, SLOT(showNormal()));
+        connect(exit_action, SIGNAL(triggered()), this, SLOT(exit_yua()));
 
         trayIconMenu = new QMenu(this);
-        trayIconMenu->addAction (restoreAction);
-        trayIconMenu->addAction (quitAction);
+        trayIconMenu->addAction(restore_action);
+        trayIconMenu->addAction(exit_action);
 
         QSystemTrayIcon* systray = new QSystemTrayIcon(this);
         systray->setIcon(ICON);
-        systray->setContextMenu (trayIconMenu);
+        systray->setContextMenu(trayIconMenu);
         systray->show();
 
 
