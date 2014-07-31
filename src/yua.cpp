@@ -101,10 +101,10 @@ Yua::Yua(QWidget *parent)
 {
         setAcceptDrops(true);
         setWindowTitle("Yua");
-        setWindowIcon(QIcon(":/yua_64x64.png"));
+        setWindowIcon(ICON);
 
 
-
+        QApplication::setQuitOnLastWindowClosed(false);
 
 
         QCoreApplication::setOrganizationName("Speed Demos Archive");
@@ -580,6 +580,20 @@ Yua::Yua(QWidget *parent)
 
 
 
+//////////// tray icon ////////////
+        restoreAction = new QAction("Restore", this);
+        quitAction = new QAction("Quit", this);
+        connect (restoreAction, SIGNAL(triggered()), this, SLOT(showNormal()));
+        connect (quitAction, SIGNAL(triggered()), qApp, SLOT(quit()));
+
+        trayIconMenu = new QMenu(this);
+        trayIconMenu->addAction (restoreAction);
+        trayIconMenu->addAction (quitAction);
+
+        QSystemTrayIcon* systray = new QSystemTrayIcon(this);
+        systray->setIcon(ICON);
+        systray->setContextMenu (trayIconMenu);
+        systray->show();
 
 
 

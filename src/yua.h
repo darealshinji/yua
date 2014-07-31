@@ -41,6 +41,10 @@
 #include "throttle.h"
 #include "power_management.h"
 
+
+#define ICON QIcon(":/yua_64x64.png")
+
+
 class Yua : public QMainWindow {
         Q_OBJECT
 public:
@@ -178,6 +182,10 @@ private slots:
 
 private:
         void closeEvent(QCloseEvent *event);
+
+        QMenu *trayIconMenu;
+        QAction *restoreAction;
+        QAction *quitAction;
 
         bool is_even_field();
 
