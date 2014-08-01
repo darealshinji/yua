@@ -106,6 +106,7 @@ LIBS += \
 ../ffmpeg/libavformat/libavformat.a \
 ../ffmpeg/libavresample/libavresample.a \
 ../ffmpeg/libavutil/libavutil.a \
+../ffmpeg/libswresample/libswresample.a \
 ../ffmpeg/libswscale/libswscale.a \
 ../fdk-aac/.libs/libfdk-aac.a \
 ../x264/libx264.a
