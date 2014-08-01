@@ -588,12 +588,15 @@ Yua::Yua(QWidget *parent)
 
         trayIconMenu = new QMenu(this);
         trayIconMenu->addAction(restore_action);
+        trayIconMenu->addSeparator();
         trayIconMenu->addAction(exit_action);
 
-        QSystemTrayIcon* systray = new QSystemTrayIcon(this);
-        systray->setIcon(ICON);
-        systray->setContextMenu(trayIconMenu);
-        systray->show();
+        trayIcon = new QSystemTrayIcon(this);
+        connect(trayIcon, SIGNAL(activated(QSystemTrayIcon::ActivationReason)),
+                this, SLOT(iconActivated(QSystemTrayIcon::ActivationReason)));
+        trayIcon->setIcon(ICON);
+        trayIcon->setContextMenu(trayIconMenu);
+        trayIcon->show();
 
 
 
@@ -1072,6 +1075,22 @@ void Yua::save_settings_before_exiting() {
 
         settings->sync(); //why is this necessary? (20130207)
 }
+
+
+void Yua::iconActivated(QSystemTrayIcon::ActivationReason reason)
+{
+    switch (reason) {
+    case QSystemTrayIcon::Trigger:
+        //trayIcon->hide();
+        showNormal();
+        break;
+    case QSystemTrayIcon::DoubleClick:
+    case QSystemTrayIcon::MiddleClick:
+    default:
+        ;
+    }
+}
+
 
 void Yua::exit_yua() {
         if (currently_encoding) {

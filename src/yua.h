@@ -178,14 +178,15 @@ private slots:
         void audio_commentary_muxer_process_finished(int exit_code, QProcess::ExitStatus status);
 
         void exit_yua();
+        void closeEvent(QCloseEvent *event);
         void save_settings_before_exiting();
+        void iconActivated(QSystemTrayIcon::ActivationReason reason);
 
 private:
-        void closeEvent(QCloseEvent *event);
-
         QMenu *trayIconMenu;
         QAction *restore_action;
         QAction *exit_action;
+        QSystemTrayIcon *trayIcon;
 
         bool is_even_field();
 
