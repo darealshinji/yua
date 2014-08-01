@@ -178,7 +178,7 @@ private slots:
         void audio_commentary_muxer_process_finished(int exit_code, QProcess::ExitStatus status);
 
         void exit_yua();
-        void closeEvent(QCloseEvent *event);
+        /* void closeEvent(QCloseEvent *event); */ // We don't need this, as long as closing the window hides it in the tray
         void save_settings_before_exiting();
         void iconActivated(QSystemTrayIcon::ActivationReason reason);
 
@@ -208,6 +208,7 @@ private:
         *fdp_2d_button, *fdp_3d_button,
         *d4_button, *d1_button;
         QPushButton *stop_button;
+        QPushButton *quit_button;
         QList<QRadioButton *> buttons;
 
         QCheckBox *xq_button, *iq_button, *hq_button, *mq_button, *lq_button;

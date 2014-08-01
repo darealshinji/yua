@@ -430,6 +430,10 @@ Yua::Yua(QWidget *parent)
         connect(stop_button, SIGNAL(clicked()), this, SLOT(stop_button_pressed()));
         stop_button->setDisabled(true);
 
+        quit_button = new QPushButton(tr("Quit"));
+        connect(quit_button, SIGNAL(clicked()), this, SLOT(exit_yua()));
+        quit_button->setDisabled(false);
+
         slider.setOrientation(Qt::Horizontal);
         slider.setFocusPolicy(Qt::StrongFocus);
         slider.setTracking(true);
@@ -477,6 +481,8 @@ Yua::Yua(QWidget *parent)
         progress_bar_and_stop_button_layout->addWidget(&progress_bar);
         progress_bar_and_stop_button_layout->addSpacing(16);
         progress_bar_and_stop_button_layout->addWidget(stop_button);
+        progress_bar_and_stop_button_layout->addSpacing(2);
+        progress_bar_and_stop_button_layout->addWidget(quit_button);
 
         main_layout->addWidget(&preview_display, 1);
         main_layout->addWidget(&no_change_display, 1);
@@ -1108,6 +1114,8 @@ void Yua::exit_yua() {
 }
 
 
+// We don't need this, as long as closing the window hides it in the tray
+/*
 void Yua::closeEvent(QCloseEvent *event) {
         if (currently_encoding) {
                 if (QMessageBox::information(this,
@@ -1123,6 +1131,7 @@ void Yua::closeEvent(QCloseEvent *event) {
         save_settings_before_exiting();
         event->accept();
 }
+*/
 
 
 void Yua::about() {
