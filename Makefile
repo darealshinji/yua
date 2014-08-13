@@ -1,27 +1,27 @@
 include confflags
 
-APP    =  yua
+APP    ?=  yua
 
-CP     =  cp -rfv
-RM     =  rm -rf
-MV     =  mv -v
-MKDIR  =  mkdir -p
-RMDIR  =  rmdir
-NULL   =  &> /dev/null
+CP     ?=  cp -rfv
+RM     ?=  rm -rf
+MV     ?=  mv -v
+MKDIR  ?=  mkdir -p
+RMDIR  ?=  rmdir
+NULL   ?=  &> /dev/null
 
-QMAKE  =  qmake-qt4
-MAKE   =  make -j$(shell nproc)
-STRIP  =  strip
-UPX    =  upx-ucl
+QMAKE  ?=  qmake-qt4
+MAKE   ?=  make -j$(shell nproc)
+STRIP  ?=  strip
+UPX    ?=  upx-ucl
 
-GZIP   =  gzip -f9
-GIT    =  git
-WGET   =  wget
-TAR    =  tar
+GZIP   ?=  gzip -f9
+GIT    ?=  git
+WGET   ?=  wget
+TAR    ?=  tar
 
-PREFIX       :=  /usr/local
-INSTALL_DIR   =  install -m755 -d
-INSTALL_PROG  =  install -m755 -D
+PREFIX        ?=  /usr/local
+INSTALL_DIR   ?=  install -m755 -d
+INSTALL_PROG  ?=  install -m755 -D
 
 SIZES = 16 24 32 48 64 96 128 256 512
 
