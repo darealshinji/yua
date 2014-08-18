@@ -596,7 +596,26 @@ Yua::Yua(QWidget *parent)
 
 
 
+        // tray icon
+        restore_action = new QAction("Restore", this);
+        exit_action = new QAction("Quit", this);
 
+        connect(restore_action, SIGNAL(triggered()), this, SLOT(showNormal()));
+        connect(exit_action, SIGNAL(triggered()), this, SLOT(exit_yua()));
+
+        trayIconMenu = new QMenu(this);
+        trayIconMenu->addAction(restore_action);
+        trayIconMenu->addSeparator();
+        trayIconMenu->addAction(exit_action);
+
+        trayIcon = new QSystemTrayIcon(this);
+        connect(trayIcon, SIGNAL(activated(QSystemTrayIcon::ActivationReason)),
+        this, SLOT(iconActivated(QSystemTrayIcon::ActivationReason)));
+        trayIcon->setIcon(QIcon(":/yua.png"));
+        trayIcon->setContextMenu(trayIconMenu);
+        //trayIcon->show();
+
+/*
         //tray icon
         auto trayIconMenu = new QMenu(this);
 
@@ -619,6 +638,7 @@ Yua::Yua(QWidget *parent)
         trayIcon->setIcon(QIcon(":/yua.png"));
         trayIcon->setContextMenu(trayIconMenu);
         //trayIcon->show();
+*/
 
 
 
@@ -1073,7 +1093,42 @@ void Yua::save_settings_before_exiting() {
         settings->sync(); //why is this necessary? (20130207)
 }
 
-void Yua::exit_yua(QCloseEvent *event) {
+void Yua::iconActivated(QSystemTrayIcon::ActivationReason reason)
+{
+        switch (reason) {
+        case QSystemTrayIcon::Trigger:
+               trayIcon->hide();
+               showNormal();
+               break;
+        case QSystemTrayIcon::DoubleClick:
+        case QSystemTrayIcon::MiddleClick:
+        default:
+               ;
+        }
+}
+
+void Yua::exit_yua() {
+        if (currently_encoding) {
+                if (QMessageBox::information(this,
+                                             tr("Exit Yua"),
+                                             tr("An encode is currently in progress. Really exit Yua?"),
+                                             QMessageBox::Ok | QMessageBox::Cancel
+                                             ) == QMessageBox::Cancel) {
+                        return;
+                }
+        }
+
+        save_settings_before_exiting();
+        QApplication::quit();
+}
+
+
+void Yua::closeEvent(QCloseEvent *event) {
+        if (close_to_tray_action->isChecked() && QSystemTrayIcon::isSystemTrayAvailable()) {
+                trayIcon->show();
+                return;
+        }
+
         if (currently_encoding) {
                 if (QMessageBox::information(this,
                                              tr("Exit Yua"),
@@ -1086,15 +1141,11 @@ void Yua::exit_yua(QCloseEvent *event) {
         }
 
         save_settings_before_exiting();
-        QApplication::quit();
-}
 
-void Yua::closeEvent(QCloseEvent *event) {
-        if (close_to_tray_action->isChecked() && QSystemTrayIcon::isSystemTrayAvailable()) {
-                trayIcon->show();
-                return;
+        if (!close_to_tray_action->isChecked() && QSystemTrayIcon::isSystemTrayAvailable()) {
+                 return exit_yua();
         }
-        return exit_yua(event);
+        event->accept();
 }
 
 

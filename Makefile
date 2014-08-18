@@ -35,8 +35,8 @@ $(APP):
 	$(STRIP) $(APP)
 
 static: static-deps
-	cd src && ./make_qrc.sh
-	cat src/$(APP)_static.pro.in src/helpers/qrc_list > src/$(APP)_static.pro
+	cd src && ./make_qrc_linux.sh
+	cat src/$(APP)_static.pro.in src/helpers/linux/qrc_list > src/$(APP)_static.pro
 	echo $(APP)_icon.qrc >> src/$(APP)_static.pro
 	cd src && $(QMAKE) $(APP)_static.pro
 	cd src && $(MAKE)
@@ -45,12 +45,12 @@ static: static-deps
 	$(UPX) $(APP)
 
 static-deps: fdk-aac x264 mp4box ffmpeg
-	$(MKDIR) src/helpers
-	$(CP) gpac/bin/gcc/MP4Box src/helpers/mp4box
-	$(CP) ffmpeg/ffmpeg src/helpers
-	$(STRIP) src/helpers/mp4box
-	$(UPX) src/helpers/mp4box
-	$(UPX) src/helpers/ffmpeg
+	$(MKDIR) src/helpers/linux
+	$(CP) gpac/bin/gcc/MP4Box src/helpers/linux/mp4box
+	$(CP) ffmpeg/ffmpeg src/helpers/linux
+	$(STRIP) src/helpers/linux/mp4box
+	$(UPX) src/helpers/linux/mp4box
+	$(UPX) src/helpers/linux/ffmpeg
 
 fdk-aac: download
 	cd fdk-aac && ./autogen.sh
@@ -88,7 +88,7 @@ clean:
 	cd src && $(RM) $(APP) ../$(APP) *.o moc_*.cpp qrc_*.cpp
 
 distclean: clean-download clean
-	$(RM) src/helpers src/$(APP)_static.pro src/Makefile
+	$(RM) src/helpers/linux src/$(APP)_static.pro src/Makefile
 
 clean-download:
 	$(RM) fdk-aac x264 gpac* ffmpeg*

@@ -2,6 +2,8 @@ QT += core gui opengl dbus
 
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
+CONFIG += c++11
+
 
 TARGET = yua
 TEMPLATE = app
@@ -33,7 +35,8 @@ SOURCES += main.cpp\
     common/power_management.cpp \
     decoder_mothership.cpp \
     statid_generator.cpp \
-    fps_conversion.cpp
+    fps_conversion.cpp \
+    yua_util.cpp
 
 linux-g++-64 {
 SOURCES += \
@@ -65,7 +68,8 @@ HEADERS  += yua.h \
     statid_generator.h \
     decoder.h \
     common/threadsafequeue.h \
-    fps_conversion.h
+    fps_conversion.h \
+    yua_util.h
 
 linux-g++-64 {
 HEADERS += \
@@ -118,4 +122,3 @@ QMAKE_CXXFLAGS += -D__STDC_CONSTANT_MACROS #for libavcodec/avcodec.h
 
 RESOURCES += \
 statid.qrc \
-#yua_icon.qrc \
