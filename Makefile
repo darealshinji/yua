@@ -3,7 +3,7 @@ include confflags
 APP    ?=  yua
 
 CP     ?=  cp -rfv
-RM     ?=  rm -rf
+RM     :=  rm -rf
 MV     ?=  mv -v
 MKDIR  ?=  mkdir -p
 RMDIR  ?=  rmdir
@@ -56,6 +56,11 @@ fdk-aac: download
 	cd fdk-aac && ./autogen.sh
 	cd fdk-aac && ./configure $(FDK_CONFFLAGS)
 	cd fdk-aac && $(MAKE)
+	# fix fdk-aac detection for ffmpeg
+	$(MKDIR) fdk-aac/libAACenc/include/fdk-aac
+	$(MKDIR) fdk-aac/libAACdec/include/fdk-aac
+	cd fdk-aac/libAACenc/include && $(CP) aacenc_lib.h fdk-aac
+	cd fdk-aac/libAACdec/include && $(CP) aacdecoder_lib.h fdk-aac
 
 x264: download
 	cd x264 && ./configure $(X264_CONFFLAGS)

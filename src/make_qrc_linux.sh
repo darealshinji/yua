@@ -16,7 +16,7 @@ for bin in ffmpeg mp4box ; do
 		mv $part $bin.$i
 		
 		echo '<RCC><qresource prefix="/"><file>'$bin.$i'</file></qresource></RCC>' > $bin.$i.qrc
-		echo "helpers/$bin.$i.qrc \\" >> qrc_list
+		echo "helpers/linux/$bin.$i.qrc \\" >> qrc_list
 		
 		i=$[ $i + 1 ]
 	done
