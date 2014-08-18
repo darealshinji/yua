@@ -4,7 +4,6 @@
 /src/yua
 /yua
 
-/src/helpers/
 /src/yua_static.pro
 
 /fdk-aac/
@@ -16,6 +15,9 @@
 *.so
 *.a
 *~
+
+.DS_Store
+Thumbs.db
 
 *.tar.bz2
 *.tar.gz
