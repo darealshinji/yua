@@ -43,7 +43,7 @@ QImage Scaler::scale(QImage in, int out_width, int out_height) {
                 return in;
         }
 
-        SwsContext *resize_img_ctx = NULL; //must be initialized to NULL since we use sws_getCachedContext() below (20130316)
+        SwsContext *resize_img_ctx = NULL;
         AVPicture *input_avpicture = NULL;
         AVPicture *output_avpicture = NULL;
 
@@ -61,14 +61,12 @@ QImage Scaler::scale(QImage in, int out_width, int out_height) {
                         clean_up();
                 }
 
-//                qDebug() << this << "making new sws context with key" << key;
+                AVPixelFormat pix_fmt = AV_PIX_FMT_RGB32;
 
-                AVPixelFormat pix_fmt = PIX_FMT_BGRA;
-
-                swscales[key] = resize_img_ctx = sws_getCachedContext(resize_img_ctx,
-                                                      in.width(), in.height(), pix_fmt,
-                                                      out_width, out_height, pix_fmt,
-                                                      SWS_LANCZOS, NULL, NULL, NULL);
+                swscales[key] = resize_img_ctx = Yua_Util::GetSwsContext(
+                                        in.width(), in.height(), pix_fmt, AVCOL_SPC_UNSPECIFIED, 0,
+                                        out_width, out_height, pix_fmt, AVCOL_SPC_UNSPECIFIED, 0,
+                                        SWS_LANCZOS);
                 Q_ASSERT(resize_img_ctx);
 
                 input_avpictures[key] = input_avpicture = (AVPicture *)av_malloc(sizeof(AVPicture));

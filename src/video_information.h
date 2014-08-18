@@ -16,6 +16,7 @@ public:
                           int = 0,
 
                           int = 0,
+                          int = 0,
 
                           bool = false,
                           qint64 = 1,
@@ -31,6 +32,7 @@ public:
         int width, height;
         int width_after_cropping, height_after_cropping;
         int colorspace;
+        int colorspace_standard;
 
         bool interlaced;
         qint64 monotonic_pts_increase;

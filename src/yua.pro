@@ -7,7 +7,7 @@ TARGET = yua
 TEMPLATE = app
 
 
-DEFINES += 'YUA_VERSION=\'\"6\"\''
+DEFINES += 'YUA_VERSION=\'\"7\"\''
 
 # deactivate deinterlacing on 32 bit, as the build would fail
 linux-g++-64: DEFINES += 'WITH_NNEDI3'

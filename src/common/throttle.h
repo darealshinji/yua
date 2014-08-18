@@ -12,11 +12,11 @@ public:
         explicit Throttle(QObject *parent = 0);
         bool busy();
         void done();
-        double break_time_ms;
+        qreal break_time_ms;
         
 private:
         GTimer timer;
-        double last_timestamp;
+        qreal last_timestamp;
 };
 
 #endif // THROTTLE_H

@@ -66,7 +66,8 @@ private:
         bool determined_audio_normalization_factor;
         bool audio_sample_format_is_float, audio_sample_format_is_double, audio_sample_format_is_floating_point,
                         audio_sample_format_is_uint8, audio_sample_format_is_int16, audio_sample_format_is_int32, audio_sample_format_is_integer;
-        AVPixelFormat dest_pix_fmt;
+        AVPixelFormat src_pix_fmt, dest_pix_fmt;
+        bool src_is_mjpeg_color_range;
 
         AVAudioResampleContext *avr;
         Audio_Information target_info;

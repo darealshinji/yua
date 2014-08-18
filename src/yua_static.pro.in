@@ -7,7 +7,7 @@ TARGET = yua
 TEMPLATE = app
 
 
-DEFINES += 'YUA_VERSION=\'\"6\"\'' \
+DEFINES += 'YUA_VERSION=\'\"7\"\'' \
            'STATIC_YUA'
 
 # deactivate deinterlacing on 32 bit, as the build would fail

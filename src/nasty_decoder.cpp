@@ -2,7 +2,7 @@
 
 Nasty_Decoder::Nasty_Decoder() :
        currently_encoding(false)
-      ,dest_pix_fmt(AV_PIX_FMT_BGRA) //must match the constant set in video_encoder.cpp - was AV_PIX_FMT_RGB24 but i had alignment problems with non-mod 4 width input (20130429))
+      ,dest_pix_fmt(AV_PIX_FMT_RGB32) //must match the constant set in video_encoder.cpp - was AV_PIX_FMT_RGB24 but i had alignment problems with non-mod 4 width input (20130429))
       ,avr(NULL)
 {
         set_ffmpeg_crap_null();
@@ -26,8 +26,8 @@ void Nasty_Decoder::set_ffmpeg_crap_null() {
 
 void Nasty_Decoder::clean_up() {
         if (buffer) av_free(buffer);
-        if (pFrameRGB) avcodec_free_frame(&pFrameRGB);
-        if (pFrame) avcodec_free_frame(&pFrame);
+        if (pFrameRGB) av_frame_free(&pFrameRGB);
+        if (pFrame) av_frame_free(&pFrame);
 
         if (vCodecCtx) avcodec_close(vCodecCtx);
         if (aCodecCtx) avcodec_close(aCodecCtx);
@@ -49,7 +49,7 @@ Nasty_Decoder::~Nasty_Decoder() {
 }
 
 qint64 Nasty_Decoder::rescale_ts(qint64 x, qint64 p, qint64 q, qint64 r, qint64 s) {
-        return av_rescale_q(x, (AVRational){p,q}, (AVRational){r,s});
+        return av_rescale_q(x, (AVRational){(int)p,(int)q}, (AVRational){(int)r,(int)s});
         return (x*p*s)/(r*q);
 }
 
@@ -108,7 +108,7 @@ void Nasty_Decoder::audio_resampler_initialize() {
 }
 
 void Nasty_Decoder::force_interlaced(bool boolean) {
-        qDebug() << this << "force_interlaced(" << boolean << ")";
+        //qDebug() << this << "force_interlaced(" << boolean << ")";
         video_info.interlaced = boolean;
         video_info.monotonic_pts_increase = video_monotonic_pts_increase;
         if (video_info.interlaced) {
@@ -118,12 +118,13 @@ void Nasty_Decoder::force_interlaced(bool boolean) {
 }
 
 void Nasty_Decoder::yv12_deinterlacing_check_and_set() {
-        if (vCodecCtx && vCodecCtx->pix_fmt == AV_PIX_FMT_YUV420P) { //we are going to convert to yuy2 using a different library first (20130123)
+        if (vCodecCtx && src_pix_fmt == AV_PIX_FMT_YUV420P) { //we are going to convert to yuy2 using a different library first (20130123)
                 interlaced_yv12_conversion_needed = true;
                 if (interlaced_convert_ctx) sws_freeContext(interlaced_convert_ctx);
-                interlaced_convert_ctx = sws_getContext(vCodecCtx->width, vCodecCtx->height/2, AV_PIX_FMT_YUYV422,
-                                                        vCodecCtx->width, vCodecCtx->height/2, dest_pix_fmt,
-                                                        SWS_POINT, NULL, NULL, NULL);
+                interlaced_convert_ctx = Yua_Util::GetSwsContext(
+                                        vCodecCtx->width, vCodecCtx->height/2, AV_PIX_FMT_YUYV422, vCodecCtx->colorspace, src_is_mjpeg_color_range ? 1 : 0,
+                                        vCodecCtx->width, vCodecCtx->height/2, dest_pix_fmt, vCodecCtx->colorspace, 0,
+                                        SWS_LANCZOS);
         }
 }
 
@@ -302,31 +303,49 @@ void Nasty_Decoder::open(QString filename) {
                         return;
                 } else {
                         video_info.framerate = av_q2d(pFormatCtx->streams[videoStream]->r_frame_rate);
-                        if (1) { //thanks avisynth - this is like changefps(last.framerate) at the end of the script (20130704)
-                                unsigned num, den;
-                                //float n = (float)pFormatCtx->streams[videoStream]->time_base.den / pFormatCtx->streams[videoStream]->time_base.num;
-                                if (pFormatCtx->streams[videoStream]->time_base.num == 83333 && pFormatCtx->streams[videoStream]->time_base.den == 5000000) { //one fraps special case added 20130831
-                                        num = 1;
-                                        den = 60;
-                                } else {
-                                        FPS_Conversion::float_to_fps(video_info.framerate, den, num);
-
-                                        qDebug() << this << "changed timebase" << pFormatCtx->streams[videoStream]->time_base.num << "/" << pFormatCtx->streams[videoStream]->time_base.den
-                                                 << "to" << num << "/" << den << "with avisynth library";
-                                }
-                                video_info.timebase_num = num;
-                                video_info.timebase_den = den*2;
+                        //thanks avisynth - this is like changefps(last.framerate) at the end of the script (20130704)
+                        unsigned num, den;
+                        //float n = (float)pFormatCtx->streams[videoStream]->time_base.den / pFormatCtx->streams[videoStream]->time_base.num;
+                        if (pFormatCtx->streams[videoStream]->time_base.num == 83333 && pFormatCtx->streams[videoStream]->time_base.den == 5000000) { //one fraps special case added 20130831
+                                num = 1;
+                                den = 60;
                         } else {
-                                //we often get large denominators from software that takes e.g. 30 fps as user input, does 1/30, and then sets the timebase to 333333/10000000, so truncate the fps to two decimal places (20130610)
-                                int int_fps = (pFormatCtx->streams[videoStream]->time_base.den+1) / pFormatCtx->streams[videoStream]->time_base.num;
-                                double double_fps = (double)(pFormatCtx->streams[videoStream]->time_base.den+1) / pFormatCtx->streams[videoStream]->time_base.num;
-                                qDebug() << this << "int_fps" << int_fps << "double_fps" << double_fps;
-                                if (int_fps != double_fps && qFabs(double_fps - int_fps) < .01) {
-                                        qDebug() << this << "correcting timebase from" << pFormatCtx->streams[videoStream]->time_base.num << pFormatCtx->streams[videoStream]->time_base.den << "to" << 1 << int_fps;
-                                        video_info.timebase_num = 1;
-                                        video_info.timebase_den = int_fps*2;
-                                }
+                                FPS_Conversion::float_to_fps(video_info.framerate, den, num);
+
+                                qDebug() << this << "changed timebase" << pFormatCtx->streams[videoStream]->time_base.num << "/" << pFormatCtx->streams[videoStream]->time_base.den
+                                         << "to" << num << "/" << den << "with avisynth library";
                         }
+                        video_info.timebase_num = num;
+                        video_info.timebase_den = den*2;
+
+                        //handle deprecated colorspaces (20140706)
+                        switch (vCodecCtx->pix_fmt) {
+                        case AV_PIX_FMT_YUVJ420P:
+                                src_pix_fmt = AV_PIX_FMT_YUV420P;
+                                src_is_mjpeg_color_range = true;
+                                break;
+                        case AV_PIX_FMT_YUVJ422P:
+                                src_pix_fmt = AV_PIX_FMT_YUV422P;
+                                src_is_mjpeg_color_range = true;
+                                break;
+                        case AV_PIX_FMT_YUVJ444P:
+                                src_pix_fmt = AV_PIX_FMT_YUV444P;
+                                src_is_mjpeg_color_range = true;
+                                break;
+                        case AV_PIX_FMT_YUVJ440P:
+                                src_pix_fmt = AV_PIX_FMT_YUV440P;
+                                src_is_mjpeg_color_range = true;
+                                break;
+                        case AV_PIX_FMT_YUVJ411P:
+                                src_pix_fmt = PIX_FMT_YUV411P;
+                                src_is_mjpeg_color_range = true;
+                                break;
+                        default:
+                                src_pix_fmt = vCodecCtx->pix_fmt;
+                                src_is_mjpeg_color_range = false;
+                        }
+
+                        video_info.colorspace_standard = vCodecCtx->colorspace;
                 }
         }
 
@@ -385,20 +404,22 @@ void Nasty_Decoder::open(QString filename) {
 
 
 
-        pFrame = avcodec_alloc_frame();
-        pFrameRGB = avcodec_alloc_frame();
+        pFrame = av_frame_alloc();
+        pFrameRGB = av_frame_alloc();
 
         numBytes = avpicture_get_size(dest_pix_fmt, vCodecCtx->width, vCodecCtx->height);
         buffer = (uint8_t *)av_malloc(numBytes * sizeof(uint8_t));
 
         avpicture_fill((AVPicture *)pFrameRGB, buffer, dest_pix_fmt, vCodecCtx->width, vCodecCtx->height);
 
-        encode_img_convert_ctx = sws_getContext(vCodecCtx->width, vCodecCtx->height, vCodecCtx->pix_fmt,
-                                                vCodecCtx->width, vCodecCtx->height, dest_pix_fmt,
-                                                SWS_POINT, NULL, NULL, NULL);
-        interlaced_convert_ctx = sws_getContext(vCodecCtx->width, vCodecCtx->height/2, vCodecCtx->pix_fmt,
-                                        vCodecCtx->width, vCodecCtx->height/2, dest_pix_fmt,
-                                        SWS_POINT, NULL, NULL, NULL);
+        encode_img_convert_ctx = Yua_Util::GetSwsContext(
+                                vCodecCtx->width, vCodecCtx->height, src_pix_fmt, vCodecCtx->colorspace, src_is_mjpeg_color_range ? 1 : 0,
+                                vCodecCtx->width, vCodecCtx->height, dest_pix_fmt, vCodecCtx->colorspace, 0,
+                                SWS_LANCZOS);
+        interlaced_convert_ctx = Yua_Util::GetSwsContext(
+                                vCodecCtx->width, vCodecCtx->height/2, src_pix_fmt, vCodecCtx->colorspace, src_is_mjpeg_color_range ? 1 : 0,
+                                vCodecCtx->width, vCodecCtx->height/2, dest_pix_fmt, vCodecCtx->colorspace, 0,
+                                SWS_LANCZOS);
 
 
         //index the stream
@@ -471,7 +492,7 @@ void Nasty_Decoder::open(QString filename) {
                                                 qint64 timestamp_in_converted_timebase = rescale_ts(timestamp,
                                                                                                     pFormatCtx->streams[videoStream]->time_base.num,pFormatCtx->streams[videoStream]->time_base.den,
                                                                                                     video_info.timebase_num,video_info.timebase_den);
-                                                qDebug() << this << "determine monotonic_pts_increase: rescaled" << timestamp << "->" << timestamp_in_converted_timebase << "from timebase" <<
+                                                if (0) qDebug() << this << "determine monotonic_pts_increase: rescaled" << timestamp << "->" << timestamp_in_converted_timebase << "from timebase" <<
                                                             pFormatCtx->streams[videoStream]->time_base.num << pFormatCtx->streams[videoStream]->time_base.den <<
                                                             "to" << video_info.timebase_num << video_info.timebase_den;
                                                 video_frame_timestamp << timestamp_in_converted_timebase;
@@ -483,7 +504,7 @@ void Nasty_Decoder::open(QString filename) {
                                                 if (cli_force_progressive) video_info.interlaced = false;
                                                 video_info.width = vCodecCtx->width;
                                                 video_info.height = vCodecCtx->height;
-                                                video_info.colorspace = vCodecCtx->pix_fmt;
+                                                video_info.colorspace = src_pix_fmt;
                                                 determined_interlacing = true;
                                                 if (video_info.interlaced) {
                                                         video_info.tff = pFrame->top_field_first;
@@ -522,7 +543,7 @@ void Nasty_Decoder::open(QString filename) {
                 qint64 divisor = video_frame_timestamp.size()-1;
                 for (int i = 1; i < video_frame_timestamp.size(); ++i) {
                         qint64 difference = video_frame_timestamp[i] - video_frame_timestamp[i-1];
-                        qDebug() << this << "determine monotonic_pts_increase: difference" << difference << "(" << video_frame_timestamp[i] << "-" << video_frame_timestamp[i-1] << ")";
+                        if (0) qDebug() << this << "determine monotonic_pts_increase: difference" << difference << "(" << video_frame_timestamp[i] << "-" << video_frame_timestamp[i-1] << ")";
                         if (difference <= 0) { //don't count retrograde intervals (20130428)
                                 qDebug() << this << "video: skipping nonmonotonic interval" << difference << "at frame" << i;
                                 --divisor;
@@ -591,19 +612,21 @@ void Nasty_Decoder::open(QString filename) {
                         video_bitrate_bits_per_second -= aCodecCtx->bit_rate;
                 }
         }
-        QString pretty_video_info = QString("Video: %1 %2 %3 %4 %5")
+        QString pretty_video_info = QString("Video: %1 %2 %3 %4 %5 %6")
                         .arg(QString("%1x%2").arg(vCodecCtx->width).arg(vCodecCtx->height), standard_field_width)
                         .arg(QString("%1 fps").arg(video_info.framerate), standard_field_width)
-                        .arg(av_get_pix_fmt_name(vCodecCtx->pix_fmt), standard_field_width)
+                        .arg(av_get_pix_fmt_name(src_pix_fmt), standard_field_width)
+                        .arg(av_get_colorspace_name(vCodecCtx->colorspace), standard_field_width)
                         .arg(avcodec_get_name(vCodecCtx->codec_id), standard_field_width)
                         .arg(QString("%1 Kbit/s").arg(video_bitrate_bits_per_second/1000.0), standard_field_width)
                         ;
         QString pretty_audio_info = "";
         if (has_audio) {
-                pretty_audio_info = QString("Audio: %1 %2 %3 %4 %5")
+                pretty_audio_info = QString("Audio: %1 %2 %3 %4 %5 %6")
                                 .arg(QString("%1ch").arg(aCodecCtx->channels), standard_field_width)
                                 .arg(QString("%1 Hz").arg(aCodecCtx->sample_rate), standard_field_width)
                                 .arg(av_get_sample_fmt_name(aCodecCtx->sample_fmt), standard_field_width)
+                                .arg("", standard_field_width) //just for spacing - to match the video line (20140706)
                                 .arg(avcodec_get_name(aCodecCtx->codec_id), standard_field_width)
                                 .arg(QString("%1 Kbit/s").arg(aCodecCtx->bit_rate/1000.0), standard_field_width)
                                 ;
@@ -649,7 +672,7 @@ void Nasty_Decoder::decode() {
                         ++video_frames_decoded;
                         --decode_to;
 
-                        if (video_info.interlaced && vCodecCtx->pix_fmt != PIX_FMT_RGB24) { //deinterlacing rgb24 is broken for some reason - is it because the data is really 24-bit aligned? it shifts one of the fields by 1/3 the width of the image (20130326)
+                        if (video_info.interlaced && src_pix_fmt != PIX_FMT_RGB24) { //deinterlacing rgb24 is broken for some reason - is it because the data is really 24-bit aligned? it shifts one of the fields by 1/3 the width of the image (20130326)
                                 //libswscale actually accesses all of these array items to check them for 128-bit alignment - therefore we must provide them or we risk a segfault (20130123)
                                 int in_stride[4] = {0,0,0,0};
                                 int out_stride[4] = {0,0,0,0};

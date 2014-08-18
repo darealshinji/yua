@@ -1,11 +1,12 @@
 #include "webcam_display.h"
 
 Webcam_Display::Webcam_Display(QWidget *parent) : QWidget(parent)
-      ,current_image_width(0)
-      ,current_image_height(0)
-      ,current_width(0)
-      ,current_height(0)
-      ,using_arbitrary_aspect_ratio(false)
+      , current_image_width(0)
+      , current_image_height(0)
+      , current_width(0)
+      , current_height(0)
+      , using_arbitrary_aspect_ratio(false)
+      , minimum_size_hint(320,240) //for yua (20140215)
 {
         QVBoxLayout *layout = new QVBoxLayout;
         layout->setContentsMargins(0,0,0,0);
@@ -16,13 +17,16 @@ Webcam_Display::Webcam_Display(QWidget *parent) : QWidget(parent)
         connect(rita, SIGNAL(clicked(QMouseEvent *)), this, SLOT(rita_clicked(QMouseEvent *)));
         connect(rita, SIGNAL(mouse_moved(QMouseEvent *)), this, SLOT(rita_mouse_moved(QMouseEvent *)));
         layout->addWidget(rita);
+
+        throttle.break_time_ms = 0;
 }
 
 QSize Webcam_Display::minimumSizeHint() const {
-        return QSize(320,240);
+        return minimum_size_hint;
 }
 
 QSize Webcam_Display::sizeHint() const {
+        //qDebug() << this << "returning size_hint" << size_hint;
         return size_hint;
 }
 
@@ -54,11 +58,15 @@ void Webcam_Display::display_image(QImage image) {
                 return;
         }
 
+        if (throttle.break_time_ms && throttle.busy()) return;
+
         bool need_update = (current_image_width != image.width() || current_image_height != image.height());
         current_image_width = image.width();
         current_image_height = image.height();
 
         emit image_ready(image);
+
+        if (throttle.break_time_ms) throttle.done();
 
         if (!need_update) return;
 
@@ -87,4 +95,8 @@ void Webcam_Display::rita_clicked(QMouseEvent *event) {
 
 void Webcam_Display::rita_mouse_moved(QMouseEvent *event) {
         emit mouse_moved(event);
+}
+
+void Webcam_Display::set_minimum_size_hint(int width, int height) {
+        minimum_size_hint = QSize(width, height);
 }
