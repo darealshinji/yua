@@ -16,8 +16,8 @@ linux-g++-64: DEFINES += 'WITH_NNEDI3'
 
 SOURCES += main.cpp\
     yua.cpp \
-    ../common/webcam_display.cpp \
-    ../common/rita.cpp \
+    common/webcam_display.cpp \
+    common/rita.cpp \
     nasty_decoder.cpp \
     deinterlacer.cpp \
     audio_information.cpp \
@@ -26,11 +26,11 @@ SOURCES += main.cpp\
     job.cpp \
     audio_encoder.cpp \
     yv12toyuy2.c \
-    ../common/frame.cpp \
+    common/frame.cpp \
     scaler.cpp \
-    ../common/throttle.cpp \
-    ../common/gtimer.cpp \
-    ../common/power_management.cpp \
+    common/throttle.cpp \
+    common/gtimer.cpp \
+    common/power_management.cpp \
     decoder_mothership.cpp \
     statid_generator.cpp \
     fps_conversion.cpp
@@ -44,8 +44,8 @@ SOURCES += \
 
 
 HEADERS  += yua.h \
-    ../common/webcam_display.h \
-    ../common/rita.h \
+    common/webcam_display.h \
+    common/rita.h \
     nasty_decoder.h \
     deinterlacer.h \
     audio_information.h \
@@ -56,15 +56,15 @@ HEADERS  += yua.h \
     audio_encoder.h \
     conversion.h \
     yv12toyuy2.h \
-    ../common/frame.h \
+    common/frame.h \
     scaler.h \
-    ../common/throttle.h \
-    ../common/gtimer.h \
-    ../common/power_management.h \
+    common/throttle.h \
+    common/gtimer.h \
+    common/power_management.h \
     decoder_mothership.h \
     statid_generator.h \
     decoder.h \
-    ../common/threadsafequeue.h \
+    common/threadsafequeue.h \
     fps_conversion.h
 
 linux-g++-64 {
@@ -75,7 +75,7 @@ HEADERS += \
 }
 
 
-INCLUDEPATH += ../common
+INCLUDEPATH += common
 
 
 #this optimization breaks nnedi3's dotProd_m32_m16_i16_SSE2() - the vals argument is 0! (20130217)

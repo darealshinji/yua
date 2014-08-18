@@ -4,10 +4,6 @@ Yua
 
 Homepage: https://forum.speeddemosarchive.com/post/yua3.html
 
-This code is meant to be used to build distribution specific GNU/Linux packages,
-especially for Debian based systems. Checkout the 'original' branch to build statically linked
-binaries on all three major OSes.
-
 
 Build
 -----
