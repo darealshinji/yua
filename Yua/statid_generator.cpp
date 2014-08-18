@@ -14,7 +14,7 @@ void Statid_Generator::reset_video_info() {
 }
 
 qint64 Statid_Generator::rescale_ts(qint64 x, qint64 p, qint64 q, qint64 r, qint64 s) {
-        return av_rescale_q(x, (AVRational){p,q}, (AVRational){r,s});
+        return av_rescale_q(x, (AVRational){(int)p,(int)q}, (AVRational){(int)r,(int)s});
         return (x*p*s)/(r*q);
 }
 

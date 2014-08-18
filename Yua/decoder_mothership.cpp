@@ -414,7 +414,7 @@ void Decoder_Mothership::set_target_number_of_audio_channels(int number) {
 }
 
 qint64 Decoder_Mothership::rescale_ts(qint64 x, qint64 p, qint64 q, qint64 r, qint64 s) {
-        return av_rescale_q(x, (AVRational){p,q}, (AVRational){r,s});
+        return av_rescale_q(x, (AVRational){(int)p,(int)q}, (AVRational){(int)r,(int)s});
         return (x*p*s)/(r*q);
 }
 
@@ -468,11 +468,11 @@ void Decoder_Mothership::video_frame_in(Frame frame) {
         if (print_timestamp_debug_info) if (currently_encoding) qDebug() << "v out"
                                          << video_pts << video_pts_2
                                          << "("
-                                         << av_rescale_q(video_pts, (AVRational){reference_timebase_num,reference_timebase_den}, (AVRational){video_info.timebase_num,video_info.timebase_den})
+                                         << av_rescale_q(video_pts, (AVRational){(int)reference_timebase_num,(int)reference_timebase_den}, (AVRational){(int)video_info.timebase_num,(int)video_info.timebase_den})
                                          //<< ((double)av_rescale_q(video_pts, (AVRational){reference_timebase_num,reference_timebase_den}, (AVRational){video_info.timebase_num,video_info.timebase_den}) * (double)video_info.timebase_num / video_info.timebase_den) * 1000.0 << "ms"
                                          //<< rescale_ts(video_pts, reference_timebase_num,reference_timebase_den, video_info.timebase_num,video_info.timebase_den)
                                          //<< ((double)rescale_ts(video_pts, reference_timebase_num,reference_timebase_den, video_info.timebase_num,video_info.timebase_den) * (double)video_info.timebase_num / video_info.timebase_den) * 1000.0 << "ms"
-                                         << av_rescale_q(video_pts_2, (AVRational){reference_timebase_num,reference_timebase_den}, (AVRational){video_info.timebase_num,video_info.timebase_den})
+                                         << av_rescale_q(video_pts_2, (AVRational){(int)reference_timebase_num,(int)reference_timebase_den}, (AVRational){(int)video_info.timebase_num,(int)video_info.timebase_den})
                                          //<< rescale_ts(video_pts_2, reference_timebase_num,reference_timebase_den, video_info.timebase_num,video_info.timebase_den)
                                          << ")"
                                          << ((double)video_pts * (double)reference_timebase_num / reference_timebase_den) * 1000.0 << "ms"

@@ -3,11 +3,6 @@
 
 #include <QtGui>
 
-//extern "C" {
-//#include "libswscale/swscale.h"
-//#include "libavcodec/avcodec.h"
-//}
-
 #include "nnedi3.h"
 #include "frame.h"
 #include "scaler.h"
@@ -41,12 +36,10 @@ private:
         QImage push_down_one_line(QImage);
         int preview_width, preview_height;
         int width_for_deinterlacer, height_for_deinterlacer;
+#ifdef WITH_NNEDI3
         NNEDI3 *nnedi3;
         QThread nnedi3_thread;
-//        SwsContext *resize_img_ctx;
-//        AVPicture *input_avpicture, *output_avpicture;
-//        int last_input_width, last_input_height, last_output_width, last_output_height;
-//        void clean_up_ffmpeg_crap();
+#endif
         Scaler scaler;
 
 };

@@ -9,7 +9,7 @@ Video_Encoder::Video_Encoder(QObject *parent) :
       ,input_avpicture(NULL)
       ,output_avframe(NULL)
       ,ignore_frames(0)
-      ,src_pix_fmt(AV_PIX_FMT_BGRA)
+      ,src_pix_fmt(AV_PIX_FMT_RGB32)
       ,pass(1)
       ,print_timestamp_debug_info(false)
       ,current_job_id(-1) //frames are initialized with job_id 0 (20130609)
@@ -27,7 +27,7 @@ void Video_Encoder::clean_up_ffmpeg_crap() {
         }
         if (output_avframe) {
                 avpicture_free(&dst_picture);
-                avcodec_free_frame(&output_avframe);
+                av_frame_free(&output_avframe);
                 output_avframe = NULL;
         }
         if (encode_img_convert_ctx) {
@@ -107,17 +107,18 @@ void Video_Encoder::start(Video_Information new_video_information, QString name,
         //this doesn't work because we set the profile and/or level for every quality below (20130330)
         av_dict_set(&opts, "refs", "4", 0);
         av_dict_set(&opts, "qpmin", "4", 0);
-        if (current_job_name == "MQ") { //it's a shame how gimped mq is, but then again compatibility is the best it's been since vhs was king (20130211)
-                av_dict_set(&opts, "profile", "baseline", 0);
-                av_dict_set(&opts, "level", "1.3", 0); //from anri
-        } else {
+//        if (current_job_name == "MQ") { //it's a shame how gimped mq is, but then again compatibility is the best it's been since vhs was king (20130211)
+//                av_dict_set(&opts, "profile", "baseline", 0);
+//                av_dict_set(&opts, "level", "13", 0); //from anri
+//        } else {
                 if (video_information.colorspace == AV_PIX_FMT_YUV420P) {
                         av_dict_set(&opts, "profile", "high", 0);
                 } //otherwise it is set automatically to high422 or high444 (20130526)
-                av_dict_set(&opts, "level", "4.1", 0); //bluray compatibility level
-        }
+                av_dict_set(&opts, "level", "41", 0); //bluray compatibility level
+//        }
 
         c->pix_fmt = (AVPixelFormat)video_information.colorspace;
+        c->colorspace = (AVColorSpace)video_information.colorspace_standard;
 
         QString stat_file_name = temp_out_file.fileName()+".stats";
         stat_file_name_ba = stat_file_name.toLocal8Bit();
@@ -314,10 +315,10 @@ void Video_Encoder::write_frame(Frame frame) {
         AVPixelFormat output_colorspace = (AVPixelFormat)video_information.colorspace;
 
         if (!encode_img_convert_ctx)
-                encode_img_convert_ctx = sws_getCachedContext(encode_img_convert_ctx,
-                                                              video_information.width_after_cropping, video_information.height_after_cropping, src_pix_fmt,
-                                                              video_information.width_after_cropping, video_information.height_after_cropping, output_colorspace,
-                                                              SWS_LANCZOS, NULL, NULL, NULL);
+                encode_img_convert_ctx = Yua_Util::GetSwsContext(
+                                        video_information.width_after_cropping, video_information.height_after_cropping, src_pix_fmt, video_information.colorspace_standard, 0,
+                                        video_information.width_after_cropping, video_information.height_after_cropping, output_colorspace, video_information.colorspace_standard, 0,
+                                        SWS_LANCZOS);
         Q_ASSERT(encode_img_convert_ctx);
 
         if (!input_avpicture) {
@@ -326,7 +327,7 @@ void Video_Encoder::write_frame(Frame frame) {
                 input_length = avpicture_get_size(src_pix_fmt, video_information.width_after_cropping, video_information.height_after_cropping);
         }
         if (!output_avframe) {
-                output_avframe = avcodec_alloc_frame();
+                output_avframe = av_frame_alloc();
                 avpicture_alloc(&dst_picture, output_colorspace, video_information.width_after_cropping, video_information.height_after_cropping);
                 /* copy data and linesize picture pointers to frame */
                 *((AVPicture *)output_avframe) = dst_picture;
@@ -338,7 +339,7 @@ void Video_Encoder::write_frame(Frame frame) {
         sws_scale(encode_img_convert_ctx, input_avpicture->data, input_avpicture->linesize, 0, frame.height(),
                   output_avframe->data, output_avframe->linesize);
 
-        AVRational src_timebase = {src_timebase_num, src_timebase_den};
+        AVRational src_timebase = {(int)src_timebase_num, (int)src_timebase_den};
         output_avframe->pts = av_rescale_q(frame.pts, src_timebase, st->codec->time_base); //was av_rescale_q(frame.pts, src_timebase, st->time_base);
 
         ffmpeg_encode_frame(output_avframe);
@@ -374,14 +375,15 @@ int Video_Encoder::ffmpeg_encode_frame(AVFrame *frame_to_encode) {
                 exit(1);
         }
         if (got_output) {
-                if (c->coded_frame->key_frame)
-                        pkt.flags |= AV_PKT_FLAG_KEY;
+                //apparently this is harmful to the mux as of 20140516 - old quicktime and premiere can't decode the output correctly
+//                if (c->coded_frame->key_frame)
+//                        pkt.flags |= AV_PKT_FLAG_KEY;
 
-                pkt.stream_index = st->index;
                 pkt.pts = av_rescale_q(pkt.pts, st->codec->time_base, st->time_base);
                 pkt.dts = av_rescale_q(pkt.dts, st->codec->time_base, st->time_base);
+                pkt.duration = av_rescale_q(pkt.duration, st->codec->time_base, st->time_base);
+                pkt.stream_index = st->index;
 
-                /* Write the compressed frame to the media file. */
                 if (av_interleaved_write_frame(oc, &pkt) != 0) {
                         qDebug() << "av_interleaved_write_frame error";
                         exit(1);

@@ -1,7 +1,9 @@
 #ifndef POWER_MANAGEMENT_H
 #define POWER_MANAGEMENT_H
 
-#include <QtGui>
+#include <QMessageBox>
+#include <QProcess>
+#include <QDebug>
 
 #ifdef Q_OS_LINUX
 #include <QtDBus>

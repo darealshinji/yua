@@ -8,13 +8,13 @@
 #include <QMutex>
 
 extern "C" {
-#include "libavutil/opt.h"
-#include "libavutil/channel_layout.h"
-#include "libavutil/samplefmt.h"
-#include "libavutil/channel_layout.h"
-#include "libavresample/avresample.h"
-#include "libavformat/avformat.h"
-#include "libavcodec/avcodec.h"
+#include <libavutil/opt.h>
+#include <libavutil/channel_layout.h>
+#include <libavutil/samplefmt.h>
+#include <libavutil/channel_layout.h>
+#include <libavresample/avresample.h>
+#include <libavformat/avformat.h>
+#include <libavcodec/avcodec.h>
 }
 
 #include "audio_information.h"

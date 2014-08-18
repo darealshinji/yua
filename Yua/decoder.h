@@ -6,21 +6,8 @@
 #include "audio_information.h"
 #include "video_information.h"
 #include "frame.h"
+#include "yua_util.h"
 
-extern "C" {
-#include "libavutil/opt.h"
-#include "libavutil/channel_layout.h"
-#include "libavutil/samplefmt.h"
-#include "libavutil/channel_layout.h"
-#include "libavresample/avresample.h"
-
-#include "libavformat/avformat.h"
-#include "libswscale/swscale.h"
-#include "libavcodec/avcodec.h"
-#include "libavutil/pixdesc.h"
-
-#include "yv12toyuy2.h"
-}
 #include <math.h>
 #include <limits>
 

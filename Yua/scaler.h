@@ -3,10 +3,7 @@
 
 #include <QtGui>
 
-extern "C" {
-#include "libswscale/swscale.h"
-#include "libavcodec/avcodec.h"
-}
+#include "yua_util.h"
 
 class Scaler : public QObject {
         Q_OBJECT

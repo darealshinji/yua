@@ -4,11 +4,11 @@
 #include <QtGui>
 
 extern "C" {
-#include "libswscale/swscale.h"
-#include "libavformat/avformat.h"
-#include "libavcodec/avcodec.h"
-#include "libavutil/opt.h"
-#include "libavutil/samplefmt.h"
+#include <libswscale/swscale.h>
+#include <libavformat/avformat.h>
+#include <libavcodec/avcodec.h>
+#include <libavutil/opt.h>
+#include <libavutil/samplefmt.h>
 }
 
 #include <math.h>

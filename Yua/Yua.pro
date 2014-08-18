@@ -5,15 +5,17 @@
 #-------------------------------------------------
 
 QT       += core gui opengl
-linux-g++-64: QT += dbus
+linux: QT += dbus
 
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
+
+CONFIG += c++11
 
 TARGET = Yua
 TEMPLATE = app
 
-DEFINES += 'YUA_VERSION=\'\"6\"\''
-
+DEFINES += 'YUA_VERSION=\'\"7\"\''
+!linux-g++-32: DEFINES += 'WITH_NNEDI3'
 
 SOURCES += main.cpp\
     yua.cpp \
@@ -27,8 +29,6 @@ SOURCES += main.cpp\
     job.cpp \
     audio_encoder.cpp \
     yv12toyuy2.c \
-    nnedi3.cpp \
-    nnedi3_worker.cpp \
     ../common/frame.cpp \
     scaler.cpp \
     ../common/throttle.cpp \
@@ -36,11 +36,19 @@ SOURCES += main.cpp\
     ../common/power_management.cpp \
     decoder_mothership.cpp \
     statid_generator.cpp \
-    fps_conversion.cpp
+    fps_conversion.cpp \
+    yua_util.cpp
+
+!linux-g++-32 {
+SOURCES += \
+    nnedi3.cpp \
+    nnedi3_worker.cpp
+}
 
 !mac {
 SOURCES += nnedi3_worker_step2.cpp
 }
+
 
 HEADERS  += yua.h \
     ../common/webcam_display.h \
@@ -55,9 +63,6 @@ HEADERS  += yua.h \
     audio_encoder.h \
     conversion.h \
     yv12toyuy2.h \
-    nnedi3.h \
-    nnedi3_worker.h \
-    nnedi3/nnedi3_constants.h \
     ../common/frame.h \
     scaler.h \
     ../common/throttle.h \
@@ -67,9 +72,19 @@ HEADERS  += yua.h \
     statid_generator.h \
     decoder.h \
     ../common/threadsafequeue.h \
-    fps_conversion.h
+    fps_conversion.h \
+    yua_util.h
+
+!linux-g++-32 {
+HEADERS += \
+    nnedi3.h \
+    nnedi3_worker.h \
+    nnedi3/nnedi3_constants.h
+}
+
 
 INCLUDEPATH += ../common
+
 
 #unfortunately -fasm-blocks is only supported by the apple fork of gcc which means that you need os x to "compile" the nnedi3 inline assembly function files (20130216)
 #mac
@@ -129,7 +144,7 @@ win32:RC_FILE = yua.rc
 
 mac:YUAPLATFORMNAME = mac
 win32:YUAPLATFORMNAME = windows
-linux-g++-64:YUAPLATFORMNAME = linux
+linux:YUAPLATFORMNAME = linux
 LIBS += \
 ../Yua/lib/$${YUAPLATFORMNAME}/libavresample.a \
 ../Yua/lib/$${YUAPLATFORMNAME}/libavcodec.a \
@@ -146,12 +161,14 @@ LIBS += ../Yua/lib/$${YUAPLATFORMNAME}/libx264.a
 QMAKE_CXXFLAGS += -D__STDC_CONSTANT_MACROS #for libavcodec/avcodec.h
 INCLUDEPATH += ../Yua/include/$${YUAPLATFORMNAME}
 
-mac:LIBS += -lz -lbz2 -liconv
+LIBS += -lz
+mac:LIBS += -lbz2 -liconv
 win32:LIBS += libws2_32 #required for ffmpeg's networking crap
 win32:LIBS += "-Wl,--large-address-aware" #so yua can use more than 1.5 gigs of ram (20130607)
-linux-g++-64:LIBS += -lz
 
-mac:LIBS += -framework CoreFoundation -framework IOKit #for Power_Management
+mac:LIBS += -framework CoreFoundation
+mac:LIBS += -framework IOKit #for Power_Management
+mac:LIBS += -framework AVFoundation -framework CoreVideo -framework CoreMedia -framework VideoDecodeAcceleration
 
 static {
     CONFIG += static
@@ -160,12 +177,11 @@ static {
 
 
 RESOURCES += statid.qrc
+RESOURCES += icon.qrc
 
-mac: RESOURCES += icon.qrc helpers/mac/helpers.qrc helpers/mac/nnedi3.qrc
-win32: RESOURCES += icon.qrc
-linux-g++-64: RESOURCES += icon.qrc
+mac: RESOURCES += helpers/mac/helpers.qrc helpers/mac/nnedi3.qrc
 
-linux-g++-64: {
+linux: {
 RESOURCES += \
 helpers/linux/ffmpeg.1.qrc \
 helpers/linux/ffmpeg.2.qrc \

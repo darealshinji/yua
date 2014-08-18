@@ -1,7 +1,7 @@
 /*
 **                    Yua
 **
-**   Copyright 2013 Taiga Software LLC
+**   Copyright 2014 Taiga Software LLC
 **
 **   This program is free software; you can redistribute it and/or modify
 **   it under the terms of the GNU General Public License as published by
@@ -24,8 +24,12 @@
 int main(int argc, char *argv[]) {
         QApplication a(argc, argv);
 
-#ifdef Q_OS_LINUX
-        a.setStyle(new QPlastiqueStyle()); //http://stackoverflow.com/questions/14606396/gtk-critical-ia-gtk-widget-style-get-assertion-gtk-is-widget-widget-fa
+        //http://stackoverflow.com/questions/14606396/gtk-critical-ia-gtk-widget-style-get-assertion-gtk-is-widget-widget-fa
+        //#ifdef Q_OS_LINUX
+        //        a.setStyle(new QPlastiqueStyle());
+        //#endif
+#ifdef Q_WS_X11
+        qputenv("LIBOVERLAY_SCROLLBAR", 0);
 #endif
 
         Yua w;

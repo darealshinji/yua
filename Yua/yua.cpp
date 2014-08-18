@@ -1,39 +1,112 @@
 #include "yua.h"
 
+#define H0 std::cout <<
+#define H1 << std::endl
+void Yua::displayHelp() {
+        H0 "command line options:"                                          H1;
+        H0 "    --input=\"/path/to/your/input.avi\""                        H1;
+        H0 "    --append=\"/path/to/additional/input.avi\""                 H1;
+        H0 "        can be used multiple times"                             H1;
+        H0 "    --output-basename"                                          H1;
+        H0 "        e.g.: --output-basename=\"MyRun\""                      H1;
+        H0 "        _HQ, _IQ labels and .mp4 extension will be appended automatically" H1;
+        H0 "    --output-path"                                              H1;
+        H0 "        output directory where the converted videos will be saved" H1;
+        H0 "    --qualities"                                                H1;
+        H0 "        possible values: x i h m l"                             H1;
+        H0 "        e.g.: --qualities=mh"                                   H1;
+#ifdef WITH_NNEDI3
+        H0 "    --interlaced"                                               H1;
+#endif
+        H0 "    --progressive"                                              H1;
+        H0 "    --f"                                                        H1;
+        H0 "        e.g.: --f1, --f2, etc."                                 H1;
+        H0 "    --d"                                                        H1;
+        H0 "        e.g.: --d4, --d1"                                       H1;
+        H0 "    --2d"                                                       H1;
+        H0 "    --3d"                                                       H1;
+        H0 "    --mono"                                                     H1;
+        H0 "        corresponds to \"downmix to mono\" option in the gui"   H1;
+        H0 "    --statid"                                                   H1;
+        H0 "        enables the statid checkbox"                            H1;
+        H0 "    --statid#"                                                  H1;
+        H0 "        e.g.: --statid1=\"My Name\" --statid2=\"Metroid Prime\" --statid3=\"Single-segment [0:49]\"" H1;
+#ifdef WITH_NNEDI3
+        H0 "    --bff"                                                      H1;
+        H0 "        bottom field first (for interlaced input)"              H1;
+        H0 "    --tff"                                                      H1;
+        H0 "        top field first (for interlaced input)"                 H1;
+#endif
+        H0 "    --standard"                                                 H1;
+        H0 "        force 4:3 aspect ratio"                                 H1;
+        H0 "    --widescreen"                                               H1;
+        H0 "        force 16:9 aspect ratio"                                H1;
+        H0 ""                                                               H1;
+        H0 "    interlaced d4 choices:"                                     H1;
+        H0 "    --1-pixel-shift"                                            H1;
+        H0 "    --alternate-1-pixel-shift"                                  H1;
+        H0 "    --de-deflicker"                                             H1;
+        H0 "    --alternate-de-deflicker"                                   H1;
+        H0 ""                                                               H1;
+        H0 "    --shutdown"                                                 H1;
+        H0 "        shut down the computer when finished encoding"          H1;
+        H0 "    --trim"                                                     H1;
+        H0 "        e.g. --trim=123,1099"                                   H1;
+        H0 "        trims based on frame number (not including any statid)" H1;
+        H0 ""                                                               H1;
+        H0 "    --help / -h"                                                H1;
+        H0 "        show this usage information"                            H1;
+        H0 "    --version / -v"                                             H1;
+        H0 "        display program version number"                         H1;
+        std::exit(0);
+}
+#undef H0
+#undef H1
+
+void Yua::displayVersion() {
+        // YUA_VERSION is defined in the .pro file
+        std::cout << YUA_VERSION << std::endl;
+        std::exit(0);
+}
+
 Yua::Yua(QWidget *parent)
-    : QMainWindow(parent)
-    ,currently_encoding(false)
-    ,audio_finished(false)
-    ,video_finished(false)
-    ,muxer_process(this)
-    ,progress_bar(this)
-    ,mp4box_regex_1("Importing ISO File:.*\\((\\d+)/\\d+\\)")
-    ,mp4box_regex_2("ISO File Writing:.*\\((\\d+)/\\d+\\)")
-    ,native_width(0)
-    ,native_height(0)
-    ,slider_resume_value(-9999)
-    ,force_field_dominance(false)
-    ,cropping_rect(320/2, 240/2, 320, 240)
-    ,cropping_rect_set_from_size(640, 480)
-    ,crop_moving_left(false)
-    ,crop_moving_right(false)
-    ,crop_moving_top(false)
-    ,crop_moving_bottom(false)
-    ,ffmpeg_process(this)
-    ,audio_commentary_muxer_process(this)
-    #if QT_VERSION >= 0x050000
-    ,desktop_path_string(QStandardPaths::writableLocation(QStandardPaths::DesktopLocation))
-    #else
-    ,desktop_path_string(QDesktopServices::storageLocation(QDesktopServices::DesktopLocation))
-    #endif
-    ,xq_bitrate_kbit(10000)
+        : QMainWindow(parent)
+        ,currently_encoding(false)
+        ,audio_finished(false)
+        ,video_finished(false)
+        ,muxer_process(this)
+        ,progress_bar(this)
+        ,mp4box_regex_1("Importing ISO File:.*\\((\\d+)/\\d+\\)")
+        ,mp4box_regex_2("ISO File Writing:.*\\((\\d+)/\\d+\\)")
+        ,native_width(0)
+        ,native_height(0)
+        ,slider_resume_value(-9999)
+        ,force_field_dominance(false)
+        ,cropping_rect(320/2, 240/2, 320, 240)
+        ,cropping_rect_set_from_size(640, 480)
+        ,crop_moving_left(false)
+        ,crop_moving_right(false)
+        ,crop_moving_top(false)
+        ,crop_moving_bottom(false)
+        ,ffmpeg_process(this)
+        ,audio_commentary_muxer_process(this)
+        #if QT_VERSION >= 0x050000
+        ,desktop_path_string(QStandardPaths::writableLocation(QStandardPaths::DesktopLocation))
+        #else
+        ,desktop_path_string(QDesktopServices::storageLocation(QDesktopServices::DesktopLocation))
+        #endif
+        ,xq_bitrate_kbit(10000)
+        ,enable_encode_preview(true)
+        ,output_name_edit_validator(QRegExp("[\\w_\\- ]+"))
 {
         setAcceptDrops(true);
         setWindowTitle("Yua");
         setWindowIcon(QIcon(":/yua.png"));
 
 
-
+        if (QSystemTrayIcon::isSystemTrayAvailable()) {
+                QApplication::setQuitOnLastWindowClosed(false);
+        }
 
 
         QCoreApplication::setOrganizationName("Speed Demos Archive");
@@ -83,6 +156,13 @@ Yua::Yua(QWidget *parent)
         encode_action->setShortcut(tr("Ctrl+E"));
         connect(encode_action, SIGNAL(triggered()), this, SLOT(encoding_start()));
 
+#ifndef Q_OS_MAC
+        file_menu->addSeparator();
+#endif
+
+        QAction *exit_action = file_menu->addAction(tr("Quit"));
+        exit_action->setShortcut(tr("Ctrl+Q"));
+        connect(exit_action, SIGNAL(triggered()), this, SLOT(exit_yua()));
 
         trim_menu = menu_bar->addMenu(tr("&Trim"));
 
@@ -133,6 +213,14 @@ Yua::Yua(QWidget *parent)
 
 
 
+        window_menu = menu_bar->addMenu(tr("&Window"));
+
+        close_to_tray_action = window_menu->addAction(tr("&Close to tray"));
+        close_to_tray_action->setCheckable(true);
+        close_to_tray_action->setChecked(settings->value("close_to_tray", false).toBool());
+
+
+
         if (0) { //for debugging the Power_Management class under the various operating systems (20130503)
                 QMenu *power_management_menu = menu_bar->addMenu(tr("&PM"));
 
@@ -169,7 +257,9 @@ Yua::Yua(QWidget *parent)
         progressive_button = new QRadioButton(tr("Progressive scan"));
         interlaced_button = new QRadioButton(tr("Interlaced"));
         interlaced_layout->addWidget(progressive_button);
+#ifdef WITH_NNEDI3
         interlaced_layout->addWidget(interlaced_button);
+#endif
         progressive_button->setChecked(true);
         connect(progressive_button, SIGNAL(clicked()), this, SLOT(interlaced_changed()));
         connect(interlaced_button, SIGNAL(clicked()), this, SLOT(interlaced_changed()));
@@ -180,8 +270,10 @@ Yua::Yua(QWidget *parent)
         field_dominance_group_box->setToolTip(tr("In some cases, you must pick the correct field dominance, or the video will not play smoothly (it will jerk back and forth as you step through each frame)."));
         tff_button = new QRadioButton(tr("Top field first"));
         bff_button = new QRadioButton(tr("Bottom field first"));
+#ifdef WITH_NNEDI3
         field_dominance_layout->addWidget(tff_button);
         field_dominance_layout->addWidget(bff_button);
+#endif
         bff_button->setChecked(true);
         connect(tff_button, SIGNAL(clicked()), this, SLOT(field_dominance_changed()));
         connect(bff_button, SIGNAL(clicked()), this, SLOT(field_dominance_changed()));
@@ -318,6 +410,7 @@ Yua::Yua(QWidget *parent)
         QPushButton *output_directory_choose_button = new QPushButton(tr("Change ..."));
         connect(output_directory_choose_button, SIGNAL(clicked()), this, SLOT(output_directory_choose()));
         output_name_edit = new QLineEdit;
+        output_name_edit->setValidator(&output_name_edit_validator);
         output_path_layout->addWidget(output_path_current_label);
         output_path_layout->addWidget(output_directory_choose_button);
         output_path_layout->addWidget(output_name_edit);
@@ -349,6 +442,10 @@ Yua::Yua(QWidget *parent)
         connect(stop_button, SIGNAL(clicked()), this, SLOT(stop_button_pressed()));
         stop_button->setDisabled(true);
 
+        quit_button = new QPushButton(tr("Quit"));
+        connect(quit_button, SIGNAL(clicked()), this, SLOT(exit_yua()));
+        quit_button->setDisabled(false);
+
         slider.setOrientation(Qt::Horizontal);
         slider.setFocusPolicy(Qt::StrongFocus);
         slider.setTracking(true);
@@ -370,7 +467,6 @@ Yua::Yua(QWidget *parent)
 
         QHBoxLayout *layout = new QHBoxLayout;
         layout->setSpacing(0);
-//        layout->setContentsMargins(0,0,0,0);
         QWidget *dummy_widget = new QWidget;
         dummy_widget->setLayout(layout);
         dummy_widget->setContentsMargins(0,0,0,0);
@@ -396,6 +492,8 @@ Yua::Yua(QWidget *parent)
         progress_bar_and_stop_button_layout->addWidget(&progress_bar);
         progress_bar_and_stop_button_layout->addSpacing(16);
         progress_bar_and_stop_button_layout->addWidget(stop_button);
+        progress_bar_and_stop_button_layout->addSpacing(2);
+        progress_bar_and_stop_button_layout->addWidget(quit_button);
 
         main_layout->addWidget(&preview_display, 1);
         main_layout->addWidget(&no_change_display, 1);
@@ -459,7 +557,9 @@ Yua::Yua(QWidget *parent)
 
         //for vate_ui()
         buttons
+                #ifdef WITH_NNEDI3
                         << tff_button << bff_button
+                   #endif
                         << standard_button << widescreen_button
                         << progressive_button << interlaced_button
                         << no_change_button << one_pixel_bob_button << alternate_one_pixel_bob_button << retard_bob_button << alternate_retard_bob_button
@@ -497,25 +597,29 @@ Yua::Yua(QWidget *parent)
 
 
 
+        //tray icon
+        auto trayIconMenu = new QMenu(this);
 
+        tray_menu_progress_action = trayIconMenu->addAction("");
+        tray_menu_progress_action->setDisabled(true);
+        set_tray_menu_progress_action_idle();
 
+        auto restore_action = trayIconMenu->addAction(tr("Restore"));
+        connect(restore_action, &QAction::triggered, [=](){
+                showNormal();
+                //trayIcon->hide(); //this leads to a crash under os x - even using QTimer::singleShot() is not enough (20140807)
+        });
 
+        trayIconMenu->addSeparator();
 
+        auto tray_exit_action = trayIconMenu->addAction(tr("Quit"));
+        connect(tray_exit_action, SIGNAL(triggered()), this, SLOT(exit_yua()));
 
-//        index_progress_bar.setRange(0, 10000);
-//        index_progress_bar.setTextVisible(false);
-//        index_progress_widget = new QDialog(this);
-//        index_progress_widget->setWindowFlags(Qt::Window | Qt::FramelessWindowHint);
-//        index_progress_widget->setModal(true);
+        trayIcon = new QSystemTrayIcon(this);
+        trayIcon->setIcon(QIcon(":/yua.png"));
+        trayIcon->setContextMenu(trayIconMenu);
+        //trayIcon->show();
 
-//        QLabel *index_progress_label = new QLabel(tr("Yua is examining the video ..."));
-//        index_progress_label->setAlignment(Qt::AlignHCenter);
-
-//        QVBoxLayout *index_progress_layout = new QVBoxLayout;
-//        index_progress_widget->setLayout(index_progress_layout);
-//        index_progress_layout->addWidget(index_progress_label);
-//        index_progress_layout->addWidget(&index_progress_bar);
-//        index_progress_widget->hide();
 
 
 
@@ -709,17 +813,17 @@ Yua::Yua(QWidget *parent)
                 QFile resource_out_file(resource_outpath);
                 QFile resource_in_file(":/" + resource_name);
                 if (!resource_in_file.exists()) {
-                                int resource_part = 1;
+                        int resource_part = 1;
+                        resource_in_file.setFileName(QString(":/%1.%2").arg(resource_name).arg(resource_part));
+                        if (!resource_in_file.exists()) {
+                                qDebug() << "Yua: resource" << resource_name << "not found! skipping ...";
+                                continue;
+                        }
+                        while (resource_in_file.exists()) {
+                                append_file(resource_in_file, resource_out_file);
+                                ++resource_part;
                                 resource_in_file.setFileName(QString(":/%1.%2").arg(resource_name).arg(resource_part));
-                                if (!resource_in_file.exists()) {
-                                        qDebug() << "Yua: resource" << resource_name << "not found! skipping ...";
-                                        continue;
-                                }
-                                while (resource_in_file.exists()) {
-                                        append_file(resource_in_file, resource_out_file);
-                                        ++resource_part;
-                                        resource_in_file.setFileName(QString(":/%1.%2").arg(resource_name).arg(resource_part));
-                                }
+                        }
                 } else {
                         append_file(resource_in_file, resource_out_file);
                 }
@@ -762,15 +866,6 @@ Yua::Yua(QWidget *parent)
 
 
 
-        //
-        //open("/down/test/Piston Hurrican 5.49.mp4");
-        //open("/down/test/Clip.avi");
-        //open("/down/test/genesis2.vob");
-        //open("/down/test/asd.avi");
-        //open("/down/test/pso.vob");
-        //open("Y:/down/test/prime.vob");
-        //open("/home/parallels/Desktop/Parallels Shared Folders/down/test/genesis2.vob");
-        //open("y:/down/Heaven_1920_1200_30_LAGSRGB_5sec.avi");
 
         cli_jobs_to_process = false;
         cli_trim_start_frame = cli_trim_end_frame = 0;
@@ -779,9 +874,17 @@ Yua::Yua(QWidget *parent)
         QStringList args = QApplication::arguments();
         args.pop_front(); //we don't care about the invocation name (20130328)
 
+        QRegExp help_regex("-h");
+        QRegExp help_regex_long("--help");
+        QRegExp version_regex("-v");
+        QRegExp version_regex_long("--version");
+
         QRegExp q_regex("--qualities=(.+)");
+        QRegExp output_path_regex("--output-path=(.+)");
         QRegExp output_basename_regex("--output-basename=(.+)");
+#ifdef WITH_NNEDI3
         QRegExp interlaced_regex("--interlaced");
+#endif
         QRegExp progressive_regex("--progressive");
         QRegExp f_regex("--f=?(\\d)");
         QRegExp d_regex("--d=?(\\d)");
@@ -790,8 +893,10 @@ Yua::Yua(QWidget *parent)
         QRegExp mono_regex("--mono");
         QRegExp statid_regex("--statid");
         QRegExp statid_line_regex("--statid(\\d)=(.+)");
+#ifdef WITH_NNEDI3
         QRegExp bff_regex("--bff");
         QRegExp tff_regex("--tff");
+#endif
         QRegExp standard_regex("--standard");
         QRegExp widescreen_regex("--widescreen");
         QRegExp one_pixel_shift_regex("--1-pixel-shift");
@@ -824,8 +929,14 @@ Yua::Yua(QWidget *parent)
                 } else if (output_basename_regex.indexIn(arg) > -1) {
                         output_name_edit->setText(output_basename_regex.cap(1));
 
+                } else if (output_path_regex.indexIn(arg) > -1) {
+                        output_path = output_path_regex.cap(1);
+                        set_output_path_current_label();
+
+#ifdef WITH_NNEDI3
                 } else if (interlaced_regex.indexIn(arg) > -1) {
                         cli_force_interlaced = true;
+#endif
 
                 } else if (progressive_regex.indexIn(arg) > -1) {
                         cli_force_progressive = true;
@@ -868,12 +979,14 @@ Yua::Yua(QWidget *parent)
                         alternate_retard_bob_button->setChecked(true);
                 } else if (statid_regex.indexIn(arg) > -1) {
                         cli_statid = true;
+#ifdef WITH_NNEDI3
                 } else if (tff_regex.indexIn(arg) > -1) {
                         tff_button->setChecked(true);
                         force_field_dominance = true;
                 } else if (bff_regex.indexIn(arg) > -1) {
                         bff_button->setChecked(true);
                         force_field_dominance = true;
+#endif
                 } else if (trim_regex.indexIn(arg) > -1) {
                         QStringList string_list = trim_regex.cap(1).split(',');
                         if (string_list.size() == 2) {
@@ -891,6 +1004,10 @@ Yua::Yua(QWidget *parent)
                         shut_down_when_done_checkbox->setChecked(true);
                 } else if (xq_bitrate_regex.indexIn(arg) > -1) {
                         xq_bitrate_kbit = xq_bitrate_regex.cap(1).toInt();
+                } else if (help_regex.indexIn(arg) > -1 || help_regex_long.indexIn(arg) > -1) {
+                        displayHelp();
+                } else if (version_regex.indexIn(arg) > -1 || version_regex_long.indexIn(arg) > -1) {
+                        displayVersion();
                 } else {
                         qDebug() << this << "unknown command line option" << arg;
                 }
@@ -935,19 +1052,7 @@ Yua::~Yua() {
         QDir().rmdir(temp_dir);
 }
 
-void Yua::closeEvent(QCloseEvent *event) {
-        if (currently_encoding) {
-                if (QMessageBox::information(this,
-                                             tr("Exit Yua"),
-                                             tr("An encode is currently in progress. Really exit Yua?"),
-                                             QMessageBox::Ok | QMessageBox::Cancel
-                                             ) == QMessageBox::Cancel) {
-                        event->ignore();
-                        return;
-                }
-        }
-
-
+void Yua::save_settings_before_exiting() {
         settings->setValue("window_location_x", pos().x());
         settings->setValue("window_location_y", pos().y());
         settings->setValue("window_size_width", width());
@@ -963,12 +1068,34 @@ void Yua::closeEvent(QCloseEvent *event) {
         settings->setValue("output_name", output_name_edit->text());
         settings->setValue("output_path", output_path);
 
+        settings->setValue("close_to_tray", close_to_tray_action->isChecked());
+
         settings->sync(); //why is this necessary? (20130207)
-
-
-        event->accept();
 }
 
+void Yua::exit_yua(QCloseEvent *event) {
+        if (currently_encoding) {
+                if (QMessageBox::information(this,
+                                             tr("Exit Yua"),
+                                             tr("An encode is currently in progress. Really exit Yua?"),
+                                             QMessageBox::Ok | QMessageBox::Cancel
+                                             ) == QMessageBox::Cancel) {
+                        if (event) event->ignore();
+                        return;
+                }
+        }
+
+        save_settings_before_exiting();
+        QApplication::quit();
+}
+
+void Yua::closeEvent(QCloseEvent *event) {
+        if (close_to_tray_action->isChecked() && QSystemTrayIcon::isSystemTrayAvailable()) {
+                trayIcon->show();
+                return;
+        }
+        return exit_yua(event);
+}
 
 
 void Yua::about() {
@@ -978,7 +1105,10 @@ void Yua::about() {
 
                               "<br><br>\n<a href=\"http://forum.speeddemosarchive.com/post/yua.html\">Yua</a> version %1 copyright %2 Taiga Software LLC"
                               "<br><br>\nYour use of this software is governed by the terms of the <a href=\"http://www.gnu.org/licenses/gpl.html\">GPL</a> version 2 or, at your option, any later version."
-                              "<br><br>\nThis software uses libraries from the <a href=\"http://ffmpeg.org/\">FFmpeg project</a> under the <a href=\"http://www.gnu.org/licenses/gpl.html\">GPL</a>."
+                              "<br><br>\nThis software uses libraries and binaries from the <a href=\"http://ffmpeg.org/\">FFmpeg</a> project and the <a href=\"http://x264.nl/\">x264</a> library, released "
+                              "under the <a href=\"http://www.gnu.org/licenses/gpl.html\">GPL</a>, the <a href=\"http://opencore-amr.sourceforge.net/\">FDK AAC</a> library, released under the "
+                              "under the <a href=\"http://sourceforge.net/p/opencore-amr/fdk-aac/ci/master/tree/NOTICE\">Fraunhofer-FDK-AAC-for-Android</a> license, and the MP4Box binary from the "
+                              "<a href=\"http://gpac.wp.mines-telecom.fr/\">GPAC Project on Advanced Content</a>, released under the <a href=\"http://www.gnu.org/licenses/lgpl.html\">LGPL</a>."
                               "<br><br>\nAviSynth timebase reduction code by RAYMOD2 and IanB"
                               "<br><br>\nAviSynth 3.0 high quality yv12 deinterlacing code by <a href=\"http://forum.doom9.org/showthread.php?p=1295182#post1295182\">Manao</a>"
                               ).arg(YUA_VERSION).arg(QDate::currentDate().year()));
@@ -1023,7 +1153,7 @@ void Yua::queue_frame_slot(Frame frame) {
 
                 //qDebug() << "queue_frame_slot(): encoding frame id" << frame.pts;
                 emit encode_frame(frame);
-                if (!preview_throttle.busy()) {
+                if (enable_encode_preview && !preview_throttle.busy()) {
                         emit encode_frame_preview(frame.image);
                         preview_throttle.done();
                 }
@@ -1088,7 +1218,7 @@ void Yua::dropEvent(QDropEvent *event) {
                 }
         }
 
-        finish:
+finish:
         event->acceptProposedAction();
 }
 
@@ -1213,13 +1343,13 @@ void Yua::set_sizes() {
         set_width_from_height_clamped_to_native_width_and_mod_2_height(xq_width, xq_height);
 
 
-//        qDebug() << "aspect ratio" << aspect_ratio;
-//        qDebug() << "native" << native_width << native_height;
-//        qDebug() << "lq" << lq_width << lq_height;
-//        qDebug() << "mq" << mq_width << mq_height;
-//        qDebug() << "hq" << hq_width << hq_height;
-//        qDebug() << "iq" << iq_width << iq_height;
-//        qDebug() << "xq" << xq_width << xq_height;
+        //        qDebug() << "aspect ratio" << aspect_ratio;
+        //        qDebug() << "native" << native_width << native_height;
+        //        qDebug() << "lq" << lq_width << lq_height;
+        //        qDebug() << "mq" << mq_width << mq_height;
+        //        qDebug() << "hq" << hq_width << hq_height;
+        //        qDebug() << "iq" << iq_width << iq_height;
+        //        qDebug() << "xq" << xq_width << xq_height;
 
 
         QStringList recommended_qualities = set_recommended_qualities();
@@ -1238,14 +1368,11 @@ void Yua::set_sizes() {
 }
 
 void Yua::emit_set_statid_size() {
-        //emit set_statid_size(preview_size.width(), preview_size.height());
-        //
         int sar_num = aspect_ratio_num * video_info.height;
         int sar_den = aspect_ratio_den * video_info.width;
         double sar = (double)sar_num / sar_den;
         qDebug() << "set_statid_size(" << native_width << "*" << sar << ", " << preview_size.height() << ")";
         emit set_statid_size(native_width * sar, preview_size.height());
-        //
         if (crop_checkbox->isChecked()) emit set_statid_size(cropping_rect.width(), cropping_rect.height());
 }
 
@@ -1255,23 +1382,11 @@ void Yua::seek_to(int seek_to_frame) {
 }
 
 void Yua::slider_moved(int slider_pos) {
-        //qDebug() << this << "slider_moved:" << slider_pos;
         if (currently_encoding) {
                 qDebug() << this << "slider_moved: currently_encoding, so canceled seek";
                 return;
         }
         int seek_to_frame = slider_pos;
-
-//        if (statid_group_box->isChecked()) {
-//                if (slider_currently_in_statid()) {
-//                        QImage statid_image = make_statid_image();
-//                        emit preview_ready(statid_image);
-//                        emit preview_ready_d4(statid_image);
-//                        return;
-//                }
-
-//                seek_to_frame -= statid_length_frames;
-//        }
 
         if (interlaced_button->isChecked()) seek_to_frame /= 2;
 
@@ -1359,11 +1474,6 @@ void Yua::open_successful(QStringList filenames, Video_Information new_video_inf
         }
 
         if (cli_jobs_to_process) {
-//                if (cli_files_to_append) {
-//                        return;
-//                }
-//                qDebug() << "encoding_start() in 1 second";
-//                QTimer::singleShot(1000, this, SLOT(encoding_start())); //give the ui time to finish firing all its signals from its initial setup and the effects to take effect - e.g. force_interlaced() (20130327)
                 return;
         }
 
@@ -1461,10 +1571,6 @@ void Yua::handle_d4_cropping_overlay(Frame &frame) {
 void Yua::new_preview(Frame preview_image) {
         if (currently_encoding || !frameid_queue.isEmpty()) { //sometimes muxing happens so fast that we receive frames from the deinterlacer after we have stopped currently_encoding - this frame will be "orphaned" across the entire toolchain (bad) unless we go ahead and handle it here (20130605)
                 emit queue_video_frame(preview_image);
-//                if (!preview_throttle.busy()) {
-//                        emit preview_ready(preview_image.image);
-//                        preview_throttle.done();
-//                }
         } else {
                 //qDebug() << this << "received preview image" << preview_image.pts << "while not currently_encoding";
                 current_preview_image = preview_image;
@@ -1598,10 +1704,10 @@ void Yua::one_pixel_bobbed(Frame top_field_image, Frame bottom_field_image, Fram
                                 emit queue_video_frame(bottom_field_image_pushed_down);
                                 emit queue_video_frame(top_field_image);
                         }
-//                        if (!preview_throttle.busy()) {
-//                                emit one_pixel_bob_image_ready(top_field_image.image);
-//                                preview_throttle.done();
-//                        }
+                        //                        if (!preview_throttle.busy()) {
+                        //                                emit one_pixel_bob_image_ready(top_field_image.image);
+                        //                                preview_throttle.done();
+                        //                        }
                 } else if (alternate_one_pixel_bob_button->isChecked()) {
                         if (tff_button->isChecked()) {
                                 emit queue_video_frame(top_field_image_pushed_down);
@@ -1610,10 +1716,10 @@ void Yua::one_pixel_bobbed(Frame top_field_image, Frame bottom_field_image, Fram
                                 emit queue_video_frame(bottom_field_image);
                                 emit queue_video_frame(top_field_image_pushed_down);
                         }
-//                        if (!preview_throttle.busy()) {
-//                                emit alternate_one_pixel_bob_image_ready(top_field_image_pushed_down.image);
-//                                preview_throttle.done();
-//                        }
+                        //                        if (!preview_throttle.busy()) {
+                        //                                emit alternate_one_pixel_bob_image_ready(top_field_image_pushed_down.image);
+                        //                                preview_throttle.done();
+                        //                        }
                 }
         } else {
                 Frame frame_1 = is_even_field() ? top_field_image : bottom_field_image_pushed_down;
@@ -1647,11 +1753,11 @@ void Yua::retard_bobbed(Frame top_field_image_retard_bobbed, Frame bottom_field_
                                 emit queue_video_frame(bottom_field_image_retard_bobbed);
                                 emit queue_video_frame(top_field_image_retard_bobbed);
                         }
-//                        if (!preview_throttle.busy()) {
-//                                if (!alternate) emit retard_bob_image_ready(top_field_image_retard_bobbed.image);
-//                                else emit alternate_retard_bob_image_ready(top_field_image_retard_bobbed.image);
-//                                preview_throttle.done();
-//                        }
+                        //                        if (!preview_throttle.busy()) {
+                        //                                if (!alternate) emit retard_bob_image_ready(top_field_image_retard_bobbed.image);
+                        //                                else emit alternate_retard_bob_image_ready(top_field_image_retard_bobbed.image);
+                        //                                preview_throttle.done();
+                        //                        }
                 }
         } else {
                 Frame image_to_label = is_even_field() ? top_field_image_retard_bobbed : bottom_field_image_retard_bobbed;
@@ -1747,8 +1853,10 @@ void Yua::encoding_start() {
         int full_f, hq_f, mq_f, lq_f;
         full_f = hq_f = mq_f = lq_f = f;
 
+        int mq_max_framerate = 35; //changed from 31 due to an ff7 run (20131214)
+
         qDebug() << this << "framerate is" << video_info.framerate;
-        if (f == 1 && (interlaced_button->isChecked() || video_info.framerate > 31)) { //need to apply the requested framerate decimation paradigm (20130113)
+        if (f == 1 && (interlaced_button->isChecked() || video_info.framerate > mq_max_framerate)) { //need to apply the requested framerate decimation paradigm (20130113)
                 if (fdp_2d_button->isChecked()) {
                         mq_f = 1;
                         lq_f = 3;
@@ -1756,13 +1864,13 @@ void Yua::encoding_start() {
                         mq_f = lq_f = 2;
                 }
         }
-        while (video_info.framerate / hq_f > 62) ++hq_f;
+        while (video_info.framerate / hq_f > mq_max_framerate*2) ++hq_f;
         if (fdp_2d_button->isChecked()) {
-                while (video_info.framerate / mq_f > 62) ++mq_f;
+                while (video_info.framerate / mq_f > mq_max_framerate*2) ++mq_f;
         } else {
-                while (video_info.framerate / mq_f > 31) ++mq_f;
+                while (video_info.framerate / mq_f > mq_max_framerate) ++mq_f;
         }
-        while (video_info.framerate / lq_f > 31) ++lq_f;
+        while (video_info.framerate / lq_f > mq_max_framerate) ++lq_f;
         qDebug() << this << "full_f:" << full_f << " hq_f:" << hq_f << " mq_f:" << mq_f << " lq_f:" << lq_f;
 
         int default_number_of_channels = 0;
@@ -1803,23 +1911,23 @@ void Yua::encoding_start() {
         qDebug() << "lq size_after_cropping" << lq_size_after_cropping;
 
         if (xq_button->isChecked()) jobs << Job("XQ"
-                                                ,Video_Information(xq_bitrate_kbit, video_info.framerate, full_f, xq_width, xq_height, xq_size_after_cropping.width(), xq_size_after_cropping.height(), high_fi_colorspace)
+                                                ,Video_Information(xq_bitrate_kbit, video_info.framerate, full_f, xq_width, xq_height, xq_size_after_cropping.width(), xq_size_after_cropping.height(), high_fi_colorspace, video_info.colorspace_standard)
                                                 ,Audio_Information(320000, default_number_of_channels));
 
         if (iq_button->isChecked()) jobs << Job("IQ"
-                                                ,Video_Information(5000, video_info.framerate, full_f, iq_width, iq_height, iq_size_after_cropping.width(), iq_size_after_cropping.height(), high_fi_colorspace)
+                                                ,Video_Information(5000, video_info.framerate, full_f, iq_width, iq_height, iq_size_after_cropping.width(), iq_size_after_cropping.height(), high_fi_colorspace, video_info.colorspace_standard)
                                                 ,Audio_Information(320000, default_number_of_channels));
 
         if (hq_button->isChecked()) jobs << Job("HQ"
-                                                ,Video_Information(2048, video_info.framerate, hq_f, hq_width, hq_height, hq_size_after_cropping.width(), hq_size_after_cropping.height(), low_fi_colorspace)
+                                                ,Video_Information(2048, video_info.framerate, hq_f, hq_width, hq_height, hq_size_after_cropping.width(), hq_size_after_cropping.height(), low_fi_colorspace, video_info.colorspace_standard)
                                                 ,Audio_Information(128000, default_number_of_channels));
 
         if (mq_button->isChecked()) jobs << Job("MQ"
-                                                ,Video_Information(512, video_info.framerate, mq_f, mq_width, mq_height, mq_size_after_cropping.width(), mq_size_after_cropping.height(), low_fi_colorspace)
+                                                ,Video_Information(512, video_info.framerate, mq_f, mq_width, mq_height, mq_size_after_cropping.width(), mq_size_after_cropping.height(), low_fi_colorspace, video_info.colorspace_standard)
                                                 ,Audio_Information(64000, low_fi_number_of_channels));
 
         if (lq_button->isChecked()) jobs << Job("LQ"
-                                                ,Video_Information(128, video_info.framerate, lq_f, lq_width, lq_height, lq_size_after_cropping.width(), lq_size_after_cropping.height(), low_fi_colorspace)
+                                                ,Video_Information(128, video_info.framerate, lq_f, lq_width, lq_height, lq_size_after_cropping.width(), lq_size_after_cropping.height(), low_fi_colorspace, video_info.colorspace_standard)
                                                 ,Audio_Information(64000, low_fi_number_of_channels));
 
         qDebug() << "encoding_start(): jobs.size() is" << jobs.size();
@@ -1844,6 +1952,7 @@ void Yua::encode_jobs() {
                 }
 
                 vate_ui(true);
+                set_tray_menu_progress_action_idle();
                 set_status(tr("All jobs finished at %1.\n\n").arg(QDateTime::currentDateTime().toString()));
                 stop_button->setEnabled(false);
                 currently_encoding = false;
@@ -1890,7 +1999,7 @@ void Yua::encode_jobs() {
         frameid_frame.clear();
         emit set_estimated_total_frames_to_encode((slider.maximum()+1) / current_job.video.f);
         if (1
-                        && previous_job.name != "MQ" && current_job.name != "MQ"
+                        //&& previous_job.name != "MQ" && current_job.name != "MQ"
                         && previous_job.video.colorspace == current_job.video.colorspace
                         && previous_job.video.number_of_frames == current_job.video.number_of_frames
                         && previous_job.video.framerate == current_job.video.framerate
@@ -1953,7 +2062,7 @@ void Yua::video_encoding_finished(QString new_video_temp_filename, int output_bi
         while (!jobs.isEmpty()
                         && output_bitrate < current_job.video.bitrate_kbit
                         && output_bitrate < jobs.at(0).video.bitrate_kbit
-                        && jobs.at(0).name != "MQ" && current_job.name != "MQ"
+                        //&& jobs.at(0).name != "MQ" && current_job.name != "MQ"
                         && jobs.at(0).video.colorspace == current_job.video.colorspace
                         && jobs.at(0).video.number_of_frames == current_job.video.number_of_frames
                         && jobs.at(0).video.framerate == current_job.video.framerate
@@ -1965,8 +2074,12 @@ void Yua::video_encoding_finished(QString new_video_temp_filename, int output_bi
                         && jobs.at(0).video.width == current_job.video.width
                         && jobs.at(0).video.width_after_cropping == current_job.video.width_after_cropping
                         ) {
-                set_status(tr("The %1 video was renamed to %2 because %1 was not necessary to encode.\n").arg(current_job.name).arg(jobs.at(0).name));
-                current_job.name = jobs.at(0).name;
+                if (jobs.at(0).name == "LQ" && current_job.name == "MQ") { //every run has to have mq (20140817)
+                        set_status(tr("It is not necessary to encode LQ for this run. MQ counts as LQ also.\n"));
+                } else {
+                        set_status(tr("The %1 video was renamed to %2 because %1 was not necessary to encode.\n").arg(current_job.name).arg(jobs.at(0).name));
+                        current_job.name = jobs.at(0).name;
+                }
                 jobs.removeFirst();
         }
 
@@ -2060,7 +2173,7 @@ void Yua::process_read_stderr() {
 void Yua::process_read_stdout() {
         QString mp4box_string_raw = muxer_process.readAllStandardOutput();
         //qDebug() << "mp4box stdout:" << mp4box_string_raw;
-//        write_to_log(mp4box_string_raw, "mp4box.stdout.log");
+        //        write_to_log(mp4box_string_raw, "mp4box.stdout.log");
         process_muxer_output(mp4box_string_raw);
 }
 
@@ -2082,7 +2195,7 @@ void Yua::show_in_finder(QString path) { //from http://lynxline.com/show-in-find
         QProcess::startDetached("osascript", args);
 #endif
 
-#ifdef Q_WS_WIN
+#ifdef Q_OS_WIN32
         QStringList args;
         args << "/select," << QDir::toNativeSeparators(path);
         QProcess::startDetached("explorer", args);
@@ -2163,7 +2276,7 @@ void Yua::vate_ui(bool boolean) {
 
 void Yua::add_progress(Progress_Type progress_type, double amount) {
         if (progress_throttle.busy()) {
-//                qDebug() << "progress_throttle busy";
+                //                qDebug() << "progress_throttle busy";
                 return;
         }// else qDebug() << "progress_throttle NOT busy";
 
@@ -2191,7 +2304,12 @@ void Yua::add_progress(Progress_Type progress_type, double amount) {
                 break;
         }
 
-        progress_bar.setValue((base + amount) * progress_bar.maximum());
+        double total = base + amount;
+
+        progress_bar.setValue(total * progress_bar.maximum());
+
+        set_tray_menu_progress_action_text(tr("Encoding %1 (%2%)").arg(current_job.name).arg(total*100, 0, 'f', 3));
+
         progress_throttle.done();
 }
 
@@ -2239,26 +2357,6 @@ void Yua::trim_set_end_frame() {
 }
 
 void Yua::audio_data_in(QByteArray data, qint64 audio_pts) {
-//        if (!audio_first_pts_set && trim_start_frame != 0 && audio_pts != AV_NOPTS_VALUE) {
-//                audio_first_pts = audio_pts;
-//                audio_first_pts_set = true;
-//                qDebug() << "audio_first_pts is" << audio_first_pts;
-//                if (video_first_pts_set) {
-//                        double difference_seconds = ((double)video_first_pts * (double)video_timebase_num / video_timebase_den)
-//                                        - ((double)audio_first_pts * (double)audio_timebase_num / audio_timebase_den);
-//                        qDebug()
-//                                        << this << "got video first;"
-//                                        << "audio_first_pts is" << audio_first_pts
-//                                        << "video_first_pts is" << video_first_pts
-//                                        << "floating point difference v-a" << difference_seconds;
-//                        audio_first_pts += difference_seconds * (double)audio_timebase_den / audio_timebase_num;
-//                        qDebug() << "now audio_first_pts is" << audio_first_pts;
-//                }
-//        }
-//        if (audio_pts != AV_NOPTS_VALUE) {
-//                audio_pts -= audio_first_pts;
-//        }
-        //qDebug() << this << "audio_data_out() pts" << audio_pts;
         emit audio_data_out(data, audio_pts);
 }
 
@@ -2659,16 +2757,16 @@ void Yua::add_audio_commentary() {
         audio_commentary_temp_out_filename = QString("%1/ac.aac").arg(temp_dir);
 
         QString audio_commentary_in_filename = QFileDialog::getOpenFileName(this,
-                                                        tr("Select Audio Commentary File"),
-                                                        settings->value("last_file_location", desktop_path_string).toString()
-                                                        );
+                                                                            tr("Select Audio Commentary File"),
+                                                                            settings->value("last_file_location", desktop_path_string).toString()
+                                                                            );
         if (audio_commentary_in_filename.isNull()) return;
         settings->setValue("last_file_location", QFileInfo(audio_commentary_in_filename).absolutePath());
         QStringList mp4_filenames = QFileDialog::getOpenFileNames(this,
-                                                              tr("Select Video Files"),
-                                                              settings->value("last_file_location", desktop_path_string).toString(),
-                                                              tr("Video files (*.mp4)")
-                                                              );
+                                                                  tr("Select Video Files"),
+                                                                  settings->value("last_file_location", desktop_path_string).toString(),
+                                                                  tr("Video files (*.mp4)")
+                                                                  );
         if (mp4_filenames.isEmpty()) return;
         settings->setValue("last_file_location", QFileInfo(mp4_filenames.at(0)).absolutePath());
 
@@ -2745,4 +2843,13 @@ void Yua::audio_commentary_muxer_process_finished(int exit_code, QProcess::ExitS
         }
         set_status(tr("Done.\n"));
         return mux_next_audio_commentary_mp4();
+}
+
+
+void Yua::set_tray_menu_progress_action_text(QString text) {
+        tray_menu_progress_action->setText(text);
+}
+
+void Yua::set_tray_menu_progress_action_idle() {
+        return set_tray_menu_progress_action_text(tr("(idle)"));
 }

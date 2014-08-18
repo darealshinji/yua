@@ -21,9 +21,14 @@
 #include <QFileDialog>
 #include <QInputDialog>
 #include <QDesktopWidget>
+#include <QRegExpValidator>
 #if QT_VERSION >= 0x050000
 #include <QtConcurrent/QtConcurrent>
 #endif
+#include <QSystemTrayIcon>
+
+// needed for displayHelp() and displayVersion()
+#include <iostream>
 
 #include "webcam_display.h"
 #include "decoder_mothership.h"
@@ -44,13 +49,11 @@ public:
         Yua(QWidget *parent = 0);
         ~Yua();
         QMutex ffmpeg_mutex;
-
 protected:
         void dragEnterEvent(QDragEnterEvent *event);
         void dragMoveEvent(QDragMoveEvent *event);
         void dragLeaveEvent(QDragLeaveEvent *event);
         void dropEvent(QDropEvent *event);
-
 signals:
         void open_file(QString);
         void append_files(QStringList);
@@ -93,7 +96,6 @@ signals:
         void encode_frame_preview(QImage);
         void set_pass(int);
         void set_encoding_abort();
-
 private slots:
         void open_dialog();
         void open(QString);
@@ -170,9 +172,13 @@ private slots:
         void audio_commentary_muxer_process_error(QProcess::ProcessError error);
         void audio_commentary_muxer_process_finished(int exit_code, QProcess::ExitStatus status);
 
-private:
+        void exit_yua(QCloseEvent *event = nullptr);
         void closeEvent(QCloseEvent *event);
+        void save_settings_before_exiting();
 
+        void set_tray_menu_progress_action_text(QString text);
+        void set_tray_menu_progress_action_idle();
+private:
         bool is_even_field();
 
         Webcam_Display preview_display, no_change_display, one_pixel_bob_display, alternate_one_pixel_bob_display, retard_bob_display, alternate_retard_bob_display;
@@ -193,15 +199,17 @@ private:
         *fdp_2d_button, *fdp_3d_button,
         *d4_button, *d1_button;
         QPushButton *stop_button;
+        QPushButton *quit_button;
         QList<QRadioButton *> buttons;
 
         QCheckBox *xq_button, *iq_button, *hq_button, *mq_button, *lq_button;
         QList<QCheckBox *> checkboxes;
 
-        QMenu *file_menu, *trim_menu, *screenshot_menu, *tools_menu, *help_menu;
+        QMenu *file_menu, *trim_menu, *screenshot_menu, *tools_menu, *window_menu, *help_menu;
         QList<QAction *> actions;
         QAction *append_action, *encode_action, *save_settings_action, *load_settings_action;
         QAction *shut_down_action, *reboot_action, *sleep_action, *hibernate_action, *lock_action;
+        QAction *close_to_tray_action;
 
 
         Frame top_field_image, bottom_field_image;
@@ -256,7 +264,6 @@ private:
         void process_muxer_output(QString);
         QTemporaryFile temporary_directory_file;
         QString temp_dir;
-//        QDialog *index_progress_widget;
         qint64 slider_resume_value;
         QString temp_out_filename, audio_commentary_temp_out_filename;
         void show_in_finder(QString);
@@ -323,6 +330,16 @@ private:
         QString desktop_path_string;
 
         int xq_bitrate_kbit;
+
+        bool enable_encode_preview;
+
+        QRegExpValidator output_name_edit_validator;
+
+        void displayHelp();
+        void displayVersion();
+
+        QSystemTrayIcon *trayIcon;
+        QAction *tray_menu_progress_action;
 };
 
 #endif // YUA_H

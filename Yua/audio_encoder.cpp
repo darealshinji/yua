@@ -124,7 +124,7 @@ void Audio_Encoder::start(Audio_Information new_target_info) {
 
 
         /* frame containing input raw audio */
-        output_frame = avcodec_alloc_frame();
+        output_frame = av_frame_alloc();
         if (!output_frame) {
                 fprintf(stderr, "Could not allocate audio frame\n");
                 exit(1);
@@ -193,7 +193,7 @@ void Audio_Encoder::finish() {
         av_write_trailer(oc);
 
         av_freep(&output_frame_data);
-        avcodec_free_frame(&output_frame);
+        av_frame_free(&output_frame);
 
         if (mutex) mutex->lock();
         avcodec_close(c);
@@ -244,7 +244,7 @@ void Audio_Encoder::encode_samples(QByteArray data_to_encode, qint64 input_pts) 
 }
 
 void Audio_Encoder::encode_data() {
-        AVRational src_timebase = {source_info.timebase_num, source_info.timebase_den};
+        AVRational src_timebase = {(int)source_info.timebase_num, (int)source_info.timebase_den};
         while (input_frames.size()) {
                 QByteArray input_frame = input_frames.takeFirst();
                 uchar *input_frame_data = (uchar *)input_frame.data();
