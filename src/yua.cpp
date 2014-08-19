@@ -604,6 +604,11 @@ Yua::Yua(QWidget *parent)
         connect(exit_action, SIGNAL(triggered()), this, SLOT(exit_yua()));
 
         trayIconMenu = new QMenu(this);
+
+        tray_menu_progress_action = trayIconMenu->addAction("");
+        tray_menu_progress_action->setDisabled(true);
+        set_tray_menu_progress_action_idle();
+
         trayIconMenu->addAction(restore_action);
         trayIconMenu->addSeparator();
         trayIconMenu->addAction(exit_action);
