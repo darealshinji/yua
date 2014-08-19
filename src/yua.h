@@ -42,6 +42,7 @@
 #include "frame.h"
 #include "throttle.h"
 #include "power_management.h"
+#include "sda_codec_settings.h"
 
 class Yua : public QMainWindow {
         Q_OBJECT
