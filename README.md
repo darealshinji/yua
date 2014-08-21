@@ -25,18 +25,6 @@ Install build dependencies for a static build:<br>
 `sudo apt-get install build-essential git qtbase5-dev libqt5opengl5-dev upx-ucl zlib1g-dev`
 
 
-Ubuntu
-------
-Ubuntu users can install Yua via PPA.
-Note that this will also install newer FFmpeg libraries.
-```
-sudo add-apt-repository ppa:djcj/yua
-sudo apt-get update
-sudo apt-get install yua
-sudo apt-get upgrade
-```
-
-
 Copyright
 ---------
 Copyright (C) 2013-2014 Taiga Software LLC
