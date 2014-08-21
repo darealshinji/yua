@@ -1,6 +1,8 @@
 #ifndef YUA_UTIL_H
 #define YUA_UTIL_H
 
+#include <QDebug>
+
 extern "C" {
 #include "libavutil/opt.h"
 #include "libavutil/channel_layout.h"

@@ -178,6 +178,7 @@ private slots:
 
         void set_tray_menu_progress_action_text(QString text);
         void set_tray_menu_progress_action_idle();
+        void iconActivated(QSystemTrayIcon::ActivationReason reason);
 private:
         bool is_even_field();
 

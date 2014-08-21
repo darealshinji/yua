@@ -64,8 +64,8 @@ QImage Scaler::scale(QImage in, int out_width, int out_height) {
                 AVPixelFormat pix_fmt = AV_PIX_FMT_RGB32;
 
                 swscales[key] = resize_img_ctx = Yua_Util::GetSwsContext(
-                                        in.width(), in.height(), pix_fmt, AVCOL_SPC_UNSPECIFIED, 0,
-                                        out_width, out_height, pix_fmt, AVCOL_SPC_UNSPECIFIED, 0,
+                                        in.width(), in.height(), pix_fmt, AVCOL_SPC_UNSPECIFIED, AVCOL_RANGE_MPEG,
+                                        out_width, out_height, pix_fmt, AVCOL_SPC_UNSPECIFIED, AVCOL_RANGE_MPEG,
                                         SWS_LANCZOS);
                 Q_ASSERT(resize_img_ctx);
 

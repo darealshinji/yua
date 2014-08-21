@@ -607,7 +607,9 @@ Yua::Yua(QWidget *parent)
         auto restore_action = trayIconMenu->addAction(tr("Restore"));
         connect(restore_action, &QAction::triggered, [=](){
                 showNormal();
-                //trayIcon->hide(); //this leads to a crash under os x - even using QTimer::singleShot() is not enough (20140807)
+#ifdef Q_OS_WIN32 //on Linux+Qt5 the icon does not reappear in the tray after minimizing again
+                trayIcon->hide(); //this leads to a crash under os x - even using QTimer::singleShot() is not enough (20140807)
+#endif
         });
 
         trayIconMenu->addSeparator();
@@ -616,9 +618,18 @@ Yua::Yua(QWidget *parent)
         connect(tray_exit_action, SIGNAL(triggered()), this, SLOT(exit_yua()));
 
         trayIcon = new QSystemTrayIcon(this);
+#ifndef Q_OS_MAC
+        connect(trayIcon, SIGNAL(activated(QSystemTrayIcon::ActivationReason)),
+                this, SLOT(iconActivated(QSystemTrayIcon::ActivationReason)));
+#endif
         trayIcon->setIcon(QIcon(":/yua.png"));
         trayIcon->setContextMenu(trayIconMenu);
-        //trayIcon->show();
+
+#ifndef Q_OS_MAC
+#ifndef Q_OS_WIN32
+        trayIcon->show(); //on Linux+Qt5 the icon does not reappear in the tray after minimizing again
+#endif
+#endif
 
 
 
@@ -1073,6 +1084,21 @@ void Yua::save_settings_before_exiting() {
         settings->sync(); //why is this necessary? (20130207)
 }
 
+void Yua::iconActivated(QSystemTrayIcon::ActivationReason reason) {
+        switch (reason) {
+        case QSystemTrayIcon::Trigger:
+#ifdef Q_OS_WIN32 //on Linux+Qt5 the icon does not reappear in the tray after minimizing again
+                trayIcon->hide(); //this leads to a crash under os x - even using QTimer::singleShot() is not enough (20140807)
+#endif
+                showNormal();
+                break;
+        case QSystemTrayIcon::DoubleClick:
+        case QSystemTrayIcon::MiddleClick:
+        default:
+                ;
+        }
+}
+
 void Yua::exit_yua(QCloseEvent *event) {
         if (currently_encoding) {
                 if (QMessageBox::information(this,
@@ -1103,7 +1129,7 @@ void Yua::about() {
 
                            tr("<i>\"it's about the strength of my desire\"</i>"
 
-                              "<br><br>\n<a href=\"http://forum.speeddemosarchive.com/post/yua.html\">Yua</a> version %1 copyright %2 Taiga Software LLC"
+                              "<br><br>\n<a href=\"http://forum.speeddemosarchive.com/post/yua.html\">Yua</a> version %1 copyright 2013-%2 Taiga Software LLC"
                               "<br><br>\nYour use of this software is governed by the terms of the <a href=\"http://www.gnu.org/licenses/gpl.html\">GPL</a> version 2 or, at your option, any later version."
                               "<br><br>\nThis software uses libraries and binaries from the <a href=\"http://ffmpeg.org/\">FFmpeg</a> project and the <a href=\"http://x264.nl/\">x264</a> library, released "
                               "under the <a href=\"http://www.gnu.org/licenses/gpl.html\">GPL</a>, the <a href=\"http://opencore-amr.sourceforge.net/\">FDK AAC</a> library, released under the "
@@ -2201,8 +2227,10 @@ void Yua::show_in_finder(QString path) { //from http://lynxline.com/show-in-find
         QProcess::startDetached("explorer", args);
 #endif
 
-#ifdef Q_WS_X11 //don't know how to do this under linux right now (20130209)
-        Q_UNUSED(path)
+#ifndef Q_OS_WIN32
+#ifndef Q_OS_MAC
+        Q_UNUSED(path) //don't know how to do this under linux right now (20130209)
+#endif
 #endif
 }
 

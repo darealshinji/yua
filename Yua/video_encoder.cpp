@@ -316,8 +316,8 @@ void Video_Encoder::write_frame(Frame frame) {
 
         if (!encode_img_convert_ctx)
                 encode_img_convert_ctx = Yua_Util::GetSwsContext(
-                                        video_information.width_after_cropping, video_information.height_after_cropping, src_pix_fmt, video_information.colorspace_standard, 0,
-                                        video_information.width_after_cropping, video_information.height_after_cropping, output_colorspace, video_information.colorspace_standard, 0,
+                                        video_information.width_after_cropping, video_information.height_after_cropping, src_pix_fmt, video_information.colorspace_standard, AVCOL_RANGE_MPEG,
+                                        video_information.width_after_cropping, video_information.height_after_cropping, output_colorspace, video_information.colorspace_standard, AVCOL_RANGE_MPEG,
                                         SWS_LANCZOS);
         Q_ASSERT(encode_img_convert_ctx);
 
