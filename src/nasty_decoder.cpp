@@ -122,8 +122,8 @@ void Nasty_Decoder::yv12_deinterlacing_check_and_set() {
                 interlaced_yv12_conversion_needed = true;
                 if (interlaced_convert_ctx) sws_freeContext(interlaced_convert_ctx);
                 interlaced_convert_ctx = Yua_Util::GetSwsContext(
-                                        vCodecCtx->width, vCodecCtx->height/2, AV_PIX_FMT_YUYV422, vCodecCtx->colorspace, src_is_mjpeg_color_range ? 1 : 0,
-                                        vCodecCtx->width, vCodecCtx->height/2, dest_pix_fmt, vCodecCtx->colorspace, 0,
+                                        vCodecCtx->width, vCodecCtx->height/2, AV_PIX_FMT_YUYV422, vCodecCtx->colorspace, src_is_mjpeg_color_range ? AVCOL_RANGE_JPEG : AVCOL_RANGE_MPEG,
+                                        vCodecCtx->width, vCodecCtx->height/2, dest_pix_fmt, vCodecCtx->colorspace, AVCOL_RANGE_MPEG,
                                         SWS_LANCZOS);
         }
 }
@@ -344,6 +344,7 @@ void Nasty_Decoder::open(QString filename) {
                                 src_pix_fmt = vCodecCtx->pix_fmt;
                                 src_is_mjpeg_color_range = false;
                         }
+                        qDebug() << this << "src_is_mjpeg_color_range set to" << src_is_mjpeg_color_range;
 
                         video_info.colorspace_standard = vCodecCtx->colorspace;
                 }
@@ -413,12 +414,12 @@ void Nasty_Decoder::open(QString filename) {
         avpicture_fill((AVPicture *)pFrameRGB, buffer, dest_pix_fmt, vCodecCtx->width, vCodecCtx->height);
 
         encode_img_convert_ctx = Yua_Util::GetSwsContext(
-                                vCodecCtx->width, vCodecCtx->height, src_pix_fmt, vCodecCtx->colorspace, src_is_mjpeg_color_range ? 1 : 0,
-                                vCodecCtx->width, vCodecCtx->height, dest_pix_fmt, vCodecCtx->colorspace, 0,
+                                vCodecCtx->width, vCodecCtx->height, src_pix_fmt, vCodecCtx->colorspace, src_is_mjpeg_color_range ? AVCOL_RANGE_JPEG : AVCOL_RANGE_MPEG,
+                                vCodecCtx->width, vCodecCtx->height, dest_pix_fmt, vCodecCtx->colorspace, AVCOL_RANGE_MPEG,
                                 SWS_LANCZOS);
         interlaced_convert_ctx = Yua_Util::GetSwsContext(
-                                vCodecCtx->width, vCodecCtx->height/2, src_pix_fmt, vCodecCtx->colorspace, src_is_mjpeg_color_range ? 1 : 0,
-                                vCodecCtx->width, vCodecCtx->height/2, dest_pix_fmt, vCodecCtx->colorspace, 0,
+                                vCodecCtx->width, vCodecCtx->height/2, src_pix_fmt, vCodecCtx->colorspace, src_is_mjpeg_color_range ? AVCOL_RANGE_JPEG : AVCOL_RANGE_MPEG,
+                                vCodecCtx->width, vCodecCtx->height/2, dest_pix_fmt, vCodecCtx->colorspace, AVCOL_RANGE_MPEG,
                                 SWS_LANCZOS);
 
 

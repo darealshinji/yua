@@ -7,7 +7,7 @@ Homepage: https://forum.speeddemosarchive.com/post/yua3.html
 
 Build
 -----
-Install build dependencies: `sudo apt-get install build-essential libqt4-dev libqt4-opengl-dev libavcodec-dev libavformat-dev libavresample-dev libavutil-dev libswscale-dev zlib1g-dev`
+Install build dependencies: `sudo apt-get install build-essential qtbase5-dev libqt5opengl5-dev libavcodec-dev libavformat-dev libavresample-dev libavutil-dev libswscale-dev zlib1g-dev`
 
 Install FFmpeg (preferably with fdk-aac enabled) and MP4Box as additional runtime dependencies:<br>
 `sudo apt-get install ffmpeg gpac`
@@ -22,7 +22,7 @@ Static build
 To compile a statically linked binary with embedded FFmpeg and MP4Box run `make static`
 
 Install build dependencies for a static build:<br>
-`sudo apt-get install build-essential git libqt4-dev libqt4-opengl-dev upx-ucl zlib1g-dev`
+`sudo apt-get install build-essential git qtbase5-dev libqt5opengl5-dev upx-ucl zlib1g-dev`
 
 
 Ubuntu

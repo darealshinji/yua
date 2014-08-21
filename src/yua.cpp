@@ -95,7 +95,7 @@ Yua::Yua(QWidget *parent)
         #else
         ,desktop_path_string(QDesktopServices::storageLocation(QDesktopServices::DesktopLocation))
         #endif
-        ,xq_bitrate_kbit(XQ_VIDEO_BITRATE)
+        ,xq_bitrate_kbit(10000)
         ,enable_encode_preview(true)
         ,output_name_edit_validator(QRegExp("[\\w_\\- ]+"))
 {
@@ -596,31 +596,7 @@ Yua::Yua(QWidget *parent)
 
 
 
-        // tray icon
-        restore_action = new QAction("Restore", this);
-        exit_action = new QAction("Quit", this);
 
-        connect(restore_action, SIGNAL(triggered()), this, SLOT(showNormal()));
-        connect(exit_action, SIGNAL(triggered()), this, SLOT(exit_yua()));
-
-        trayIconMenu = new QMenu(this);
-
-        tray_menu_progress_action = trayIconMenu->addAction("");
-        tray_menu_progress_action->setDisabled(true);
-        set_tray_menu_progress_action_idle();
-
-        trayIconMenu->addAction(restore_action);
-        trayIconMenu->addSeparator();
-        trayIconMenu->addAction(exit_action);
-
-        trayIcon = new QSystemTrayIcon(this);
-        connect(trayIcon, SIGNAL(activated(QSystemTrayIcon::ActivationReason)),
-        this, SLOT(iconActivated(QSystemTrayIcon::ActivationReason)));
-        trayIcon->setIcon(QIcon(":/yua.png"));
-        trayIcon->setContextMenu(trayIconMenu);
-        //trayIcon->show();
-
-/*
         //tray icon
         auto trayIconMenu = new QMenu(this);
 
@@ -631,7 +607,9 @@ Yua::Yua(QWidget *parent)
         auto restore_action = trayIconMenu->addAction(tr("Restore"));
         connect(restore_action, &QAction::triggered, [=](){
                 showNormal();
-                //trayIcon->hide(); //this leads to a crash under os x - even using QTimer::singleShot() is not enough (20140807)
+#ifndef Q_OS_MAC
+                trayIcon->hide(); //this leads to a crash under os x - even using QTimer::singleShot() is not enough (20140807)
+#endif
         });
 
         trayIconMenu->addSeparator();
@@ -640,10 +618,12 @@ Yua::Yua(QWidget *parent)
         connect(tray_exit_action, SIGNAL(triggered()), this, SLOT(exit_yua()));
 
         trayIcon = new QSystemTrayIcon(this);
+#ifndef Q_OS_MAC
+        connect(trayIcon, SIGNAL(activated(QSystemTrayIcon::ActivationReason)),
+                this, SLOT(iconActivated(QSystemTrayIcon::ActivationReason)));
+#endif
         trayIcon->setIcon(QIcon(":/yua.png"));
         trayIcon->setContextMenu(trayIconMenu);
-        //trayIcon->show();
-*/
 
 
 
@@ -1098,42 +1078,22 @@ void Yua::save_settings_before_exiting() {
         settings->sync(); //why is this necessary? (20130207)
 }
 
-void Yua::iconActivated(QSystemTrayIcon::ActivationReason reason)
-{
+void Yua::iconActivated(QSystemTrayIcon::ActivationReason reason) {
         switch (reason) {
         case QSystemTrayIcon::Trigger:
-               trayIcon->hide();
-               showNormal();
-               break;
+#ifndef Q_OS_MAC
+                trayIcon->hide(); //this leads to a crash under os x - even using QTimer::singleShot() is not enough (20140807)
+#endif
+                showNormal();
+                break;
         case QSystemTrayIcon::DoubleClick:
         case QSystemTrayIcon::MiddleClick:
         default:
-               ;
+                ;
         }
 }
 
-void Yua::exit_yua() {
-        if (currently_encoding) {
-                if (QMessageBox::information(this,
-                                             tr("Exit Yua"),
-                                             tr("An encode is currently in progress. Really exit Yua?"),
-                                             QMessageBox::Ok | QMessageBox::Cancel
-                                             ) == QMessageBox::Cancel) {
-                        return;
-                }
-        }
-
-        save_settings_before_exiting();
-        QApplication::quit();
-}
-
-
-void Yua::closeEvent(QCloseEvent *event) {
-        if (close_to_tray_action->isChecked() && QSystemTrayIcon::isSystemTrayAvailable()) {
-                trayIcon->show();
-                return;
-        }
-
+void Yua::exit_yua(QCloseEvent *event) {
         if (currently_encoding) {
                 if (QMessageBox::information(this,
                                              tr("Exit Yua"),
@@ -1146,11 +1106,15 @@ void Yua::closeEvent(QCloseEvent *event) {
         }
 
         save_settings_before_exiting();
+        QApplication::quit();
+}
 
-        if (!close_to_tray_action->isChecked() && QSystemTrayIcon::isSystemTrayAvailable()) {
-                 return exit_yua();
+void Yua::closeEvent(QCloseEvent *event) {
+        if (close_to_tray_action->isChecked() && QSystemTrayIcon::isSystemTrayAvailable()) {
+                trayIcon->show();
+                return;
         }
-        event->accept();
+        return exit_yua(event);
 }
 
 
@@ -1369,23 +1333,23 @@ void Yua::set_sizes() {
                         native_height /= 2;
                 }
         } else if (d4_button->isChecked()) { //if the aspect ratio checkbox is not checked and the d1 box is checked we do nothing - if d4 is checked we reduce to d4 (20130212)
-                native_height = D4_NATIVE_HEIGHT;
+                native_height = 240;
         }
         aspect_ratio = (double)aspect_ratio_den / (double)aspect_ratio_num;
         emit set_aspect_ratio(aspect_ratio_num, aspect_ratio_den); //we will use this to calculate the pixel aspect ratio passed to x264 so that we can display at the correct aspect ratio without stretching the image horizontally and without losing resolution vertically (i.e., without setting the height from the width) (20130213)
 
 
         //heights
-        lq_height = LQ_HEIGHT;
+        lq_height = 240;
         if (lq_height > native_height) lq_height = native_height;
 
-        mq_height = MQ_HEIGHT;
+        mq_height = 240;
         if (mq_height > native_height) mq_height = native_height;
 
-        hq_height = HQ_HEIGHT;
+        hq_height = 480;
         if (hq_height > native_height) hq_height = native_height;
 
-        iq_height = IQ_HEIGHT;
+        iq_height = 768;
         if (iq_height > native_height) iq_height = native_height;
 
         xq_height = native_height;
@@ -1909,7 +1873,7 @@ void Yua::encoding_start() {
         int full_f, hq_f, mq_f, lq_f;
         full_f = hq_f = mq_f = lq_f = f;
 
-        int mq_max_framerate = MQ_MAX_FRAMERATE;
+        int mq_max_framerate = 35; //changed from 31 due to an ff7 run (20131214)
 
         qDebug() << this << "framerate is" << video_info.framerate;
         if (f == 1 && (interlaced_button->isChecked() || video_info.framerate > mq_max_framerate)) { //need to apply the requested framerate decimation paradigm (20130113)
@@ -1968,23 +1932,23 @@ void Yua::encoding_start() {
 
         if (xq_button->isChecked()) jobs << Job("XQ"
                                                 ,Video_Information(xq_bitrate_kbit, video_info.framerate, full_f, xq_width, xq_height, xq_size_after_cropping.width(), xq_size_after_cropping.height(), high_fi_colorspace, video_info.colorspace_standard)
-                                                ,Audio_Information(XQ_AUDIO_BITRATE, default_number_of_channels));
+                                                ,Audio_Information(320000, default_number_of_channels));
 
         if (iq_button->isChecked()) jobs << Job("IQ"
-                                                ,Video_Information(IQ_VIDEO_BITRATE, video_info.framerate, full_f, iq_width, iq_height, iq_size_after_cropping.width(), iq_size_after_cropping.height(), high_fi_colorspace, video_info.colorspace_standard)
-                                                ,Audio_Information(IQ_AUDIO_BITRATE, default_number_of_channels));
+                                                ,Video_Information(5000, video_info.framerate, full_f, iq_width, iq_height, iq_size_after_cropping.width(), iq_size_after_cropping.height(), high_fi_colorspace, video_info.colorspace_standard)
+                                                ,Audio_Information(320000, default_number_of_channels));
 
         if (hq_button->isChecked()) jobs << Job("HQ"
-                                                ,Video_Information(HQ_VIDEO_BITRATE, video_info.framerate, hq_f, hq_width, hq_height, hq_size_after_cropping.width(), hq_size_after_cropping.height(), low_fi_colorspace, video_info.colorspace_standard)
-                                                ,Audio_Information(HQ_AUDIO_BITRATE, default_number_of_channels));
+                                                ,Video_Information(2048, video_info.framerate, hq_f, hq_width, hq_height, hq_size_after_cropping.width(), hq_size_after_cropping.height(), low_fi_colorspace, video_info.colorspace_standard)
+                                                ,Audio_Information(128000, default_number_of_channels));
 
         if (mq_button->isChecked()) jobs << Job("MQ"
-                                                ,Video_Information(MQ_VIDEO_BITRATE, video_info.framerate, mq_f, mq_width, mq_height, mq_size_after_cropping.width(), mq_size_after_cropping.height(), low_fi_colorspace, video_info.colorspace_standard)
-                                                ,Audio_Information(MQ_AUDIO_BITRATE, low_fi_number_of_channels));
+                                                ,Video_Information(512, video_info.framerate, mq_f, mq_width, mq_height, mq_size_after_cropping.width(), mq_size_after_cropping.height(), low_fi_colorspace, video_info.colorspace_standard)
+                                                ,Audio_Information(64000, low_fi_number_of_channels));
 
         if (lq_button->isChecked()) jobs << Job("LQ"
-                                                ,Video_Information(LQ_VIDEO_BITRATE, video_info.framerate, lq_f, lq_width, lq_height, lq_size_after_cropping.width(), lq_size_after_cropping.height(), low_fi_colorspace, video_info.colorspace_standard)
-                                                ,Audio_Information(LQ_AUDIO_BITRATE, low_fi_number_of_channels));
+                                                ,Video_Information(128, video_info.framerate, lq_f, lq_width, lq_height, lq_size_after_cropping.width(), lq_size_after_cropping.height(), low_fi_colorspace, video_info.colorspace_standard)
+                                                ,Audio_Information(64000, low_fi_number_of_channels));
 
         qDebug() << "encoding_start(): jobs.size() is" << jobs.size();
         return encode_jobs();
@@ -2576,7 +2540,7 @@ QStringList Yua::set_recommended_qualities() {
         if (native_height > 576+8 || (interlaced_button->isChecked() && d1_button->isChecked() && f1_button->isChecked())) {
                 iq_button->setStyleSheet("QCheckBox { color: red }");
                 retval << "i";
-                if (native_height > IQ_HEIGHT) {
+                if (native_height > 768) {
                         xq_button->setStyleSheet("QCheckBox { color: red }");
                         retval << "x";
                 }
@@ -2834,7 +2798,7 @@ void Yua::add_audio_commentary() {
         QStringList ffmpeg_args;
         ffmpeg_args
                         << "-i" << QFileInfo(audio_commentary_in_filename).absoluteFilePath()
-                        << "-b:a" << AUDIO_COMMENTARY_BITRATE_SETTING
+                        << "-b:a" << "32k"
                         << "-y" << audio_commentary_temp_out_filename
                            ;
         qDebug() << "ffmpeg" << ffmpeg_args.join(" ");

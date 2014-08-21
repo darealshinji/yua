@@ -1,5 +1,5 @@
-QT += core gui opengl
-linux-g++-32|linux-g++-64: QT += dbus
+QT        += core gui opengl
+linux: QT += dbus
 
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
@@ -156,7 +156,7 @@ LIBS += ../Yua/lib/$${YUAPLATFORMNAME}/libfdk-aac.a
 LIBS += ../Yua/lib/$${YUAPLATFORMNAME}/libx264.a
 }
 
-linux-g++-32|linux-g++-64: {
+linux: {
 LIBS += \
 -lavcodec \
 -lavformat \
@@ -189,7 +189,7 @@ RESOURCES += yua_icon.qrc
 
 mac: RESOURCES += helpers/mac/helpers.qrc helpers/mac/nnedi3.qrc
 
-linux-g++-32|linux-g++-64: RESOURCES += ffmpeg.qrc mp4box.qrc
+linux: RESOURCES += ffmpeg.qrc mp4box.qrc
 
 win32 {
 RESOURCES += \

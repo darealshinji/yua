@@ -101,20 +101,20 @@ void Video_Encoder::start(Video_Information new_video_information, QString name,
 
 
 
-        av_dict_set(&opts, "preset", SDA_PRESET, 0);
+        av_dict_set(&opts, "preset", "veryslow", 0);
 
         //http://mewiki.project357.com/wiki/X264_Encoding_Suggestions#QuickTime_Player_X_compatibility
         //this doesn't work because we set the profile and/or level for every quality below (20130330)
-        av_dict_set(&opts, "refs", SDA_REFS, 0);
-        av_dict_set(&opts, "qpmin", SDA_QPMIN, 0);
+        av_dict_set(&opts, "refs", "4", 0);
+        av_dict_set(&opts, "qpmin", "4", 0);
 //        if (current_job_name == "MQ") { //it's a shame how gimped mq is, but then again compatibility is the best it's been since vhs was king (20130211)
-//                av_dict_set(&opts, "profile", SDA_MQ_PROFILE, 0);
-//                av_dict_set(&opts, "level", SDA_MQ_LEVEL, 0); //from anri
+//                av_dict_set(&opts, "profile", "baseline", 0);
+//                av_dict_set(&opts, "level", "13", 0); //from anri
 //        } else {
                 if (video_information.colorspace == AV_PIX_FMT_YUV420P) {
-                        av_dict_set(&opts, "profile", SDA_PROFILE, 0);
+                        av_dict_set(&opts, "profile", "high", 0);
                 } //otherwise it is set automatically to high422 or high444 (20130526)
-                av_dict_set(&opts, "level", SDA_LEVEL, 0); //bluray compatibility level
+                av_dict_set(&opts, "level", "41", 0); //bluray compatibility level
 //        }
 
         c->pix_fmt = (AVPixelFormat)video_information.colorspace;
@@ -127,8 +127,8 @@ void Video_Encoder::start(Video_Information new_video_information, QString name,
         av_dict_set(&opts, "stats", stat_file_name_pointer, 0);
 
         if (pass == 1) {
-                av_dict_set(&opts, "crf", SDA_FIRSTPASS_CRF, 0);
-                av_dict_set(&opts, "fastfirstpass", SDA_FASTFIRSTPASS, 0);
+                av_dict_set(&opts, "crf", "17", 0);
+                av_dict_set(&opts, "fastfirstpass", "0", 0);
                 c->flags |= CODEC_FLAG_PASS1;
         } else if (pass == 2) {
                 c->bit_rate = video_information.bitrate_kbit * 1000;
@@ -316,8 +316,8 @@ void Video_Encoder::write_frame(Frame frame) {
 
         if (!encode_img_convert_ctx)
                 encode_img_convert_ctx = Yua_Util::GetSwsContext(
-                                        video_information.width_after_cropping, video_information.height_after_cropping, src_pix_fmt, video_information.colorspace_standard, 0,
-                                        video_information.width_after_cropping, video_information.height_after_cropping, output_colorspace, video_information.colorspace_standard, 0,
+                                        video_information.width_after_cropping, video_information.height_after_cropping, src_pix_fmt, video_information.colorspace_standard, AVCOL_RANGE_MPEG,
+                                        video_information.width_after_cropping, video_information.height_after_cropping, output_colorspace, video_information.colorspace_standard, AVCOL_RANGE_MPEG,
                                         SWS_LANCZOS);
         Q_ASSERT(encode_img_convert_ctx);
 

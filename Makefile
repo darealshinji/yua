@@ -9,7 +9,7 @@ MKDIR  ?=  mkdir -p
 RMDIR  ?=  rmdir
 NULL   ?=  &> /dev/null
 
-QMAKE  ?=  qmake-qt4
+QMAKE  ?=  qmake
 MAKE   ?=  make -j$(shell nproc)
 STRIP  ?=  strip
 UPX    ?=  upx-ucl

@@ -14,6 +14,7 @@ SwsContext *Yua_Util::GetSwsContext(int SrcW, int SrcH, PixelFormat SrcFormat, i
         // 0 = limited range, 1 = full range
         int SrcRange = SrcColorRange == AVCOL_RANGE_JPEG;
         int DstRange = DstColorRange == AVCOL_RANGE_JPEG;
+        qDebug() << "Yua_Util::GetSwsContext(): srcrange dstrange:" << SrcRange << DstRange;
 
         av_opt_set_int(Context, "sws_flags",  Flags, 0);
         av_opt_set_int(Context, "srcw",       SrcW, 0);

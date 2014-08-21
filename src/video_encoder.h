@@ -17,7 +17,6 @@ extern "C" {
 #include "video_information.h"
 #include "frame.h"
 #include "scaler.h"
-#include "sda_codec_settings.h"
 
 class Video_Encoder : public QObject {
         Q_OBJECT

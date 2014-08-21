@@ -42,7 +42,6 @@
 #include "frame.h"
 #include "throttle.h"
 #include "power_management.h"
-#include "sda_codec_settings.h"
 
 class Yua : public QMainWindow {
         Q_OBJECT
@@ -173,13 +172,13 @@ private slots:
         void audio_commentary_muxer_process_error(QProcess::ProcessError error);
         void audio_commentary_muxer_process_finished(int exit_code, QProcess::ExitStatus status);
 
-        void exit_yua();
+        void exit_yua(QCloseEvent *event = nullptr);
         void closeEvent(QCloseEvent *event);
         void save_settings_before_exiting();
-        void iconActivated(QSystemTrayIcon::ActivationReason reason);
 
         void set_tray_menu_progress_action_text(QString text);
         void set_tray_menu_progress_action_idle();
+        void iconActivated(QSystemTrayIcon::ActivationReason reason);
 private:
         bool is_even_field();
 
@@ -340,10 +339,8 @@ private:
         void displayHelp();
         void displayVersion();
 
-        QMenu *trayIconMenu;
         QSystemTrayIcon *trayIcon;
         QAction *tray_menu_progress_action;
-        QAction *restore_action;
 };
 
 #endif // YUA_H
