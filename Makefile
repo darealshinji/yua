@@ -28,13 +28,15 @@ SIZES = 16 24 32 48 64 96 128 256 512
 
 all: $(APP)
 
+static: static-deps static-$(APP)
+
 $(APP):
 	cd src && $(QMAKE) $(APP).pro
 	cd src && $(MAKE)
 	$(CP) src/$(APP) $(APP)
 	$(STRIP) $(APP)
 
-static: static-deps
+static-$(APP):
 	cd src && ./make_qrc_linux.sh
 	cat src/$(APP)_static.pro.in src/helpers/linux/qrc_list > src/$(APP)_static.pro
 	echo $(APP)_icon.qrc >> src/$(APP)_static.pro
