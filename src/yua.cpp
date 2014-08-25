@@ -559,7 +559,7 @@ Yua::Yua(QWidget *parent)
         buttons
                 #ifdef WITH_NNEDI3
                         << tff_button << bff_button
-                   #endif
+                #endif
                         << standard_button << widescreen_button
                         << progressive_button << interlaced_button
                         << no_change_button << one_pixel_bob_button << alternate_one_pixel_bob_button << retard_bob_button << alternate_retard_bob_button
@@ -597,7 +597,8 @@ Yua::Yua(QWidget *parent)
 
 
 
-        //tray icon
+#if QT_VERSION >= 0x050000
+        //tray icon Qt5yua
         auto trayIconMenu = new QMenu(this);
 
         tray_menu_progress_action = trayIconMenu->addAction("");
@@ -622,13 +623,27 @@ Yua::Yua(QWidget *parent)
         connect(trayIcon, SIGNAL(activated(QSystemTrayIcon::ActivationReason)),
                 this, SLOT(iconActivated(QSystemTrayIcon::ActivationReason)));
 #endif
+#else
+        //tray icon Qt4
+        restore_action = new QAction("Restore", this);
+        exit_action = new QAction("Quit", this);
+
+        connect(restore_action, SIGNAL(triggered()), this, SLOT(showNormal()));
+        connect(exit_action, SIGNAL(triggered()), this, SLOT(exit_yua()));
+
+        trayIconMenu = new QMenu(this);
+        trayIconMenu->addAction(restore_action);
+        trayIconMenu->addSeparator();
+        trayIconMenu->addAction(exit_action);
+
+        trayIcon = new QSystemTrayIcon(this);
+        connect(trayIcon, SIGNAL(activated(QSystemTrayIcon::ActivationReason)),
+                this, SLOT(iconActivated(QSystemTrayIcon::ActivationReason)));
+#endif
         trayIcon->setIcon(QIcon(":/yua.png"));
         trayIcon->setContextMenu(trayIconMenu);
-
-#ifndef Q_OS_MAC
-#ifndef Q_OS_WIN32
+#if QT_VERSION >= 0x050000 && !defined(Q_OS_MAC) && !defined(Q_OS_WIN32)
         trayIcon->show(); //on Linux+Qt5 the icon does not reappear in the tray after minimizing again
-#endif
 #endif
 
 
@@ -1087,8 +1102,9 @@ void Yua::save_settings_before_exiting() {
 void Yua::iconActivated(QSystemTrayIcon::ActivationReason reason) {
         switch (reason) {
         case QSystemTrayIcon::Trigger:
-#ifdef Q_OS_WIN32 //on Linux+Qt5 the icon does not reappear in the tray after minimizing again
+#if QT_VERSION < 0x050000 && !defined(Q_OS_WIN32) && !defined(Q_OS_MAC)
                 trayIcon->hide(); //this leads to a crash under os x - even using QTimer::singleShot() is not enough (20140807)
+                                  //on Linux+Qt5 the icon does not reappear in the tray after minimizing again
 #endif
                 showNormal();
                 break;
@@ -1099,14 +1115,20 @@ void Yua::iconActivated(QSystemTrayIcon::ActivationReason reason) {
         }
 }
 
+#if QT_VERSION >= 0x050000
 void Yua::exit_yua(QCloseEvent *event) {
+#else
+void Yua::exit_yua() {
+#endif
         if (currently_encoding) {
                 if (QMessageBox::information(this,
                                              tr("Exit Yua"),
                                              tr("An encode is currently in progress. Really exit Yua?"),
                                              QMessageBox::Ok | QMessageBox::Cancel
                                              ) == QMessageBox::Cancel) {
+#if QT_VERSION >= 0x050000
                         if (event) event->ignore();
+#endif
                         return;
                 }
         }
@@ -1120,7 +1142,27 @@ void Yua::closeEvent(QCloseEvent *event) {
                 trayIcon->show();
                 return;
         }
+#if QT_VERSION >= 0x050000
         return exit_yua(event);
+#else
+        if (currently_encoding) {
+                if (QMessageBox::information(this,
+                                             tr("Exit Yua"),
+                                             tr("An encode is currently in progress. Really exit Yua?"),
+                                             QMessageBox::Ok | QMessageBox::Cancel
+                                             ) == QMessageBox::Cancel) {
+                        if (event) event->ignore();
+                        return;
+                }
+        }
+
+        save_settings_before_exiting();
+
+        if (!close_to_tray_action->isChecked() && QSystemTrayIcon::isSystemTrayAvailable()) {
+                return exit_yua();
+        }
+        event->accept();
+#endif
 }
 
 
@@ -1978,7 +2020,9 @@ void Yua::encode_jobs() {
                 }
 
                 vate_ui(true);
+#if QT_VERSION >= 0x050000
                 set_tray_menu_progress_action_idle();
+#endif
                 set_status(tr("All jobs finished at %1.\n\n").arg(QDateTime::currentDateTime().toString()));
                 stop_button->setEnabled(false);
                 currently_encoding = false;
@@ -2336,7 +2380,9 @@ void Yua::add_progress(Progress_Type progress_type, double amount) {
 
         progress_bar.setValue(total * progress_bar.maximum());
 
+#if QT_VERSION >= 0x050000
         set_tray_menu_progress_action_text(tr("Encoding %1 (%2%)").arg(current_job.name).arg(total*100, 0, 'f', 3));
+#endif
 
         progress_throttle.done();
 }
@@ -2873,7 +2919,7 @@ void Yua::audio_commentary_muxer_process_finished(int exit_code, QProcess::ExitS
         return mux_next_audio_commentary_mp4();
 }
 
-
+#if QT_VERSION >= 0x050000
 void Yua::set_tray_menu_progress_action_text(QString text) {
         tray_menu_progress_action->setText(text);
 }
@@ -2881,3 +2927,4 @@ void Yua::set_tray_menu_progress_action_text(QString text) {
 void Yua::set_tray_menu_progress_action_idle() {
         return set_tray_menu_progress_action_text(tr("(idle)"));
 }
+#endif

@@ -19,6 +19,8 @@ GIT    ?=  git
 WGET   ?=  wget
 TAR    ?=  tar
 
+QMAKE_QT4  ?=  qmake-qt4
+
 PREFIX        ?=  /usr/local
 INSTALL_DIR   ?=  install -m755 -d
 INSTALL_PROG  ?=  install -m755 -D
@@ -36,15 +38,30 @@ $(APP):
 	$(CP) src/$(APP) $(APP)
 	$(STRIP) $(APP)
 
-static-$(APP):
-	cd src && ./make_qrc_linux.sh
-	cat src/$(APP)_static.pro.in src/helpers/linux/qrc_list > src/$(APP)_static.pro
-	echo $(APP)_icon.qrc >> src/$(APP)_static.pro
+qt4:
+	cd src && $(QMAKE_QT4) $(APP)_qt4_linux.pro
+	cd src && $(MAKE)
+	$(CP) src/$(APP) $(APP)
+	$(STRIP) $(APP)
+
+static-$(APP): src/$(APP)_static.pro
 	cd src && $(QMAKE) $(APP)_static.pro
 	cd src && $(MAKE)
 	$(CP) src/$(APP) $(APP)
 	$(STRIP) $(APP)
 	$(UPX) $(APP)
+
+static-qt4: src/$(APP)_static.pro
+	cd src && $(QMAKE_QT4) $(APP)_static.pro
+	cd src && $(MAKE)
+	$(CP) src/$(APP) $(APP)
+	$(STRIP) $(APP)
+	$(UPX) $(APP)
+
+src/$(APP)_static.pro:
+	cd src && ./make_qrc_linux.sh
+	cat src/$(APP)_static.pro.in src/helpers/linux/qrc_list > src/$(APP)_static.pro
+	echo $(APP)_icon.qrc >> src/$(APP)_static.pro
 
 static-deps: fdk-aac x264 mp4box ffmpeg
 	$(MKDIR) src/helpers/linux

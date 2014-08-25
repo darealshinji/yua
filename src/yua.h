@@ -172,13 +172,17 @@ private slots:
         void audio_commentary_muxer_process_error(QProcess::ProcessError error);
         void audio_commentary_muxer_process_finished(int exit_code, QProcess::ExitStatus status);
 
-        void exit_yua(QCloseEvent *event = nullptr);
-        void closeEvent(QCloseEvent *event);
-        void save_settings_before_exiting();
-
+        void iconActivated(QSystemTrayIcon::ActivationReason reason);
+#if QT_VERSION >= 0x050000
         void set_tray_menu_progress_action_text(QString text);
         void set_tray_menu_progress_action_idle();
-        void iconActivated(QSystemTrayIcon::ActivationReason reason);
+
+        void exit_yua(QCloseEvent *event = nullptr);
+#else
+        void exit_yua();
+#endif
+        void closeEvent(QCloseEvent *event);
+        void save_settings_before_exiting();
 private:
         bool is_even_field();
 
@@ -341,6 +345,10 @@ private:
 
         QSystemTrayIcon *trayIcon;
         QAction *tray_menu_progress_action;
+#if QT_VERSION < 0x050000
+        QMenu *trayIconMenu;
+        QAction *restore_action;
+#endif
 };
 
 #endif // YUA_H
