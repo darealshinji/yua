@@ -4,6 +4,9 @@
 %:
 	dh ${@} --parallel
 
+override_dh_auto_build:
+	$(MAKE) qt4
+
 override_dh_auto_install:
 	$(MAKE) install PREFIX=$(CURDIR)/debian/yua/usr
 	rm -f $(CURDIR)/debian/yua/usr/share/doc/yua/COPYING

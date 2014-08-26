@@ -1,3 +1,9 @@
+yua (7) unstable; urgency=low
+
+  * New version
+
+ -- Marshall Banana <djcj@gmx.de>  Thu, 21 Aug 2014 12:00:00 +0200
+
 yua (6) UNRELEASED; urgency=low
 
   * Debianize Yua
