@@ -44,14 +44,14 @@ qt4:
 	$(CP) src/$(APP) $(APP)
 	$(STRIP) $(APP)
 
-static-$(APP): src/$(APP)_static.pro
+static-$(APP): static-deps src/$(APP)_static.pro
 	cd src && $(QMAKE) $(APP)_static.pro
 	cd src && $(MAKE)
 	$(CP) src/$(APP) $(APP)
 	$(STRIP) $(APP)
 	$(UPX) $(APP)
 
-static-qt4: src/$(APP)_static.pro
+static-qt4: static-deps src/$(APP)_static.pro
 	cd src && $(QMAKE_QT4) $(APP)_static.pro
 	cd src && $(MAKE)
 	$(CP) src/$(APP) $(APP)
@@ -72,9 +72,8 @@ static-deps: fdk-aac x264 mp4box ffmpeg
 	$(UPX) src/helpers/linux/ffmpeg
 
 fdk-aac: download
-	cd fdk-aac && ./autogen.sh
-	cd fdk-aac && ./configure $(FDK_CONFFLAGS)
-	cd fdk-aac && $(MAKE)
+	[ -f fdk-aac/.libs/libfdk-aac.a ] || \
+	( cd fdk-aac && ./autogen.sh && ./configure $(FDK_CONFFLAGS) && $(MAKE) )
 	# fix fdk-aac detection for ffmpeg
 	$(MKDIR) fdk-aac/libAACenc/include/fdk-aac
 	$(MKDIR) fdk-aac/libAACdec/include/fdk-aac
@@ -82,31 +81,32 @@ fdk-aac: download
 	cd fdk-aac/libAACdec/include && $(CP) aacdecoder_lib.h fdk-aac
 
 x264: download
-	cd x264 && ./configure $(X264_CONFFLAGS)
-	cd x264 && $(MAKE)
+	[ -f x264/libx264.a ] || ( cd x264 && ./configure $(X264_CONFFLAGS) && $(MAKE) )
 
 mp4box: download
-	cd gpac && ./configure $(MP4BOX_CONFFLAGS)
-	cd gpac && $(MAKE) lib
-	cd gpac && $(MAKE) apps
+	[ -f gpac/bin/gcc/MP4Box ] || ( cd gpac && \
+	./configure $(MP4BOX_CONFFLAGS) && $(MAKE) lib && $(MAKE) apps )
 
 ffmpeg: download
 	cd ffmpeg && ./configure $(FFMPEG_CONFFLAGS)
 	cd ffmpeg && $(MAKE)
 
-download: clean-download
-	$(GIT) clone git://git.videolan.org/x264.git
+download:
+	[ -d x264 ] || $(GIT) clone git://git.videolan.org/x264.git
 
-	$(GIT) clone git://git.code.sf.net/p/opencore-amr/fdk-aac
-	cd fdk-aac && git checkout v$(FDKVERSION)
+	[ -d fdk-aac ] || \
+	( $(GIT) clone git://git.code.sf.net/p/opencore-amr/fdk-aac && \
+	cd fdk-aac && git checkout v$(FDKVERSION) )
 
-	$(WGET) http://archive.ubuntu.com/ubuntu/pool/universe/g/gpac/gpac_$(GPACVERSION).orig.tar.bz2
-	$(TAR) xvjf gpac_$(GPACVERSION).orig.tar.bz2
-	$(MV) gpac-$(GPACVERSION).orig gpac
+	[ -d gpac ] || \
+	( $(WGET) http://archive.ubuntu.com/ubuntu/pool/universe/g/gpac/gpac_$(GPACVERSION).orig.tar.bz2 && \
+	$(TAR) xvjf gpac_$(GPACVERSION).orig.tar.bz2 && \
+	$(MV) gpac-$(GPACVERSION).orig gpac )
 
-	$(WGET) http://ffmpeg.org/releases/ffmpeg-$(FFVERSION).tar.bz2
-	$(TAR) xvjf ffmpeg-$(FFVERSION).tar.bz2
-	$(MV) ffmpeg-$(FFVERSION) ffmpeg
+	[ -d ffmpeg ] || \
+	( $(WGET) http://ffmpeg.org/releases/ffmpeg-$(FFVERSION).tar.bz2 && \
+	$(TAR) xvjf ffmpeg-$(FFVERSION).tar.bz2 && \
+	$(MV) ffmpeg-$(FFVERSION) ffmpeg )
 
 clean:
 	cd src && $(RM) $(APP) ../$(APP) *.o moc_*.cpp qrc_*.cpp
@@ -130,20 +130,3 @@ uninstall:
 	$(RM) $(PREFIX)/share/pixmaps/$(APP).xpm
 	$(RM) $(PREFIX)/share/doc/$(APP)
 	$(foreach SIZE,$(SIZES),$(RM) $(PREFIX)/share/icons/hicolor/$(SIZE)x$(SIZE)/apps/$(APP).png ;)
-
-	# remove directories if they're empty
-	$(RMDIR) $(PREFIX)/bin $(NULL)
-	$(RMDIR) $(PREFIX)/share/applications/apps $(NULL)
-	$(RMDIR) $(PREFIX)/share/applications $(NULL)
-	$(RMDIR) $(PREFIX)/share/doc $(NULL)
-	$(RMDIR) $(PREFIX)/share/man/man1 $(NULL)
-	$(RMDIR) $(PREFIX)/share/man $(NULL)
-	$(RMDIR) $(PREFIX)/share/pixmaps $(NULL)
-	$(foreach SIZE,$(SIZES),
-		$(RMDIR) $(PREFIX)/share/icons/hicolor/$(SIZE)x$(SIZE)/apps $(NULL) ;
-		$(RMDIR) $(PREFIX)/share/icons/hicolor/$(SIZE)x$(SIZE) $(NULL) ;
-	)
-	$(RMDIR) $(PREFIX)/share/icons/hicolor $(NULL)
-	$(RMDIR) $(PREFIX)/share/icons $(NULL)
-	$(RMDIR) $(PREFIX)/share $(NULL)
-
