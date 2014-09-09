@@ -82,8 +82,8 @@ Yua::Yua(QWidget *parent)
         ,native_height(0)
         ,slider_resume_value(-9999)
         ,force_field_dominance(false)
-        ,cropping_rect(320/2, 240/2, 320, 240)
-        ,cropping_rect_set_from_size(640, 480)
+        ,cropping_rect(D4_NATIVE_WIDTH/2, D4_NATIVE_HEIGHT/2, D4_NATIVE_WIDTH, D4_NATIVE_HEIGHT)
+        ,cropping_rect_set_from_size(D1_NATIVE_WIDTH, D1_NATIVE_HEIGHT)
         ,crop_moving_left(false)
         ,crop_moving_right(false)
         ,crop_moving_top(false)
@@ -95,7 +95,7 @@ Yua::Yua(QWidget *parent)
         #else
         ,desktop_path_string(QDesktopServices::storageLocation(QDesktopServices::DesktopLocation))
         #endif
-        ,xq_bitrate_kbit(10000)
+        ,xq_bitrate_kbit(XQ_VIDEO_BITRATE)
         ,enable_encode_preview(true)
         ,output_name_edit_validator(QRegExp("[\\w_\\- ]+"))
 {
@@ -497,14 +497,14 @@ Yua::Yua(QWidget *parent)
 
         main_layout->addWidget(&preview_display, 1);
         main_layout->addWidget(&no_change_display, 1);
-        no_change_display.setMaximumWidth(320);
+        no_change_display.setMaximumWidth(D4_NATIVE_WIDTH);
 
         d4_options_container_widget = new QWidget; //so we can hide all the d4 stuff all at once
         d4_options_container_widget->setContentsMargins(0,0,0,0);
         d4_filters_layout->setContentsMargins(0,0,0,0);
         d4_filters_layout->setSpacing(0);
-        d4_options_container_widget->setMinimumWidth(320*2);
-        d4_options_container_widget->setMinimumHeight(240*2);
+        d4_options_container_widget->setMinimumWidth(D4_NATIVE_WIDTH*2);
+        d4_options_container_widget->setMinimumHeight(D4_NATIVE_HEIGHT*2);
         d4_options_container_widget->setLayout(d4_filters_layout);
         d4_options_container_widget->hide();
 
@@ -528,8 +528,8 @@ Yua::Yua(QWidget *parent)
         connect(&alternate_retard_bob_display, SIGNAL(clicked()), this, SLOT(d4_filter_display_clicked()));
 
 
-        preview_display.setMinimumWidth(320);
-        no_change_display.setMinimumWidth(320);
+        preview_display.setMinimumWidth(D4_NATIVE_WIDTH);
+        no_change_display.setMinimumWidth(D4_NATIVE_WIDTH);
 
 
         options_layout->addWidget(interlaced_group_box);
@@ -1381,23 +1381,23 @@ void Yua::set_sizes() {
                         native_height /= 2;
                 }
         } else if (d4_button->isChecked()) { //if the aspect ratio checkbox is not checked and the d1 box is checked we do nothing - if d4 is checked we reduce to d4 (20130212)
-                native_height = 240;
+                native_height = D4_NATIVE_HEIGHT;
         }
         aspect_ratio = (double)aspect_ratio_den / (double)aspect_ratio_num;
         emit set_aspect_ratio(aspect_ratio_num, aspect_ratio_den); //we will use this to calculate the pixel aspect ratio passed to x264 so that we can display at the correct aspect ratio without stretching the image horizontally and without losing resolution vertically (i.e., without setting the height from the width) (20130213)
 
 
         //heights
-        lq_height = 240;
+        lq_height = LQ_HEIGHT;
         if (lq_height > native_height) lq_height = native_height;
 
-        mq_height = 240;
+        mq_height = MQ_HEIGHT;
         if (mq_height > native_height) mq_height = native_height;
 
-        hq_height = 480;
+        hq_height = HQ_HEIGHT;
         if (hq_height > native_height) hq_height = native_height;
 
-        iq_height = 768;
+        iq_height = IQ_HEIGHT;
         if (iq_height > native_height) iq_height = native_height;
 
         xq_height = native_height;
@@ -1921,7 +1921,7 @@ void Yua::encoding_start() {
         int full_f, hq_f, mq_f, lq_f;
         full_f = hq_f = mq_f = lq_f = f;
 
-        int mq_max_framerate = 35; //changed from 31 due to an ff7 run (20131214)
+        int mq_max_framerate = MQ_MAX_FRAMERATE;
 
         qDebug() << this << "framerate is" << video_info.framerate;
         if (f == 1 && (interlaced_button->isChecked() || video_info.framerate > mq_max_framerate)) { //need to apply the requested framerate decimation paradigm (20130113)
@@ -1980,23 +1980,23 @@ void Yua::encoding_start() {
 
         if (xq_button->isChecked()) jobs << Job("XQ"
                                                 ,Video_Information(xq_bitrate_kbit, video_info.framerate, full_f, xq_width, xq_height, xq_size_after_cropping.width(), xq_size_after_cropping.height(), high_fi_colorspace, video_info.colorspace_standard)
-                                                ,Audio_Information(320000, default_number_of_channels));
+                                                ,Audio_Information(XQ_AUDIO_BITRATE, default_number_of_channels));
 
         if (iq_button->isChecked()) jobs << Job("IQ"
-                                                ,Video_Information(5000, video_info.framerate, full_f, iq_width, iq_height, iq_size_after_cropping.width(), iq_size_after_cropping.height(), high_fi_colorspace, video_info.colorspace_standard)
-                                                ,Audio_Information(320000, default_number_of_channels));
+                                                ,Video_Information(IQ_VIDEO_BITRATE, video_info.framerate, full_f, iq_width, iq_height, iq_size_after_cropping.width(), iq_size_after_cropping.height(), high_fi_colorspace, video_info.colorspace_standard)
+                                                ,Audio_Information(IQ_AUDIO_BITRATE, default_number_of_channels));
 
         if (hq_button->isChecked()) jobs << Job("HQ"
-                                                ,Video_Information(2048, video_info.framerate, hq_f, hq_width, hq_height, hq_size_after_cropping.width(), hq_size_after_cropping.height(), low_fi_colorspace, video_info.colorspace_standard)
-                                                ,Audio_Information(128000, default_number_of_channels));
+                                                ,Video_Information(HQ_VIDEO_BITRATE, video_info.framerate, hq_f, hq_width, hq_height, hq_size_after_cropping.width(), hq_size_after_cropping.height(), low_fi_colorspace, video_info.colorspace_standard)
+                                                ,Audio_Information(HQ_AUDIO_BITRATE, default_number_of_channels));
 
         if (mq_button->isChecked()) jobs << Job("MQ"
-                                                ,Video_Information(512, video_info.framerate, mq_f, mq_width, mq_height, mq_size_after_cropping.width(), mq_size_after_cropping.height(), low_fi_colorspace, video_info.colorspace_standard)
-                                                ,Audio_Information(64000, low_fi_number_of_channels));
+                                                ,Video_Information(MQ_VIDEO_BITRATE, video_info.framerate, mq_f, mq_width, mq_height, mq_size_after_cropping.width(), mq_size_after_cropping.height(), low_fi_colorspace, video_info.colorspace_standard)
+                                                ,Audio_Information(MQ_AUDIO_BITRATE, low_fi_number_of_channels));
 
         if (lq_button->isChecked()) jobs << Job("LQ"
-                                                ,Video_Information(128, video_info.framerate, lq_f, lq_width, lq_height, lq_size_after_cropping.width(), lq_size_after_cropping.height(), low_fi_colorspace, video_info.colorspace_standard)
-                                                ,Audio_Information(64000, low_fi_number_of_channels));
+                                                ,Video_Information(LQ_VIDEO_BITRATE, video_info.framerate, lq_f, lq_width, lq_height, lq_size_after_cropping.width(), lq_size_after_cropping.height(), low_fi_colorspace, video_info.colorspace_standard)
+                                                ,Audio_Information(LQ_AUDIO_BITRATE, low_fi_number_of_channels));
 
         qDebug() << "encoding_start(): jobs.size() is" << jobs.size();
         return encode_jobs();
@@ -2594,7 +2594,7 @@ QStringList Yua::set_recommended_qualities() {
         if (native_height > 576+8 || (interlaced_button->isChecked() && d1_button->isChecked() && f1_button->isChecked())) {
                 iq_button->setStyleSheet("QCheckBox { color: red }");
                 retval << "i";
-                if (native_height > 768) {
+                if (native_height > IQ_HEIGHT) {
                         xq_button->setStyleSheet("QCheckBox { color: red }");
                         retval << "x";
                 }
@@ -2852,7 +2852,7 @@ void Yua::add_audio_commentary() {
         QStringList ffmpeg_args;
         ffmpeg_args
                         << "-i" << QFileInfo(audio_commentary_in_filename).absoluteFilePath()
-                        << "-b:a" << "32k"
+                        << "-b:a" << AUDIO_COMMENTARY_BITRATE_SETTING
                         << "-y" << audio_commentary_temp_out_filename
                            ;
         qDebug() << "ffmpeg" << ffmpeg_args.join(" ");
