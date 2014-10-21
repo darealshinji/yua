@@ -125,9 +125,11 @@ static-deps: fdk-aac x264 mp4box ffmpeg
 	$(UPX) src/helpers/linux/ffmpeg
 
 nnedi3_weights_qrc:
+ifeq ($(shell uname -p),x86_64)
 	$(MKDIR) src/helpers/linux
 	$(CP) src/helpers/nnedi3_weights.bin src/helpers/linux
 	cd src && ./make_qrc_linux.sh
+endif
 
 fdk-aac: download
 	[ -f fdk-aac/.libs/libfdk-aac.a ] || \

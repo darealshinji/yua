@@ -191,7 +191,7 @@ mac: RESOURCES += helpers/mac/helpers.qrc helpers/mac/nnedi3.qrc
 
 linux: RESOURCES += ffmpeg.qrc mp4box.qrc
 
-linux: {
+!linux-g++-32: {
 RESOURCES += \
 helpers/linux/nnedi3_weights.bin.1.qrc \
 helpers/linux/nnedi3_weights.bin.2.qrc \
