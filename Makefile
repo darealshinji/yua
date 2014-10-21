@@ -61,7 +61,7 @@ MV     ?=  mv -v
 MKDIR  ?=  mkdir -p
 RMDIR  ?=  rmdir
 
-QMAKE  ?=  qmake
+QMAKE  ?=  qmake $(QMAKE_FLAGS)
 MAKE   ?=  make -j$(shell nproc)
 STRIP  ?=  strip
 UPX    ?=  upx-ucl
@@ -71,7 +71,7 @@ GIT    ?=  git
 WGET   ?=  wget
 TAR    ?=  tar
 
-QMAKE_QT4  ?=  qmake-qt4
+QMAKE_QT4  ?=  qmake-qt4 $(QMAKE_FLAGS)
 
 PREFIX        ?=  /usr/local
 INSTALL_DIR   ?=  install -m755 -d

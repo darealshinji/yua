@@ -1,15 +1,28 @@
 #!/usr/bin/make -f
 
+QMAKE_CFLAGS_RELEASE = $(shell dpkg-buildflags --get CFLAGS) $(shell dpkg-buildflags --get CPPFLAGS)
+QMAKE_CXXFLAGS_RELEASE = $(shell dpkg-buildflags --get CXXFLAGS) $(shell dpkg-buildflags --get CPPFLAGS)
+QMAKE_LFLAGS_RELEASE = $(shell dpkg-buildflags --get LDFLAGS) -Wl,--as-needed
+
+QMAKE_FLAGS = \
+	QMAKE_CFLAGS_RELEASE='$(QMAKE_CFLAGS_RELEASE)' \
+	QMAKE_CFLAGS_DEBUG='$(QMAKE_CFLAGS_RELEASE)' \
+	QMAKE_CXXFLAGS_RELEASE='$(QMAKE_CXXFLAGS_RELEASE)' \
+	QMAKE_CXXFLAGS_DEBUG='$(QMAKE_CXXFLAGS_RELEASE)' \
+	QMAKE_LFLAGS_RELEASE='$(QMAKE_LFLAGS_RELEASE)' \
+	QMAKE_LFLAGS_DEBUG='$(QMAKE_LFLAGS_RELEASE)'
+
 
 %:
 	dh ${@} --parallel
 
 override_dh_auto_build:
-	$(MAKE) qt4
+	QMAKE_FLAGS="$(QMAKE_FLAGS)" $(MAKE) qt4
 
 override_dh_auto_install:
-	$(MAKE) install PREFIX=$(CURDIR)/debian/yua/usr
+	dh_auto_install -- PREFIX=$(CURDIR)/debian/yua/usr
 	rm -f $(CURDIR)/debian/yua/usr/share/doc/yua/COPYING
 
 override_dh_builddeb:
 	dh_builddeb -- -Zxz -z9
+
