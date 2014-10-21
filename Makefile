@@ -84,13 +84,13 @@ all: $(APP)
 
 static: static-deps static-$(APP)
 
-$(APP):
+$(APP): nnedi3_weights_qrc
 	cd src && $(QMAKE) $(APP).pro
 	cd src && $(MAKE)
 	$(CP) src/$(APP) $(APP)
 	$(STRIP) $(APP)
 
-qt4:
+qt4: nnedi3_weights_qrc
 	cd src && $(QMAKE_QT4) $(APP)_qt4_linux.pro
 	cd src && $(MAKE)
 	$(CP) src/$(APP) $(APP)
@@ -117,11 +117,17 @@ src/$(APP)_static.pro:
 
 static-deps: fdk-aac x264 mp4box ffmpeg
 	$(MKDIR) src/helpers/linux
+	$(CP) src/helpers/nnedi3_weights.bin src/helpers/linux
 	$(CP) gpac/bin/gcc/MP4Box src/helpers/linux/mp4box
 	$(CP) ffmpeg/ffmpeg src/helpers/linux
 	$(STRIP) src/helpers/linux/mp4box
 	$(UPX) src/helpers/linux/mp4box
 	$(UPX) src/helpers/linux/ffmpeg
+
+nnedi3_weights_qrc:
+	$(MKDIR) src/helpers/linux
+	$(CP) src/helpers/nnedi3_weights.bin src/helpers/linux
+	cd src && ./make_qrc_linux.sh
 
 fdk-aac: download
 	[ -f fdk-aac/.libs/libfdk-aac.a ] || \

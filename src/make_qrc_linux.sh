@@ -6,7 +6,7 @@
 
 cd helpers/linux
 
-for bin in ffmpeg mp4box ; do
+for bin in ffmpeg mp4box nnedi3_weights.bin ; do
 	rm -f $bin.*
 	
 	split -b 1000000 $bin $bin.

@@ -191,7 +191,25 @@ mac: RESOURCES += helpers/mac/helpers.qrc helpers/mac/nnedi3.qrc
 
 linux: RESOURCES += ffmpeg.qrc mp4box.qrc
 
-win32 {
+linux: {
+RESOURCES += \
+helpers/linux/nnedi3_weights.bin.1.qrc \
+helpers/linux/nnedi3_weights.bin.2.qrc \
+helpers/linux/nnedi3_weights.bin.3.qrc \
+helpers/linux/nnedi3_weights.bin.4.qrc \
+helpers/linux/nnedi3_weights.bin.5.qrc \
+helpers/linux/nnedi3_weights.bin.6.qrc \
+helpers/linux/nnedi3_weights.bin.7.qrc \
+helpers/linux/nnedi3_weights.bin.8.qrc \
+helpers/linux/nnedi3_weights.bin.9.qrc \
+helpers/linux/nnedi3_weights.bin.10.qrc \
+helpers/linux/nnedi3_weights.bin.11.qrc \
+helpers/linux/nnedi3_weights.bin.12.qrc \
+helpers/linux/nnedi3_weights.bin.13.qrc \
+helpers/linux/nnedi3_weights.bin.14.qrc
+}
+
+win32: {
 RESOURCES += \
 helpers/windows/ffmpeg.1.qrc \
 helpers/windows/ffmpeg.2.qrc \

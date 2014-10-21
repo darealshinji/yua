@@ -102,6 +102,20 @@ static {
 }
 
 
-RESOURCES += statid.qrc yua_icon.qrc ffmpeg.qrc mp4box.qrc
+RESOURCES += statid.qrc yua_icon.qrc ffmpeg.qrc mp4box.qrc \
+helpers/linux/nnedi3_weights.bin.1.qrc \
+helpers/linux/nnedi3_weights.bin.2.qrc \
+helpers/linux/nnedi3_weights.bin.3.qrc \
+helpers/linux/nnedi3_weights.bin.4.qrc \
+helpers/linux/nnedi3_weights.bin.5.qrc \
+helpers/linux/nnedi3_weights.bin.6.qrc \
+helpers/linux/nnedi3_weights.bin.7.qrc \
+helpers/linux/nnedi3_weights.bin.8.qrc \
+helpers/linux/nnedi3_weights.bin.9.qrc \
+helpers/linux/nnedi3_weights.bin.10.qrc \
+helpers/linux/nnedi3_weights.bin.11.qrc \
+helpers/linux/nnedi3_weights.bin.12.qrc \
+helpers/linux/nnedi3_weights.bin.13.qrc \
+helpers/linux/nnedi3_weights.bin.14.qrc
 
 
