@@ -293,7 +293,7 @@ void Audio_Encoder::convert_headers(AVPacket *pkt) {
         }
         if (a > 0) {
                 av_free_packet(pkt);
-                new_pkt.destruct = av_destruct_packet;
+                new_pkt.destruct = av_free_packet;
         } else if (a < 0) {
                 av_log(NULL, AV_LOG_ERROR, "Failed to open bitstream filter %s for stream %d with codec %s",
                        bsfc->filter->name, pkt->stream_index,
