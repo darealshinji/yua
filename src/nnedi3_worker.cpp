@@ -272,7 +272,7 @@ void e0_m16_C(float *s, const int n)
 {
         for (int i=0; i<n; ++i)
         {
-                s[i] = (float)(std::max(std::min(s[i],exp_hi[0]),exp_lo[0])*e0_mult[0]+e0_bias[0]);;
+                s[i] = (float)(std::max(std::min(s[i],exp_hi[0]),exp_lo[0])*e0_mult[0]+e0_bias[0]);
         }
 }
 
