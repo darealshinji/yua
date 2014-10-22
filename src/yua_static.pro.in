@@ -115,7 +115,7 @@ LIBS += \
 ../fdk-aac/.libs/libfdk-aac.a \
 ../x264/libx264.a
 
-LIBS += -lz -llzma -lva
+LIBS += -lz -lva
 
 QMAKE_CXXFLAGS += -D__STDC_CONSTANT_MACROS #for libavcodec/avcodec.h
 

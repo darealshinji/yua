@@ -2,11 +2,18 @@ FFVERSION    =  2.4.2
 FDKVERSION   =  0.1.3
 GPACVERSION  =  0.5.0+svn4288~dfsg1
 
+XCFLAGS   := $(shell dpkg-buildflags --get CFLAGS)
+XCPPFLAGS := $(shell dpkg-buildflags --get CPPFLAGS)
+XCXXFLAGS := $(shell dpkg-buildflags --get CXXFLAGS)
+XLDFLAGS  := $(shell dpkg-buildflags --get LDFLAGS) -Wl,--as-needed
+
 FDK_CONFFLAGS = \
 		--enable-static=yes \
 		--enable-shared=no
 
 X264_CONFFLAGS = \
+		--extra-cflags='$(XCFLAGS) $(XCPPFLAGS)' \
+		--extra-ldflags='$(XLDFLAGS)' \
 		--bit-depth=8 \
 		--chroma-format=all \
 		--disable-cli \
@@ -21,8 +28,9 @@ X264_CONFFLAGS = \
 		--disable-lsmash
 
 FFMPEG_CONFFLAGS = \
-		--extra-cflags='-I../x264 -I../fdk-aac/libAACenc/include -I../fdk-aac/libAACdec/include -I../fdk-aac/libSYS/include' \
-		--extra-ldflags='-L../x264 -L../fdk-aac/.libs' \
+		--extra-cflags='$(XCFLAGS) $(XCPPFLAGS)  -I../x264 -I../fdk-aac/libAACenc/include -I../fdk-aac/libAACdec/include -I../fdk-aac/libSYS/include' \
+		--extra-cxxflags='$(XCXXFLAGS) $(XCPPFLAGS)' \
+		--extra-ldflags='$(XLDFLAGS)  -L../x264 -L../fdk-aac/.libs' \
 		--disable-debug \
 		--disable-runtime-cpudetect \
 		--disable-bzlib \
@@ -30,6 +38,7 @@ FFMPEG_CONFFLAGS = \
 		--disable-ffprobe \
 		--disable-ffserver \
 		--disable-doc \
+		--disable-lzma \
 		--enable-avresample \
 		--enable-gpl \
 		--enable-libx264 \
@@ -37,7 +46,8 @@ FFMPEG_CONFFLAGS = \
 		--enable-libfdk-aac
 
 MP4BOX_CONFFLAGS = \
-		--extra-cflags='-Wall -fPIC -DPIC -DXP_UNIX' \
+		--extra-cflags='$(XCFLAGS) $(XCPPFLAGS)  -Wall -fPIC -DPIC -DXP_UNIX' \
+		--extra-ldflags='$(XLDFLAGS)' \
 		--strip \
 		--disable-ipv6 \
 		--disable-wx \
@@ -51,6 +61,13 @@ MP4BOX_CONFFLAGS = \
 		--disable-ssl \
 		--static-mp4box
 
+QMAKE_FLAGS = \
+	QMAKE_CFLAGS_RELEASE='$(XCFLAGS) $(XCPPFLAGS) -Wno-unused-parameter' \
+	QMAKE_CFLAGS_DEBUG='$(XCFLAGS) $(XCPPFLAGS) -Wno-unused-parameter' \
+	QMAKE_CXXFLAGS_RELEASE='$(XCXXFLAGS) $(XCPPFLAGS)' \
+	QMAKE_CXXFLAGS_DEBUG='$(XCXXFLAGS) $(XCPPFLAGS)' \
+	QMAKE_LFLAGS_RELEASE='$(XLDFLAGS)' \
+	QMAKE_LFLAGS_DEBUG='$(XLDFLAGS)'
 
 
 APP    ?=  yua
@@ -61,8 +78,13 @@ MV     ?=  mv -v
 MKDIR  ?=  mkdir -p
 RMDIR  ?=  rmdir
 
-QMAKE  ?=  qmake $(QMAKE_FLAGS)
-MAKE   ?=  make -j$(shell nproc)
+QMAKE  :=  qmake $(QMAKE_FLAGS)
+ifeq ($(V),1)
+MAKE   :=  make -j$(shell nproc) V=1
+MP4BOX_CONFFLAGS += --verbose
+else
+MAKE   :=  make -j$(shell nproc)
+endif
 STRIP  ?=  strip
 UPX    ?=  upx-ucl
 
@@ -71,7 +93,7 @@ GIT    ?=  git
 WGET   ?=  wget
 TAR    ?=  tar
 
-QMAKE_QT4  ?=  qmake-qt4 $(QMAKE_FLAGS)
+QMAKE_QT4  :=  qmake-qt4 $(QMAKE_FLAGS)
 
 PREFIX        ?=  /usr/local
 INSTALL_DIR   ?=  install -m755 -d
@@ -133,7 +155,9 @@ endif
 
 fdk-aac: download
 	[ -f fdk-aac/.libs/libfdk-aac.a ] || \
-	( cd fdk-aac && ./autogen.sh && ./configure $(FDK_CONFFLAGS) && $(MAKE) )
+	( cd fdk-aac && ./autogen.sh && \
+	CFLAGS='$(XCFLAGS)' CPPFLAGS='$(XCPPFLAGS)' CXXFLAGS='$(XCXXFLAGS)' LDFLAGS='$(XLDFLAGS)' \
+	./configure $(FDK_CONFFLAGS) && $(MAKE) )
 	# fix fdk-aac detection for ffmpeg
 	$(MKDIR) fdk-aac/libAACenc/include/fdk-aac
 	$(MKDIR) fdk-aac/libAACdec/include/fdk-aac
