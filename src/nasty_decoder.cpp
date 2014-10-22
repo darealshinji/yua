@@ -361,8 +361,6 @@ void Nasty_Decoder::open(QString filename) {
                         emit error_with_string(tr("could not open audio codec %1").arg(aCodec->long_name));
                 } else {
                         has_audio = true;
-                        audio_info.timebase_num = pFormatCtx->streams[audioStream]->time_base.num;
-                        audio_info.timebase_den = pFormatCtx->streams[audioStream]->time_base.den;
 
                         audio_is_planar = av_sample_fmt_is_planar(aCodecCtx->sample_fmt);
                         number_of_audio_planes = audio_is_planar ? aCodecCtx->channels : 1;
