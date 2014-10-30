@@ -129,8 +129,8 @@ void NNEDI3_Worker::step_1() {
         const int opt = pss->opt;
         const int pscrn = pss->pscrn;
         const int fapprox = pss->fapprox;
-        void (*uc2s)(const unsigned char*, const int, float*);
-        void (*computeNetwork0)(const float*, const float*, unsigned char *d);
+//      void (*uc2s)(const unsigned char*, const int, float*);
+//      void (*computeNetwork0)(const float*, const float*, unsigned char *d);
         int (*processLine0)(const unsigned char*, int, unsigned char*, const unsigned char*, const int);
         if (opt == 1)
                 processLine0 = processLine0_C;

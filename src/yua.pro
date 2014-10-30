@@ -189,7 +189,7 @@ RESOURCES += yua_icon.qrc
 
 mac: RESOURCES += helpers/mac/helpers.qrc helpers/mac/nnedi3.qrc
 
-linux: RESOURCES += ffmpeg.qrc mp4box.qrc
+linux: RESOURCES += helpers/linux/ffmpeg.1.qrc helpers/linux/mp4box.1.qrc
 
 !linux-g++-32: {
 RESOURCES += \

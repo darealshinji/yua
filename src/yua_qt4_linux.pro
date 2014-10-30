@@ -102,7 +102,11 @@ static {
 }
 
 
-RESOURCES += statid.qrc yua_icon.qrc ffmpeg.qrc mp4box.qrc
+RESOURCES += \
+statid.qrc \
+yua_icon.qrc \
+helpers/linux/ffmpeg.1.qrc \
+helpers/linux/mp4box.1.qrc
 
 linux-g++-64: {
 RESOURCES += \

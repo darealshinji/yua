@@ -30,6 +30,8 @@ public:
         explicit NNEDI3_Worker(QObject *parent = 0);
         PS_INFO *pss;
         static void BitBlt(uchar *dstp, int dst_pitch, const uchar *srcp, int src_pitch, int row_size, int height);
+        void (*uc2s)(const unsigned char*, const int, float*);
+        void (*computeNetwork0)(const float*, const float*, unsigned char *d);
         
 signals:
         void step_1_finished();
