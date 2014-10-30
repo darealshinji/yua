@@ -2,10 +2,19 @@ FFVERSION    =  2.4.2
 FDKVERSION   =  0.1.3
 GPACVERSION  =  0.5.0+svn4288~dfsg1
 
-XCFLAGS   := $(shell dpkg-buildflags --get CFLAGS)
-XCPPFLAGS := $(shell dpkg-buildflags --get CPPFLAGS)
-XCXXFLAGS := $(shell dpkg-buildflags --get CXXFLAGS)
-XLDFLAGS  := $(shell dpkg-buildflags --get LDFLAGS) -Wl,--as-needed
+XCFLAGS   += $(shell dpkg-buildflags --get CFLAGS)
+XCPPFLAGS += $(shell dpkg-buildflags --get CPPFLAGS)
+XCXXFLAGS += $(shell dpkg-buildflags --get CXXFLAGS)
+XLDFLAGS  += $(shell dpkg-buildflags --get LDFLAGS) -Wl,--as-needed
+
+QMAKE_FLAGS += \
+	QMAKE_CFLAGS_RELEASE='$(XCFLAGS) $(XCPPFLAGS) -Wno-unused-parameter' \
+	QMAKE_CFLAGS_DEBUG='$(XCFLAGS) $(XCPPFLAGS) -Wno-unused-parameter' \
+	QMAKE_CXXFLAGS_RELEASE='$(XCXXFLAGS) $(XCPPFLAGS)' \
+	QMAKE_CXXFLAGS_DEBUG='$(XCXXFLAGS) $(XCPPFLAGS)' \
+	QMAKE_LFLAGS_RELEASE='$(XLDFLAGS)' \
+	QMAKE_LFLAGS_DEBUG='$(XLDFLAGS)'
+
 
 FDK_CONFFLAGS = \
 		--enable-static=yes \
@@ -61,14 +70,6 @@ MP4BOX_CONFFLAGS = \
 		--disable-ssl \
 		--static-mp4box
 
-QMAKE_FLAGS = \
-	QMAKE_CFLAGS_RELEASE='$(XCFLAGS) $(XCPPFLAGS) -Wno-unused-parameter' \
-	QMAKE_CFLAGS_DEBUG='$(XCFLAGS) $(XCPPFLAGS) -Wno-unused-parameter' \
-	QMAKE_CXXFLAGS_RELEASE='$(XCXXFLAGS) $(XCPPFLAGS)' \
-	QMAKE_CXXFLAGS_DEBUG='$(XCXXFLAGS) $(XCPPFLAGS)' \
-	QMAKE_LFLAGS_RELEASE='$(XLDFLAGS)' \
-	QMAKE_LFLAGS_DEBUG='$(XLDFLAGS)'
-
 
 APP    ?=  yua
 
@@ -79,6 +80,8 @@ MKDIR  ?=  mkdir -p
 RMDIR  ?=  rmdir
 
 QMAKE  :=  qmake $(QMAKE_FLAGS)
+QMAKE_QT4 := qmake-qt4 $(QMAKE_FLAGS)
+
 ifeq ($(V),1)
 MAKE   :=  make -j$(shell nproc) V=1
 MP4BOX_CONFFLAGS += --verbose
@@ -93,13 +96,11 @@ GIT    ?=  git
 WGET   ?=  wget
 TAR    ?=  tar
 
-QMAKE_QT4  :=  qmake-qt4 $(QMAKE_FLAGS)
-
 PREFIX        ?=  /usr/local
 INSTALL_DIR   ?=  install -m755 -d
 INSTALL_PROG  ?=  install -m755 -D
 
-SIZES = 16 24 32 48 64 96 128 256 512
+SIZES = 16 22 24 32 48 64 96 128 256 512
 
 
 all: $(APP)
@@ -202,15 +203,15 @@ clean-download:
 	$(RM) fdk-aac x264 gpac* ffmpeg*
 
 install:
-	$(INSTALL_DIR) $(PREFIX)/bin
-	$(INSTALL_PROG) $(APP) $(PREFIX)/bin
-	$(CP) share $(PREFIX)
-	$(GZIP) $(PREFIX)/share/man/man1/$(APP).1
+	$(INSTALL_DIR) $(DESTDIR)$(PREFIX)/bin
+	$(INSTALL_PROG) $(APP) $(DESTDIR)$(PREFIX)/bin
+	$(CP) share $(DESTDIR)$(PREFIX)
+	$(GZIP) $(DESTDIR)$(PREFIX)/share/man/man1/$(APP).1
 
 uninstall:
-	$(RM) $(PREFIX)/bin/$(APP)
-	$(RM) $(PREFIX)/share/applications/apps/$(APP).desktop
-	$(RM) $(PREFIX)/share/man/man1/$(APP).1.gz
-	$(RM) $(PREFIX)/share/pixmaps/$(APP).xpm
-	$(RM) $(PREFIX)/share/doc/$(APP)
-	$(foreach SIZE,$(SIZES),$(RM) $(PREFIX)/share/icons/hicolor/$(SIZE)x$(SIZE)/apps/$(APP).png ;)
+	$(RM) $(DESTDIR)$(PREFIX)/bin/$(APP)
+	$(RM) $(DESTDIR)$(PREFIX)/share/applications/apps/$(APP).desktop
+	$(RM) $(DESTDIR)$(PREFIX)/share/man/man1/$(APP).1.gz
+	$(RM) $(DESTDIR)$(PREFIX)/share/pixmaps/$(APP).xpm
+	$(RM) $(DESTDIR)$(PREFIX)/share/doc/$(APP)
+	$(foreach SIZE,$(SIZES),$(RM) $(DESTDIR)$(PREFIX)/share/icons/hicolor/$(SIZE)x$(SIZE)/apps/$(APP).png ;)
