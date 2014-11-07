@@ -109,7 +109,8 @@ Yua::Yua(QWidget *parent)
         }
 
 
-        QCoreApplication::setOrganizationName("Speed Demos Archive");
+        //QCoreApplication::setOrganizationName("Speed Demos Archive");
+        QCoreApplication::setOrganizationName("yua"); //save configuration in ~/.config/yua/
         QCoreApplication::setOrganizationDomain("speeddemosarchive.com");
         QCoreApplication::setApplicationName("Yua");
         QCoreApplication::setApplicationVersion(QString("%1").arg(YUA_VERSION));
