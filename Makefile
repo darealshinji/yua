@@ -1,4 +1,4 @@
-FFVERSION    =  2.4.2
+FFVERSION    =  2.4.3
 FDKVERSION   =  0.1.3
 GPACVERSION  =  0.5.0+svn4288~dfsg1
 
