@@ -1,6 +1,8 @@
 #include "conversion.h"
 #include "yv12toyuy2.h"
 
+#pragma GCC diagnostic ignored "-Wunused-parameter"
+
 #define KERNEL(x1, x2, x, y) ( ( (x1) * (x) + (x2) * (y) + 4 ) >> 3 )
 
 #define KERNEL_0_8(x1, x2) (x2)
