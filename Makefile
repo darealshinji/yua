@@ -1,4 +1,3 @@
-FFVERSION    =  2.4.3
 FDKVERSION   =  0.1.3
 GPACVERSION  =  0.5.0+svn4288~dfsg1
 
@@ -190,9 +189,8 @@ download:
 	$(MV) gpac-$(GPACVERSION).orig gpac )
 
 	[ -d ffmpeg ] || \
-	( $(WGET) http://ffmpeg.org/releases/ffmpeg-$(FFVERSION).tar.bz2 && \
-	$(TAR) xvjf ffmpeg-$(FFVERSION).tar.bz2 && \
-	$(MV) ffmpeg-$(FFVERSION) ffmpeg )
+	( $(WGET) http://ffmpeg.org/releases/ffmpeg-snapshot.tar.bz2 && \
+	$(TAR) xvjf ffmpeg-snapshot.tar.bz2 )
 
 clean:
 	cd src && $(RM) $(APP) ../$(APP) *.o moc_*.cpp qrc_*.cpp
