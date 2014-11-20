@@ -1,18 +1,13 @@
 FDKVERSION   =  0.1.3
 GPACVERSION  =  0.5.0+svn4288~dfsg1
 
-XCFLAGS   += $(shell dpkg-buildflags --get CFLAGS)
-XCPPFLAGS += $(shell dpkg-buildflags --get CPPFLAGS)
-XCXXFLAGS += $(shell dpkg-buildflags --get CXXFLAGS)
-XLDFLAGS  += $(shell dpkg-buildflags --get LDFLAGS) -Wl,--as-needed
-
 QMAKE_FLAGS += \
-	QMAKE_CFLAGS_RELEASE='$(XCFLAGS) $(XCPPFLAGS)' \
-	QMAKE_CFLAGS_DEBUG='$(XCFLAGS) $(XCPPFLAGS)' \
-	QMAKE_CXXFLAGS_RELEASE='$(XCXXFLAGS) $(XCPPFLAGS)' \
-	QMAKE_CXXFLAGS_DEBUG='$(XCXXFLAGS) $(XCPPFLAGS)' \
-	QMAKE_LFLAGS_RELEASE='$(XLDFLAGS)' \
-	QMAKE_LFLAGS_DEBUG='$(XLDFLAGS)'
+	QMAKE_CFLAGS_RELEASE='$(CFLAGS) $(CPPFLAGS)' \
+	QMAKE_CFLAGS_DEBUG='$(CFLAGS) $(CPPFLAGS)' \
+	QMAKE_CXXFLAGS_RELEASE='$(CXXFLAGS) $(CPPFLAGS)' \
+	QMAKE_CXXFLAGS_DEBUG='$(CXXFLAGS) $(CPPFLAGS)' \
+	QMAKE_LFLAGS_RELEASE='$(LDFLAGS)' \
+	QMAKE_LFLAGS_DEBUG='$(LDFLAGS)'
 
 
 FDK_CONFFLAGS = \
@@ -20,8 +15,8 @@ FDK_CONFFLAGS = \
 		--enable-shared=no
 
 X264_CONFFLAGS = \
-		--extra-cflags='$(XCFLAGS) $(XCPPFLAGS)' \
-		--extra-ldflags='$(XLDFLAGS)' \
+		--extra-cflags='$(CFLAGS) $(CPPFLAGS)' \
+		--extra-ldflags='$(LDFLAGS)' \
 		--bit-depth=8 \
 		--chroma-format=all \
 		--disable-cli \
@@ -36,9 +31,9 @@ X264_CONFFLAGS = \
 		--disable-lsmash
 
 FFMPEG_CONFFLAGS = \
-		--extra-cflags='$(XCFLAGS) $(XCPPFLAGS)  -I../x264 -I../fdk-aac/libAACenc/include -I../fdk-aac/libAACdec/include -I../fdk-aac/libSYS/include' \
-		--extra-cxxflags='$(XCXXFLAGS) $(XCPPFLAGS)' \
-		--extra-ldflags='$(XLDFLAGS)  -L../x264 -L../fdk-aac/.libs' \
+		--extra-cflags='$(CFLAGS) $(CPPFLAGS)  -I../x264 -I../fdk-aac/libAACenc/include -I../fdk-aac/libAACdec/include -I../fdk-aac/libSYS/include' \
+		--extra-cxxflags='$(CXXFLAGS) $(CPPFLAGS)' \
+		--extra-ldflags='$(LDFLAGS)  -L../x264 -L../fdk-aac/.libs' \
 		--disable-debug \
 		--disable-runtime-cpudetect \
 		--disable-bzlib \
@@ -54,8 +49,8 @@ FFMPEG_CONFFLAGS = \
 		--enable-libfdk-aac
 
 MP4BOX_CONFFLAGS = \
-		--extra-cflags='-Wall -DXP_UNIX  $(XCFLAGS) $(XCPPFLAGS)' \
-		--extra-ldflags='$(XLDFLAGS)' \
+		--extra-cflags='-Wall -DXP_UNIX  $(CFLAGS) $(CPPFLAGS)' \
+		--extra-ldflags='$(LDFLAGS)' \
 		--strip \
 		--disable-ipv6 \
 		--disable-wx \
@@ -157,7 +152,7 @@ endif
 fdk-aac: download
 	[ -f fdk-aac/.libs/libfdk-aac.a ] || \
 	( cd fdk-aac && ./autogen.sh && \
-	CFLAGS='$(XCFLAGS)' CPPFLAGS='$(XCPPFLAGS)' CXXFLAGS='$(XCXXFLAGS)' LDFLAGS='$(XLDFLAGS)' \
+	CFLAGS='$(CFLAGS)' CPPFLAGS='$(CPPFLAGS)' CXXFLAGS='$(CXXFLAGS)' LDFLAGS='$(LDFLAGS)' \
 	./configure $(FDK_CONFFLAGS) && $(MAKE) )
 	# fix fdk-aac detection for ffmpeg
 	$(MKDIR) fdk-aac/libAACenc/include/fdk-aac
