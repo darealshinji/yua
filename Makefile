@@ -55,7 +55,7 @@ FFMPEG_CONFFLAGS = \
 		--enable-libfdk-aac
 
 MP4BOX_CONFFLAGS = \
-		--extra-cflags='$(XCFLAGS) $(XCPPFLAGS)  -Wall -fPIC -DPIC -DXP_UNIX' \
+		--extra-cflags='-Wall -DXP_UNIX  $(XCFLAGS) $(XCPPFLAGS)' \
 		--extra-ldflags='$(XLDFLAGS)' \
 		--strip \
 		--disable-ipv6 \

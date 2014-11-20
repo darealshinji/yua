@@ -26,7 +26,7 @@ Static build
 To compile a statically linked binary with embedded FFmpeg and MP4Box run `make static` (Qt5) or `make static-qt4`
 
 Install build dependencies for a static build:<br>
-`sudo apt-get install build-essential git upx-ucl zlib1g-dev`<br>
+`sudo apt-get install build-essential automake git upx-ucl zlib1g-dev`<br>
 `qtbase5-dev libqt5opengl5-dev` (Qt5)<br>
 `libqt4-dev libqt4-opengl-dev` (Qt4)
 
