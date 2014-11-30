@@ -1,4 +1,3 @@
-FDKVERSION   =  0.1.3
 GPACVERSION  =  0.5.0+svn4288~dfsg1
 
 QMAKE_FLAGS := \
