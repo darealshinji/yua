@@ -172,20 +172,16 @@ ffmpeg: download
 	cd ffmpeg && $(MAKE)
 
 download:
-	[ -d x264 ] || $(GIT) clone git://git.videolan.org/x264.git
+	[ -d x264 ] || $(GIT) clone --depth 1 git://git.videolan.org/x264.git
 
-	[ -d fdk-aac ] || \
-	( $(GIT) clone git://git.code.sf.net/p/opencore-amr/fdk-aac && \
-	cd fdk-aac && git checkout v$(FDKVERSION) )
+	[ -d ffmpeg ] || $(GIT) clone --depth 1 git://source.ffmpeg.org/ffmpeg.git
+
+	[ -d fdk-aac ] || $(GIT) clone --depth 1 git://git.code.sf.net/p/opencore-amr/fdk-aac
 
 	[ -d gpac ] || \
 	( $(WGET) http://archive.ubuntu.com/ubuntu/pool/universe/g/gpac/gpac_$(GPACVERSION).orig.tar.bz2 && \
 	$(TAR) xvjf gpac_$(GPACVERSION).orig.tar.bz2 && \
 	$(MV) gpac-$(GPACVERSION).orig gpac )
-
-	[ -d ffmpeg ] || \
-	( $(WGET) http://ffmpeg.org/releases/ffmpeg-snapshot.tar.bz2 && \
-	$(TAR) xvjf ffmpeg-snapshot.tar.bz2 )
 
 clean:
 	cd src && $(RM) $(APP) ../$(APP) *.o moc_*.cpp qrc_*.cpp
