@@ -127,6 +127,10 @@ static-qt4: static-deps src/$(APP)_static.pro
 	$(UPX) $(APP)
 
 src/$(APP)_static.pro:
+	$(MKDIR) src/helpers/linux
+ifeq ($(shell uname -p),x86_64)
+	$(CP) src/helpers/nnedi3_weights.bin src/helpers/linux
+endif
 	cd src && ./make_qrc_linux.sh
 	cat src/$(APP)_static.pro.in src/helpers/linux/qrc_list > src/$(APP)_static.pro
 	echo $(APP)_icon.qrc >> src/$(APP)_static.pro
