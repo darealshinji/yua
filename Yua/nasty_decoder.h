@@ -67,6 +67,7 @@ private:
         bool audio_sample_format_is_float, audio_sample_format_is_double, audio_sample_format_is_floating_point,
                         audio_sample_format_is_uint8, audio_sample_format_is_int16, audio_sample_format_is_int32, audio_sample_format_is_integer;
         AVPixelFormat src_pix_fmt, dest_pix_fmt;
+        AVColorSpace dest_colorspace_standard;
         bool src_is_mjpeg_color_range;
 
         AVAudioResampleContext *avr;
@@ -86,6 +87,7 @@ private:
         qint16 audio_level_max_int16;
         qint32 audio_level_max_int32;
         void determine_audio_normalization_factor_finish();
+        AVColorSpace src_colorspace_standard;
 };
 
 #endif // NASTY_DECODER_H
