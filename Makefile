@@ -1,12 +1,9 @@
 GPACVERSION  =  0.5.0+svn4288~dfsg1
 
 QMAKE_FLAGS := \
-	QMAKE_CFLAGS_RELEASE='$(CFLAGS) $(CPPFLAGS)' \
-	QMAKE_CFLAGS_DEBUG='$(CFLAGS) $(CPPFLAGS)' \
-	QMAKE_CXXFLAGS_RELEASE='$(CXXFLAGS) $(CPPFLAGS)' \
-	QMAKE_CXXFLAGS_DEBUG='$(CXXFLAGS) $(CPPFLAGS)' \
-	QMAKE_LFLAGS_RELEASE='$(LDFLAGS)' \
-	QMAKE_LFLAGS_DEBUG='$(LDFLAGS)'
+	QMAKE_CFLAGS='$(CFLAGS) $(CPPFLAGS)' \
+	QMAKE_CXXFLAGS='$(CXXFLAGS) $(CPPFLAGS)' \
+	QMAKE_LFLAGS='$(LDFLAGS)'
 
 
 FDK_CONFFLAGS = \
@@ -184,6 +181,7 @@ download:
 	[ -d gpac ] || \
 	( $(WGET) http://archive.ubuntu.com/ubuntu/pool/universe/g/gpac/gpac_$(GPACVERSION).orig.tar.bz2 && \
 	$(TAR) xvjf gpac_$(GPACVERSION).orig.tar.bz2 && \
+	$(RM) gpac_$(GPACVERSION).orig.tar.bz2 && \
 	$(MV) gpac-$(GPACVERSION).orig gpac )
 
 clean:
