@@ -114,14 +114,12 @@ static-$(APP): static-deps src/$(APP)_static.pro
 	cd src && $(MAKE)
 	$(CP) src/$(APP) $(APP)
 	$(STRIP) $(APP)
-	$(UPX) $(APP)
 
 static-qt4: static-deps src/$(APP)_static.pro
 	cd src && $(QMAKE_QT4) $(APP)_static.pro
 	cd src && $(MAKE)
 	$(CP) src/$(APP) $(APP)
 	$(STRIP) $(APP)
-	$(UPX) $(APP)
 
 src/$(APP)_static.pro:
 	$(MKDIR) src/helpers/linux
