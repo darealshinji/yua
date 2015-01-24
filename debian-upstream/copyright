@@ -2,15 +2,14 @@ Format: http://www.debian.org/doc/packaging-manuals/copyright-format/1.0/
 Source: https://github.com/darealshinji/yua
 
 Files: src/*
-       common/*
-Copyright: 2014 Taiga Software LLC
+Copyright: 2013-2015 Taiga Software LLC
 License: GPL-2+
 
 Files: *
        debian/*
        share/*
-Copyright: 2014 djcj <djcj@gmx.de>
-           2014 Taiga Software LLC
+Copyright: 2014-2015 djcj <djcj@gmx.de>
+           2013-2015 Taiga Software LLC
 License: GPL-2+
 
 Files: src/yv12toyuy2.h

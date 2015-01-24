@@ -33,7 +33,7 @@ Install build dependencies for a static build:<br>
 
 Copyright
 ---------
-Copyright (C) 2013-2014 Taiga Software LLC
+Copyright (C) 2013-2015 Taiga Software LLC
 
 Authors are Nathan 'nate' Jahnke and djcj <djcj@gmx.de>.
 

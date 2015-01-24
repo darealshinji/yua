@@ -1,9 +1,10 @@
 #include "nasty_decoder.h"
 
 Nasty_Decoder::Nasty_Decoder() :
-       currently_encoding(false)
-      ,dest_pix_fmt(AV_PIX_FMT_RGB32) //must match the constant set in video_encoder.cpp - was AV_PIX_FMT_RGB24 but i had alignment problems with non-mod 4 width input (20130429))
-      ,avr(NULL)
+         currently_encoding(false)
+       , dest_pix_fmt(AV_PIX_FMT_RGB32) //must match the constant set in video_encoder.cpp - was AV_PIX_FMT_RGB24 but i had alignment problems with non-mod 4 width input (20130429)
+       , dest_colorspace_standard(AVCOL_SPC_BT709) //we always decode to this colorspace standard (20141214)
+       , avr(NULL)
 {
         set_ffmpeg_crap_null();
 
@@ -122,8 +123,8 @@ void Nasty_Decoder::yv12_deinterlacing_check_and_set() {
                 interlaced_yv12_conversion_needed = true;
                 if (interlaced_convert_ctx) sws_freeContext(interlaced_convert_ctx);
                 interlaced_convert_ctx = Yua_Util::GetSwsContext(
-                                        vCodecCtx->width, vCodecCtx->height/2, AV_PIX_FMT_YUYV422, vCodecCtx->colorspace, src_is_mjpeg_color_range ? AVCOL_RANGE_JPEG : AVCOL_RANGE_MPEG,
-                                        vCodecCtx->width, vCodecCtx->height/2, dest_pix_fmt, vCodecCtx->colorspace, AVCOL_RANGE_MPEG,
+                                        vCodecCtx->width, vCodecCtx->height/2, AV_PIX_FMT_YUYV422, src_colorspace_standard, src_is_mjpeg_color_range ? AVCOL_RANGE_JPEG : AVCOL_RANGE_MPEG,
+                                        vCodecCtx->width, vCodecCtx->height/2, dest_pix_fmt, dest_colorspace_standard, AVCOL_RANGE_MPEG,
                                         SWS_LANCZOS);
         }
 }
@@ -319,34 +320,41 @@ void Nasty_Decoder::open(QString filename) {
                         video_info.timebase_den = den*2;
 
                         //handle deprecated colorspaces (20140706)
+                        src_is_mjpeg_color_range = true;
                         switch (vCodecCtx->pix_fmt) {
                         case AV_PIX_FMT_YUVJ420P:
                                 src_pix_fmt = AV_PIX_FMT_YUV420P;
-                                src_is_mjpeg_color_range = true;
                                 break;
                         case AV_PIX_FMT_YUVJ422P:
                                 src_pix_fmt = AV_PIX_FMT_YUV422P;
-                                src_is_mjpeg_color_range = true;
                                 break;
                         case AV_PIX_FMT_YUVJ444P:
                                 src_pix_fmt = AV_PIX_FMT_YUV444P;
-                                src_is_mjpeg_color_range = true;
                                 break;
                         case AV_PIX_FMT_YUVJ440P:
                                 src_pix_fmt = AV_PIX_FMT_YUV440P;
-                                src_is_mjpeg_color_range = true;
                                 break;
                         case AV_PIX_FMT_YUVJ411P:
                                 src_pix_fmt = PIX_FMT_YUV411P;
-                                src_is_mjpeg_color_range = true;
                                 break;
                         default:
                                 src_pix_fmt = vCodecCtx->pix_fmt;
-                                src_is_mjpeg_color_range = false;
                         }
                         qDebug() << this << "src_is_mjpeg_color_range set to" << src_is_mjpeg_color_range;
 
-                        video_info.colorspace_standard = vCodecCtx->colorspace;
+                        src_colorspace_standard = vCodecCtx->colorspace;
+                        if (vCodecCtx->colorspace == AVCOL_SPC_UNSPECIFIED) {
+                                src_colorspace_standard = AVCOL_SPC_RGB;
+                                if (!(av_pix_fmt_desc_get(src_pix_fmt)->flags & AV_PIX_FMT_FLAG_RGB)) { //i.e., it is yuv (20150113)
+                                        src_colorspace_standard = AVCOL_SPC_BT470BG;
+                                        if (vCodecCtx->width > 1184 && vCodecCtx->height > 666) {
+                                                src_colorspace_standard = AVCOL_SPC_BT709;
+                                        }
+                                }
+                        }
+                        qDebug() << this << "set source colorspace to" << av_get_colorspace_name(src_colorspace_standard);
+
+                        video_info.colorspace_standard = dest_colorspace_standard;
                 }
         }
 
@@ -412,12 +420,12 @@ void Nasty_Decoder::open(QString filename) {
         avpicture_fill((AVPicture *)pFrameRGB, buffer, dest_pix_fmt, vCodecCtx->width, vCodecCtx->height);
 
         encode_img_convert_ctx = Yua_Util::GetSwsContext(
-                                vCodecCtx->width, vCodecCtx->height, src_pix_fmt, vCodecCtx->colorspace, src_is_mjpeg_color_range ? AVCOL_RANGE_JPEG : AVCOL_RANGE_MPEG,
-                                vCodecCtx->width, vCodecCtx->height, dest_pix_fmt, vCodecCtx->colorspace, AVCOL_RANGE_MPEG,
+                                vCodecCtx->width, vCodecCtx->height, src_pix_fmt, src_colorspace_standard, src_is_mjpeg_color_range ? AVCOL_RANGE_JPEG : AVCOL_RANGE_MPEG,
+                                vCodecCtx->width, vCodecCtx->height, dest_pix_fmt, dest_colorspace_standard, AVCOL_RANGE_MPEG,
                                 SWS_LANCZOS);
         interlaced_convert_ctx = Yua_Util::GetSwsContext(
-                                vCodecCtx->width, vCodecCtx->height/2, src_pix_fmt, vCodecCtx->colorspace, src_is_mjpeg_color_range ? AVCOL_RANGE_JPEG : AVCOL_RANGE_MPEG,
-                                vCodecCtx->width, vCodecCtx->height/2, dest_pix_fmt, vCodecCtx->colorspace, AVCOL_RANGE_MPEG,
+                                vCodecCtx->width, vCodecCtx->height/2, src_pix_fmt, src_colorspace_standard, src_is_mjpeg_color_range ? AVCOL_RANGE_JPEG : AVCOL_RANGE_MPEG,
+                                vCodecCtx->width, vCodecCtx->height/2, dest_pix_fmt, dest_colorspace_standard, AVCOL_RANGE_MPEG,
                                 SWS_LANCZOS);
 
 

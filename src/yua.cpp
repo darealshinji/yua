@@ -2389,7 +2389,9 @@ void Yua::add_progress(Progress_Type progress_type, double amount) {
 }
 
 void Yua::set_status(QString text) {
+        status_textedit.moveCursor(QTextCursor::End);
         status_textedit.insertPlainText(text);
+        status_textedit.moveCursor(QTextCursor::End);
         status_textedit.ensureCursorVisible();
 }
 
