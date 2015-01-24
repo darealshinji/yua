@@ -22,7 +22,7 @@ Architecture: any
 Depends:
    ${misc:Depends},
    ${shlibs:Depends},
-   ffmpeg | libav-tools,
+   ffmpeg,
    gpac
 Description: Speedrun encoding tool
  This graphical tool automates the conversion process of your
