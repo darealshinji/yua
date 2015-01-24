@@ -8,7 +8,7 @@ CONFIG += c++11
 TARGET = yua
 TEMPLATE = app
 
-DEFINES += 'YUA_VERSION=\'\"7\"\''
+DEFINES += 'YUA_VERSION=\'\"8\"\''
 !linux-g++-32: DEFINES += 'WITH_NNEDI3'
 
 SOURCES += main.cpp\
