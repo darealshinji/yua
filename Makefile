@@ -1,16 +1,23 @@
-GPACVERSION  =  0.5.0+svn4288~dfsg1
+GPACVERSION = 0.5.0+svn4288~dfsg1
+prefix = $(CURDIR)/ffmpeg/libs
+
+CFLAGS   += -fstack-protector --param=ssp-buffer-size=4
+CXXFLAGS += -fstack-protector --param=ssp-buffer-size=4
+CPPFLAGS += -D_FORTIFY_SOURCE=2
+LDFLAGS  += -Wl,-Bsymbolic-functions -Wl,-z,relro -Wl,-z,noexecstack -Wl,--as-needed
 
 QMAKE_FLAGS := \
 	QMAKE_CFLAGS='$(CFLAGS) $(CPPFLAGS)' \
 	QMAKE_CXXFLAGS='$(CXXFLAGS) $(CPPFLAGS)' \
 	QMAKE_LFLAGS='$(LDFLAGS)'
 
-
 FDK_CONFFLAGS = \
+		--prefix=$(prefix) \
 		--enable-static=yes \
 		--enable-shared=no
 
 X264_CONFFLAGS = \
+		--prefix=$(prefix) \
 		--extra-cflags='$(CFLAGS) $(CPPFLAGS)' \
 		--extra-ldflags='$(LDFLAGS)' \
 		--bit-depth=8 \
@@ -27,9 +34,9 @@ X264_CONFFLAGS = \
 		--disable-lsmash
 
 FFMPEG_CONFFLAGS = \
-		--extra-cflags='$(CFLAGS) $(CPPFLAGS)  -I../x264 -I../fdk-aac/libAACenc/include -I../fdk-aac/libAACdec/include -I../fdk-aac/libSYS/include' \
+		--extra-cflags='$(CFLAGS) $(CPPFLAGS) -I./libs/include' \
 		--extra-cxxflags='$(CXXFLAGS) $(CPPFLAGS)' \
-		--extra-ldflags='$(LDFLAGS)  -L../x264 -L../fdk-aac/.libs' \
+		--extra-ldflags='$(LDFLAGS)  -L./libs/lib' \
 		--disable-debug \
 		--disable-runtime-cpudetect \
 		--disable-bzlib \
@@ -130,7 +137,7 @@ endif
 	cat src/$(APP)_static.pro.in src/helpers/linux/qrc_list > src/$(APP)_static.pro
 	echo $(APP)_icon.qrc >> src/$(APP)_static.pro
 
-static-deps: fdk-aac x264 mp4box ffmpeg
+static-deps: fdk-aac x264 ffmpeg mp4box
 	$(MKDIR) src/helpers/linux
 	$(CP) src/helpers/nnedi3_weights.bin src/helpers/linux
 	$(CP) gpac/bin/gcc/MP4Box src/helpers/linux/mp4box
@@ -150,16 +157,12 @@ endif
 fdk-aac: download
 	[ -f fdk-aac/.libs/libfdk-aac.a ] || \
 	( cd fdk-aac && ./autogen.sh && \
-	CFLAGS='$(CFLAGS)' CPPFLAGS='$(CPPFLAGS)' CXXFLAGS='$(CXXFLAGS)' LDFLAGS='$(LDFLAGS)' \
-	./configure $(FDK_CONFFLAGS) && $(MAKE) )
-	# fix fdk-aac detection for ffmpeg
-	$(MKDIR) fdk-aac/libAACenc/include/fdk-aac
-	$(MKDIR) fdk-aac/libAACdec/include/fdk-aac
-	cd fdk-aac/libAACenc/include && $(CP) aacenc_lib.h fdk-aac
-	cd fdk-aac/libAACdec/include && $(CP) aacdecoder_lib.h fdk-aac
+	CXXFLAGS='-O3 $(CXXFLAGS)' CPPFLAGS='$(CPPFLAGS)' LDFLAGS='$(LDFLAGS)' \
+	./configure $(FDK_CONFFLAGS) && $(MAKE) && $(MAKE) install )
 
 x264: download
-	[ -f x264/libx264.a ] || ( cd x264 && ./configure $(X264_CONFFLAGS) && $(MAKE) )
+	[ -f x264/libx264.a ] || \
+	( cd x264 && ./configure $(X264_CONFFLAGS) && $(MAKE) && $(MAKE) install )
 
 mp4box: download
 	[ -f gpac/bin/gcc/MP4Box ] || ( cd gpac && \
