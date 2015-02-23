@@ -1,5 +1,5 @@
 GPACVERSION = 0.5.0+svn4288~dfsg1
-prefix = $(CURDIR)/ffmpeg/libs
+ffmpeg_prefix = $(CURDIR)/ffmpeg/libs
 
 CFLAGS   += -fstack-protector --param=ssp-buffer-size=4
 CXXFLAGS += -fstack-protector --param=ssp-buffer-size=4
@@ -12,12 +12,12 @@ QMAKE_FLAGS := \
 	QMAKE_LFLAGS='$(LDFLAGS)'
 
 FDK_CONFFLAGS = \
-		--prefix=$(prefix) \
+		--prefix=$(ffmpeg_prefix) \
 		--enable-static=yes \
 		--enable-shared=no
 
 X264_CONFFLAGS = \
-		--prefix=$(prefix) \
+		--prefix=$(ffmpeg_prefix) \
 		--extra-cflags='$(CFLAGS) $(CPPFLAGS)' \
 		--extra-ldflags='$(LDFLAGS)' \
 		--bit-depth=8 \
@@ -76,8 +76,8 @@ MV     ?=  mv -v
 MKDIR  ?=  mkdir -p
 RMDIR  ?=  rmdir
 
-QMAKE  :=  qmake $(QMAKE_FLAGS)
-QMAKE_QT4 := qmake-qt4 $(QMAKE_FLAGS)
+QMAKE_QT4 := qtchooser -run-tool=qmake -qt=4 $(QMAKE_FLAGS)
+QMAKE_QT5 := qtchooser -run-tool=qmake -qt=5 $(QMAKE_FLAGS)
 
 ifeq ($(V),1)
 MAKE   :=  make -j$(shell nproc) V=1
@@ -105,7 +105,7 @@ all: $(APP)
 static: static-deps static-$(APP)
 
 $(APP): qrc
-	cd src && $(QMAKE) $(APP).pro
+	cd src && $(QMAKE_QT5) $(APP).pro
 	cd src && $(MAKE)
 	$(CP) src/$(APP) $(APP)
 	$(STRIP) $(APP)
@@ -117,7 +117,7 @@ qt4: qrc
 	$(STRIP) $(APP)
 
 static-$(APP): static-deps src/$(APP)_static.pro
-	cd src && $(QMAKE) $(APP)_static.pro
+	cd src && $(QMAKE_QT5) $(APP)_static.pro
 	cd src && $(MAKE)
 	$(CP) src/$(APP) $(APP)
 	$(STRIP) $(APP)
@@ -200,10 +200,11 @@ install:
 	$(CP) share $(DESTDIR)$(PREFIX)
 	$(GZIP) $(DESTDIR)$(PREFIX)/share/man/man1/$(APP).1
 
-uninstall:
-	$(RM) $(DESTDIR)$(PREFIX)/bin/$(APP)
-	$(RM) $(DESTDIR)$(PREFIX)/share/applications/apps/$(APP).desktop
-	$(RM) $(DESTDIR)$(PREFIX)/share/man/man1/$(APP).1.gz
-	$(RM) $(DESTDIR)$(PREFIX)/share/pixmaps/$(APP).xpm
-	$(RM) $(DESTDIR)$(PREFIX)/share/doc/$(APP)
-	$(foreach SIZE,$(SIZES),$(RM) $(DESTDIR)$(PREFIX)/share/icons/hicolor/$(SIZE)x$(SIZE)/apps/$(APP).png ;)
+#uninstall:
+#	$(RM) $(DESTDIR)$(PREFIX)/bin/$(APP)
+#	$(RM) $(DESTDIR)$(PREFIX)/share/applications/apps/$(APP).desktop
+#	$(RM) $(DESTDIR)$(PREFIX)/share/man/man1/$(APP).1.gz
+#	$(RM) $(DESTDIR)$(PREFIX)/share/pixmaps/$(APP).xpm
+#	$(RM) $(DESTDIR)$(PREFIX)/share/doc/$(APP)
+#	$(foreach SIZE,$(SIZES),$(RM) $(DESTDIR)$(PREFIX)/share/icons/hicolor/$(SIZE)x$(SIZE)/apps/$(APP).png ;)
+
