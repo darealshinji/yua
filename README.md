@@ -7,7 +7,7 @@ Homepage: https://forum.speeddemosarchive.com/post/yua3.html
 
 Build
 -----
-Install build dependencies: `sudo apt-get install build-essential libavcodec-dev libavformat-dev libavresample-dev libavutil-dev libswscale-dev zlib1g-dev`<br>
+Install build dependencies: `sudo apt-get install build-essential libfdk-aac-dev libavcodec-dev libavformat-dev libavresample-dev libavutil-dev libswscale-dev zlib1g-dev`<br>
 `qtbase5-dev libqt5opengl5-dev` (Qt5)<br>
 `libqt4-dev libqt4-opengl-dev` (Qt4)
 
@@ -20,10 +20,12 @@ Build Qt4 version: `make qt4`<br>
 Default prefix: /usr/local<br>
 Install in different prefix: `make install PREFIX=/usr`
 
+You can check your build dependencies by running `./check.sh`.
+
 
 Static build
 ------------
-To compile a statically linked binary with embedded FFmpeg and MP4Box run `make static` (Qt5) or `make static-qt4`
+To compile a binary with embedded FFmpeg and MP4Box binaries and embedded encoding libraries run `make static` (Qt5) or `make static-qt4`
 
 Install build dependencies for a static build:<br>
 `sudo apt-get install build-essential automake git upx-ucl zlib1g-dev`<br>
