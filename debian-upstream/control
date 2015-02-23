@@ -11,6 +11,7 @@ Build-Depends:
    libavresample-dev,
    libavutil-dev,
    libswscale-dev,
+   libfdk-aac-dev,
    zlib1g-dev
 Standards-Version: 3.9.5
 Homepage: https://forum.speeddemosarchive.com/post/yua3.html
