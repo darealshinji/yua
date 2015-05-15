@@ -2,7 +2,7 @@ GPACVERSION = 0.5.0+svn4288~dfsg1
 ffmpeg_prefix = $(CURDIR)/ffmpeg/libs
 
 CFLAGS   += -fstack-protector --param=ssp-buffer-size=4
-CXXFLAGS += -fstack-protector --param=ssp-buffer-size=4
+CXXFLAGS += -fstack-protector --param=ssp-buffer-size=4 -Wno-unused-result
 CPPFLAGS += -D_FORTIFY_SOURCE=2
 LDFLAGS  += -Wl,-Bsymbolic-functions -Wl,-z,relro -Wl,-z,noexecstack -Wl,--as-needed
 
@@ -34,8 +34,8 @@ X264_CONFFLAGS = \
 		--disable-lsmash
 
 FFMPEG_CONFFLAGS = \
-		--extra-cflags='$(CFLAGS) $(CPPFLAGS) -I./libs/include' \
-		--extra-cxxflags='$(CXXFLAGS) $(CPPFLAGS)' \
+		--extra-cflags='$(CFLAGS) -Wno-deprecated-declarations $(CPPFLAGS) -I./libs/include' \
+		--extra-cxxflags='$(CXXFLAGS) -Wno-deprecated-declarations $(CPPFLAGS)' \
 		--extra-ldflags='$(LDFLAGS)  -L./libs/lib' \
 		--disable-debug \
 		--disable-runtime-cpudetect \
@@ -168,7 +168,7 @@ mp4box: download
 	[ -f gpac/bin/gcc/MP4Box ] || ( cd gpac && \
 	./configure $(MP4BOX_CONFFLAGS) && $(MAKE) lib && $(MAKE) apps )
 
-ffmpeg: download
+ffmpeg: download x264 fdk-aac
 	cd ffmpeg && ./configure $(FFMPEG_CONFFLAGS)
 	cd ffmpeg && $(MAKE)
 
@@ -189,7 +189,7 @@ clean:
 	cd src && $(RM) $(APP) ../$(APP) *.o moc_*.cpp qrc_*.cpp
 
 distclean: clean-download clean
-	$(RM) src/helpers/linux src/$(APP)_static.pro src/Makefile
+	$(RM) src/helpers/linux src/$(APP)_static.pro src/Makefile src/qrc_list
 
 clean-download:
 	$(RM) fdk-aac x264 gpac* ffmpeg*
