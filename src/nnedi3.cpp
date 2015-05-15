@@ -117,6 +117,21 @@ NNEDI3::NNEDI3(int width, int half_height, QObject *parent)
         float *bdata = NULL;
         QByteArray weights_data;
         QString resource_name("nnedi3_weights.bin");
+#ifdef EXTERNAL_NNEDI3_WEIGHTS
+        QFile extweights1(QString("/usr/share/nnedi3/%1").arg(resource_name));
+        QFile extweights2(QString("%1/%2").arg(qApp->applicationDirPath()).arg(resource_name));
+        if (extweights1.exists()) {
+            extweights1.open(QIODevice::ReadOnly);
+            weights_data.append(extweights1.readAll());
+            extweights1.close();
+        } else if (extweights2.exists()) {
+            extweights2.open(QIODevice::ReadOnly);
+            weights_data.append(extweights2.readAll());
+            extweights2.close();
+        } else {
+            qDebug() << "NNEDI3: could not open weights file";
+        }
+#else
         QFile resource_in_file(":/" + resource_name);
         if (resource_in_file.exists()) {
                 resource_in_file.open(QIODevice::ReadOnly);
@@ -138,6 +153,7 @@ NNEDI3::NNEDI3(int width, int half_height, QObject *parent)
                         }
                 }
         }
+#endif
         if (weights_data.size()) {
                 bdata = (float*)weights_data.data();
         }

@@ -32,6 +32,16 @@ int main(int argc, char *argv[]) {
         qputenv("LIBOVERLAY_SCROLLBAR", 0);
 #endif
 
+#ifdef EXTERNAL_NNEDI3_WEIGHTS
+        QString resource_name("nnedi3_weights.bin");
+        QString path1 = QString("/usr/share/nnedi3/%1").arg(resource_name);
+        QString path2 = QString("%1/%2").arg(qApp->applicationDirPath()).arg(resource_name);
+        if (!(QFile(path1).exists()) && !(QFile(path2).exists())) {
+            qDebug() << "NNEDI3: could not find weights file in" << path1 << "or" << path2;
+            std::exit(1);
+        }
+#endif
+
         Yua w;
         w.show();
 
