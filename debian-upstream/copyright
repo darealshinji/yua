@@ -12,9 +12,13 @@ Copyright: 2014-2015 djcj <djcj@gmx.de>
            2013-2015 Taiga Software LLC
 License: GPL-2+
 
-Files: src/yv12toyuy2.h
-       src/yv12toyuy2.c
-Copyright: Manao
+Files: src/helpers/nnedi3_weights.bin
+Copyright: none
+License: public-domain
+ This file isn't under any license, you can do whatever you want with it.
+Comment:
+ This file was created by Kevin Eliot Stone <kes25c@mail.missouri.edu>.
+ He doesn't claim any copyright.
 
 License: GPL-2+
  This program is free software; you can redistribute it and/or modify
