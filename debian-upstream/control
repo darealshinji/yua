@@ -4,16 +4,12 @@ Priority: optional
 Maintainer: Marshall Banana <djcj@gmx.de>
 Build-Depends:
    debhelper (>= 9),
+   dh-autoreconf,
    libqt4-dev,
    libqt4-opengl-dev,
-   libavcodec-dev,
-   libavformat-dev,
-   libavresample-dev,
-   libavutil-dev,
-   libswscale-dev,
-   libfdk-aac-dev,
+   yasm,
    zlib1g-dev
-Standards-Version: 3.9.5
+Standards-Version: 3.9.6
 Homepage: https://forum.speeddemosarchive.com/post/yua3.html
 Vcs-Git: https://github.com/darealshinji/yua.git
 Vcs-Browser: https://github.com/darealshinji/yua
@@ -24,7 +20,8 @@ Depends:
    ${misc:Depends},
    ${shlibs:Depends},
    ffmpeg,
-   gpac
+   gpac,
+   nnedi3-weights (>= 0.9.4)
 Description: Speedrun encoding tool
  This graphical tool automates the conversion process of your
  speedruns footage. The video material will be encoded to the

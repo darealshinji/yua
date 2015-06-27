@@ -1,16 +1,41 @@
 #!/usr/bin/make -f
 
+export CFLAGS=$(filter-out -g -O2,$(shell dpkg-buildflags --get CFLAGS))
+export CXXFLAGS=$(filter-out -g -O2,$(shell dpkg-buildflags --get CXXFLAGS))
+export LDFLAGS=
+export V=1
+
 
 %:
 	dh ${@} --parallel
 
+override_dh_auto_clean:
+	dh_auto_clean
+	rm -rf lib
+
 override_dh_auto_build:
-	dh_auto_build -- qt4
+	cp -r third-party/* $(CURDIR)
+	$(MAKE) ffmpeg
+
+	$(MAKE) -C ffmpeg install DESTDIR=$(CURDIR)/lib
+	cp fdk-aac/.libs/libfdk-aac.a lib/usr/local/lib
+	cp x264/libx264.a lib/usr/local/lib
+
+	CXXFLAGS="$(CXXFLAGS) -I$(CURDIR)/lib/usr/local/include" \
+		$(MAKE) qt4_linux_external_weights \
+		LIBS="-L$(CURDIR)/lib/usr/local/lib -lavcodec -lfdk-aac -lx264 -lswresample -lavformat -lavresample -lavutil -lswscale -lz -lQtDBus -lQtOpenGL -lQtGui -lQtCore -lGL -lpthread"
 
 override_dh_auto_install:
 	dh_auto_install -- PREFIX=/usr DESTDIR=$(CURDIR)/debian/yua
 	rm -f $(CURDIR)/debian/yua/usr/share/doc/yua/COPYING
 
-override_dh_builddeb:
-	dh_builddeb -- -Zxz -z9
+get-orig-source:
+	git clone --depth 1 https://github.com/darealshinji/yua.git
+	$(MAKE) -C yua download
+	rm -rf `find yua -name .git` yua/gpac
+	mkdir -p yua/gpac && echo "all:" > yua/gpac/Makefile
+	echo "" > yua/src/helpers/nnedi3_weights.bin
+	mkdir -p yua/third-party
+	cd yua && mv fdk-aac ffmpeg gpac x264 third-party
+	tar cJf yua.orig.tar.xz yua
 
