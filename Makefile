@@ -1,10 +1,8 @@
 GPACVERSION = 0.5.0+svn4288~dfsg1
 ffmpeg_prefix = $(CURDIR)/ffmpeg/libs
 
-CFLAGS   += -fstack-protector --param=ssp-buffer-size=4
-CXXFLAGS += -fstack-protector --param=ssp-buffer-size=4 -Wno-unused-result
-CPPFLAGS += -D_FORTIFY_SOURCE=2
-LDFLAGS  += -Wl,-Bsymbolic-functions -Wl,-z,relro -Wl,-z,noexecstack -Wl,--as-needed
+CXXFLAGS += -Wno-unused-result
+LDFLAGS  += -Wl,-z,relro -Wl,-z,noexecstack -Wl,--as-needed
 
 QMAKE_FLAGS := \
 	QMAKE_CFLAGS='$(CFLAGS) $(CPPFLAGS)' \
@@ -114,6 +112,12 @@ $(APP): qrc
 	$(CP) src/$(APP) $(APP)
 	$(STRIP) $(APP)
 
+qt4_linux_external_weights:
+	cd src && $(QMAKE_QT4) $(APP)_$@.pro
+	cd src && $(MAKE)
+	$(CP) src/$(APP) $(APP)
+	$(STRIP) $(APP)
+
 qt4: qrc
 	cd src && $(QMAKE_QT4) $(APP)_qt4_linux.pro
 	cd src && $(MAKE)
@@ -203,12 +207,4 @@ install:
 	$(INSTALL_PROG) $(APP) $(DESTDIR)$(PREFIX)/bin
 	$(CP) share $(DESTDIR)$(PREFIX)
 	$(GZIP) $(DESTDIR)$(PREFIX)/share/man/man1/$(APP).1
-
-#uninstall:
-#	$(RM) $(DESTDIR)$(PREFIX)/bin/$(APP)
-#	$(RM) $(DESTDIR)$(PREFIX)/share/applications/apps/$(APP).desktop
-#	$(RM) $(DESTDIR)$(PREFIX)/share/man/man1/$(APP).1.gz
-#	$(RM) $(DESTDIR)$(PREFIX)/share/pixmaps/$(APP).xpm
-#	$(RM) $(DESTDIR)$(PREFIX)/share/doc/$(APP)
-#	$(foreach SIZE,$(SIZES),$(RM) $(DESTDIR)$(PREFIX)/share/icons/hicolor/$(SIZE)x$(SIZE)/apps/$(APP).png ;)
 
