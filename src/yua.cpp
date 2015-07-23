@@ -1176,7 +1176,7 @@ void Yua::about() {
                               "<br><br>\nYour use of this software is governed by the terms of the <a href=\"http://www.gnu.org/licenses/gpl.html\">GPL</a> version 2 or, at your option, any later version."
                               "<br><br>\nThis software uses libraries and binaries from the <a href=\"http://ffmpeg.org/\">FFmpeg</a> project and the <a href=\"http://x264.nl/\">x264</a> library, released "
                               "under the <a href=\"http://www.gnu.org/licenses/gpl.html\">GPL</a>, the <a href=\"http://opencore-amr.sourceforge.net/\">FDK AAC</a> library, released under the "
-                              "under the <a href=\"http://sourceforge.net/p/opencore-amr/fdk-aac/ci/master/tree/NOTICE\">Fraunhofer-FDK-AAC-for-Android</a> license, and the MP4Box binary from the "
+                              "<a href=\"http://sourceforge.net/p/opencore-amr/fdk-aac/ci/master/tree/NOTICE\">Fraunhofer-FDK-AAC-for-Android</a> license, and the MP4Box binary from the "
                               "<a href=\"http://gpac.wp.mines-telecom.fr/\">GPAC Project on Advanced Content</a>, released under the <a href=\"http://www.gnu.org/licenses/lgpl.html\">LGPL</a>."
                               "<br><br>\nAviSynth timebase reduction code by RAYMOD2 and IanB"
                               "<br><br>\nAviSynth 3.0 high quality yv12 deinterlacing code by <a href=\"http://forum.doom9.org/showthread.php?p=1295182#post1295182\">Manao</a>"
