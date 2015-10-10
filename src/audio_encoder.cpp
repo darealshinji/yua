@@ -281,7 +281,7 @@ void Audio_Encoder::convert_headers(AVPacket *pkt) {
                                            &new_pkt.data, &new_pkt.size,
                                            pkt->data, pkt->size,
                                            pkt->flags & AV_PKT_FLAG_KEY);
-        if(a == 0 && new_pkt.data != pkt->data && new_pkt.destruct) {
+        if(a == 0 && new_pkt.data != pkt->data) {
                 uint8_t *t = (uint8_t *)av_malloc(new_pkt.size + FF_INPUT_BUFFER_PADDING_SIZE); //the new should be a subset of the old so cannot overflow
                 if(t) {
                         memcpy(t, new_pkt.data, new_pkt.size);
@@ -293,7 +293,6 @@ void Audio_Encoder::convert_headers(AVPacket *pkt) {
         }
         if (a > 0) {
                 av_free_packet(pkt);
-                new_pkt.destruct = av_free_packet;
         } else if (a < 0) {
                 av_log(NULL, AV_LOG_ERROR, "Failed to open bitstream filter %s for stream %d with codec %s",
                        bsfc->filter->name, pkt->stream_index,

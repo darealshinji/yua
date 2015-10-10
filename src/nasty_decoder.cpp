@@ -335,7 +335,7 @@ void Nasty_Decoder::open(QString filename) {
                                 src_pix_fmt = AV_PIX_FMT_YUV440P;
                                 break;
                         case AV_PIX_FMT_YUVJ411P:
-                                src_pix_fmt = PIX_FMT_YUV411P;
+                                src_pix_fmt = AV_PIX_FMT_YUV411P;
                                 break;
                         default:
                                 src_pix_fmt = vCodecCtx->pix_fmt;
@@ -679,7 +679,7 @@ void Nasty_Decoder::decode() {
                         ++video_frames_decoded;
                         --decode_to;
 
-                        if (video_info.interlaced && src_pix_fmt != PIX_FMT_RGB24) { //deinterlacing rgb24 is broken for some reason - is it because the data is really 24-bit aligned? it shifts one of the fields by 1/3 the width of the image (20130326)
+                        if (video_info.interlaced && src_pix_fmt != AV_PIX_FMT_RGB24) { //deinterlacing rgb24 is broken for some reason - is it because the data is really 24-bit aligned? it shifts one of the fields by 1/3 the width of the image (20130326)
                                 //libswscale actually accesses all of these array items to check them for 128-bit alignment - therefore we must provide them or we risk a segfault (20130123)
                                 int in_stride[4] = {0,0,0,0};
                                 int out_stride[4] = {0,0,0,0};
