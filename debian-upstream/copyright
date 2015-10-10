@@ -13,6 +13,14 @@ Copyright: 2013-2015 Taiga Software LLC
            2014-2015 djcj <djcj@gmx.de>
 License: GPL-2+
 
+Files: src/helpers/nnedi3_weights.bin
+Copyright: none
+License: public-domain
+ This file isn't under any license, you can do whatever you want with it.
+Comment:
+ This file was created by Kevin Eliot Stone <kes25c@mail.missouri.edu>.
+ He doesn't claim any copyright.
+
 Files: debian/*
 Copyright: 2014-2015 djcj <djcj@gmx.de>
 License: GPL-2+
