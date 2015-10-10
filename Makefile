@@ -1,11 +1,10 @@
-GPACVERSION = 0.5.0+svn4288~dfsg1
 ffmpeg_prefix = $(CURDIR)/ffmpeg/libs
 
 CXXFLAGS += -Wno-unused-result
 LDFLAGS  += -Wl,-z,relro -Wl,-z,noexecstack -Wl,--as-needed
 
 QMAKE_FLAGS := \
-	QMAKE_CFLAGS='$(CFLAGS) $(CPPFLAGS)' \
+	QMAKE_CFLAGS='$(CFLAGS) -Wno-unused-parameter $(CPPFLAGS)' \
 	QMAKE_CXXFLAGS='$(CXXFLAGS) $(CPPFLAGS)' \
 	QMAKE_LFLAGS='$(LDFLAGS)'
 
@@ -54,9 +53,13 @@ FFMPEG_CONFFLAGS = \
 		--enable-libfdk-aac
 
 MP4BOX_CONFFLAGS = \
-		--extra-cflags='-Wall -DXP_UNIX  $(CFLAGS) $(CPPFLAGS)' \
+		--extra-cflags='-Wall -DXP_UNIX $(CFLAGS) $(CPPFLAGS)' \
 		--extra-ldflags='$(LDFLAGS)' \
+		--extra-libs="-lz -lm" \
+		--static-modules \
+		--static-mp4box \
 		--strip \
+		--disable-pic \
 		--disable-ipv6 \
 		--disable-wx \
 		--disable-platinum \
@@ -64,10 +67,11 @@ MP4BOX_CONFFLAGS = \
 		--disable-oss-audio \
 		--disable-jack \
 		--disable-pulseaudio \
-		--disable-x11-shm \
-		--disable-x11-xv \
+		--disable-x11 \
 		--disable-ssl \
-		--static-mp4box
+		--use-js=no --use-ft=no --use-jpeg=no --use-png=no --use-faad=no --use-mad=no --use-xvid=no \
+		--use-ffmpeg=no --use-ogg=no --use-vorbis=no --use-theora=no --use-openjpeg=no --use-a52=no
+
 
 
 APP    ?=  yua
@@ -92,7 +96,6 @@ UPX    ?=  upx-ucl
 
 GZIP   ?=  gzip -f9
 GIT    ?=  git
-WGET   ?=  wget
 TAR    ?=  tar
 
 PREFIX        ?=  /usr/local
@@ -174,11 +177,13 @@ x264: download
 
 mp4box: download
 	[ -f gpac/bin/gcc/MP4Box ] || ( cd gpac && \
-	./configure $(MP4BOX_CONFFLAGS) && $(MAKE) lib && $(MAKE) apps )
+	./configure $(MP4BOX_CONFFLAGS) && \
+	sed -i 's|-fPIC -DPIC||g' config.mak && \
+	$(MAKE) lib && $(MAKE) -C applications/mp4box MP4BOX_STATIC=yes )
 
 ffmpeg: download x264 fdk-aac
-	cd ffmpeg && ./configure $(FFMPEG_CONFFLAGS)
-	cd ffmpeg && $(MAKE)
+	[ -f ffmpeg/ffmpeg_stamp ] || ( cd ffmpeg && \
+	./configure $(FFMPEG_CONFFLAGS) && $(MAKE) && touch ffmpeg_stamp )
 
 download:
 	[ -d x264 ] || $(GIT) clone --depth 1 git://git.videolan.org/x264.git
@@ -187,11 +192,7 @@ download:
 
 	[ -d fdk-aac ] || $(GIT) clone --depth 1 git://git.code.sf.net/p/opencore-amr/fdk-aac
 
-	[ -d gpac ] || \
-	( $(WGET) http://archive.ubuntu.com/ubuntu/pool/universe/g/gpac/gpac_$(GPACVERSION).orig.tar.bz2 && \
-	$(TAR) xvjf gpac_$(GPACVERSION).orig.tar.bz2 && \
-	$(RM) gpac_$(GPACVERSION).orig.tar.bz2 && \
-	$(MV) gpac-$(GPACVERSION).orig gpac )
+	[ -d gpac ] || $(GIT) clone --depth 1 https://github.com/gpac/gpac
 
 clean:
 	cd src && $(RM) $(APP) ../$(APP) *.o moc_*.cpp qrc_*.cpp

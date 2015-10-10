@@ -13,7 +13,7 @@ do
     test $exitCode -eq 0 && echo "ok" || echo "not found!"
 done
 
-for c in make automake ffmpeg MP4Box upx-ucl git wget pkg-config ;
+for c in make automake ffmpeg MP4Box upx-ucl git pkg-config ;
 do
     printf "check for $c ... "
     which $c 2>/dev/null 1>/dev/null
@@ -25,7 +25,8 @@ which pkg-config 2>/dev/null 1>/dev/null
 exitCode=$(echo $?)
 test $exitCode -eq 0 && true || exit 0
 
-for l in zlib gl fdk-aac libavcodec libavformat libavresample libavutil libswscale QtDBus QtOpenGL QtGui QtCore ;
+for l in zlib gl fdk-aac libavcodec libavformat libavresample libavutil libswscale \
+    QtDBus QtOpenGL QtGui QtCore Qt5DBus Qt5OpenGL Qt5Gui Qt5Core ;
 do
     printf "check for library $l ... "
     pkg-config --libs $l 2>/dev/null 1>/dev/null
