@@ -31,7 +31,7 @@ void Audio_Encoder::start(Audio_Information new_target_info) {
                 return;
         }
         filename_string = temp_out_file.fileName()+"a.aac"; //using mp4 as the output format requires convert_headers() before av_interleaved_write_frame() and tends to screw up final muxing - strange mp4s are written with problems in the first few milliseconds, e.g. missing material, apparently depending on the input timebase (20130612)
-        QByteArray filename_ba = filename_string.toLocal8Bit();
+        QByteArray filename_ba = filename_string.toUtf8();
         char *filename_pointer = filename_ba.data();
         avformat_alloc_output_context2(&oc, NULL, NULL, filename_pointer);
         Q_ASSERT(oc);

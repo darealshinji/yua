@@ -59,7 +59,7 @@ void Video_Encoder::start(Video_Information new_video_information, QString name,
                 return;
         }
         filename_string = temp_out_file.fileName()+"v.mp4";
-        QByteArray filename_ba = filename_string.toLocal8Bit();
+        QByteArray filename_ba = filename_string.toUtf8();
         char *filename_pointer = filename_ba.data();
         avformat_alloc_output_context2(&oc, NULL, NULL, filename_pointer);
         Q_ASSERT(oc);
@@ -121,7 +121,7 @@ void Video_Encoder::start(Video_Information new_video_information, QString name,
         c->colorspace = (AVColorSpace)video_information.colorspace_standard;
 
         QString stat_file_name = temp_out_file.fileName()+".stats";
-        stat_file_name_ba = stat_file_name.toLocal8Bit();
+        stat_file_name_ba = stat_file_name.toUtf8();
         char *stat_file_name_pointer = stat_file_name_ba.data();
 
         av_dict_set(&opts, "stats", stat_file_name_pointer, 0);
