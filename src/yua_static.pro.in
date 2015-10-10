@@ -9,7 +9,7 @@ TARGET = yua
 TEMPLATE = app
 
 
-DEFINES += YUA_VERSION=\'\"8\"\'
+DEFINES += YUA_VERSION=\'\"9\"\'
 
 
 # deactivate deinterlacing on 32 bit, as the build would fail
