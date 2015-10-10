@@ -1,9 +1,14 @@
 #!/usr/bin/make -f
 
-export CFLAGS=$(filter-out -g -O2,$(shell dpkg-buildflags --get CFLAGS))
-export CXXFLAGS=$(filter-out -g -O2,$(shell dpkg-buildflags --get CXXFLAGS))
+export CFLAGS=$(filter-out -g -O2,$(shell dpkg-buildflags --get CFLAGS)) $(CPPFLAGS)
+export CXXFLAGS=$(filter-out -g -O2,$(shell dpkg-buildflags --get CXXFLAGS)) $(CPPFLAGS)
 export LDFLAGS=
 export V=1
+
+LOCAL = $(CURDIR)/lib/usr/local/
+
+YUA_LIBS = -lavcodec -lfdk-aac -lx264 -lswresample -lavformat -lavresample \
+	-lavutil -lswscale -lz -lQtDBus -lQtOpenGL -lQtGui -lQtCore -lGL -lpthread
 
 
 %:
@@ -18,19 +23,19 @@ override_dh_auto_build:
 	$(MAKE) ffmpeg
 
 	$(MAKE) -C ffmpeg install DESTDIR=$(CURDIR)/lib
-	cp fdk-aac/.libs/libfdk-aac.a lib/usr/local/lib
-	cp x264/libx264.a lib/usr/local/lib
+	cp fdk-aac/.libs/libfdk-aac.a $(LOCAL)lib
+	cp x264/libx264.a $(LOCAL)lib
 
-	CXXFLAGS="$(CXXFLAGS) -I$(CURDIR)/lib/usr/local/include" \
-		$(MAKE) qt4_linux_external_weights \
-		LIBS="-L$(CURDIR)/lib/usr/local/lib -lavcodec -lfdk-aac -lx264 -lswresample -lavformat -lavresample -lavutil -lswscale -lz -lQtDBus -lQtOpenGL -lQtGui -lQtCore -lGL -lpthread"
+	CXXFLAGS="$(CXXFLAGS) -I$(LOCAL)include" \
+	$(MAKE) qt4_linux_external_weights \
+		LIBS="-L$(LOCAL)lib $(YUA_LIBS)"
 
 override_dh_auto_install:
 	dh_auto_install -- PREFIX=/usr DESTDIR=$(CURDIR)/debian/yua
 	rm -f $(CURDIR)/debian/yua/usr/share/doc/yua/COPYING
 
 get-orig-source:
-	git clone --depth 1 https://github.com/darealshinji/yua.git
+	git clone --depth 1 "https://github.com/darealshinji/yua.git"
 	$(MAKE) -C yua download
 	rm -rf `find yua -name .git` yua/gpac
 	mkdir -p yua/gpac && echo "all:" > yua/gpac/Makefile
