@@ -20,14 +20,14 @@ void Scaler::clean_up() {
         QHashIterator<QString, AVPicture *> input_avpictures_it(input_avpictures);
         while (input_avpictures_it.hasNext()) {
                 input_avpictures_it.next();
-                avpicture_free(input_avpictures_it.value());
+                av_freep(input_avpictures_it.value());
         }
         input_avpictures.clear();
 
         QHashIterator<QString, AVPicture *> output_avpictures_it(output_avpictures);
         while (output_avpictures_it.hasNext()) {
                 output_avpictures_it.next();
-                avpicture_free(output_avpictures_it.value());
+                av_freep(output_avpictures_it.value());
         }
         output_avpictures.clear();
 }

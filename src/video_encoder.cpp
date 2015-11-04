@@ -22,11 +22,11 @@ Video_Encoder::~Video_Encoder() {
 
 void Video_Encoder::clean_up_ffmpeg_crap() {
         if (input_avpicture) {
-                avpicture_free(input_avpicture);
+                av_freep(input_avpicture);
                 input_avpicture = NULL;
         }
         if (output_avframe) {
-                avpicture_free(&dst_picture);
+                av_freep(&dst_picture);
                 av_frame_free(&output_avframe);
                 output_avframe = NULL;
         }
