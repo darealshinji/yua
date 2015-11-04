@@ -1,11 +1,22 @@
 QT += core gui opengl dbus
 
+greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
+
+CONFIG += c++11
+
+
 TARGET = yua
 TEMPLATE = app
 
-DEFINES += 'YUA_VERSION=\'\"9\"\''
+
+DEFINES += YUA_VERSION=\'\"9\"\'
+
+
+# deactivate deinterlacing on 32 bit, as the build would fail
 linux-g++-64: DEFINES += 'WITH_NNEDI3'
+
 linux-g++-64: DEFINES += 'EXTERNAL_NNEDI3_WEIGHTS'
+
 
 SOURCES += main.cpp\
     yua.cpp \
@@ -35,6 +46,7 @@ SOURCES += \
     nnedi3_worker.cpp \
     nnedi3_worker_step2.cpp
 }
+
 
 HEADERS  += yua.h \
     common/webcam_display.h \
@@ -72,7 +84,9 @@ HEADERS += \
 INCLUDEPATH += common
 
 
-linux-g++-64:QMAKE_CXXFLAGS_RELEASE += -fno-caller-saves #this optimization breaks nnedi3's dotProd_m32_m16_i16_SSE2() - the vals argument is 0! (20130217)
+#this optimization breaks nnedi3's dotProd_m32_m16_i16_SSE2() - the vals argument is 0! (20130217)
+QMAKE_CXXFLAGS_RELEASE += -fno-caller-saves
+
 
 linux-g++-64 {
 SOURCES += \
@@ -86,26 +100,27 @@ nnedi3/nnedi3_weightedAvgElliottMul5_m16_SSE2_linux.s \
 nnedi3/nnedi3_processLine0_SSE2_linux.s
 }
 
+
+INCLUDEPATH += \
+../ffmpeg \
+../fdk-aac/libAACenc/include \
+../fdk-aac/libSYS/include \
+../x264
+
 LIBS += \
--lavcodec \
--lavformat \
--lavresample \
--lavutil \
--lswscale \
--lz
+../ffmpeg/libavcodec/libavcodec.a \
+../ffmpeg/libavformat/libavformat.a \
+../ffmpeg/libavresample/libavresample.a \
+../ffmpeg/libavutil/libavutil.a \
+../ffmpeg/libswresample/libswresample.a \
+../ffmpeg/libswscale/libswscale.a \
+../fdk-aac/.libs/libfdk-aac.a \
+../x264/libx264.a
+
+LIBS += -lz
 
 QMAKE_CXXFLAGS += -D__STDC_CONSTANT_MACROS #for libavcodec/avcodec.h
-INCLUDEPATH += ../Yua/include/$${YUAPLATFORMNAME}
-
-static {
-    CONFIG += static
-    DEFINES += STATIC
-}
 
 
 RESOURCES += \
 statid.qrc \
-yua_icon.qrc \
-ffmpeg.qrc \
-mp4box.qrc
-

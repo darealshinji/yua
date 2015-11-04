@@ -5,9 +5,21 @@ exitCode=1
 printf "NNEDI3 deinterlacing available? ... "
 test $(uname -p) = "x86_64" && echo "yes" || echo "no"
 
+printf "check for qmake ... "
+test "x$(qmake -v | grep 'Qt version')" != "x" && \
+    echo "$(qmake -v | grep 'Qt version')" || echo "not found!"
+
 for v in 4 5 ;
 do
-    printf "check for QT$v qmake ... "
+    printf "check for qmake-qt$v ... "
+    qmake-qt$v 2>/dev/null 1>/dev/null
+    exitCode=$(echo $?)
+    test $exitCode -eq 0 && echo "ok" || echo "not found!"
+done
+
+for v in 4 5 ;
+do
+    printf "check for QT$v qmake via qtchooser ... "
     qtchooser -run-tool=qmake -qt=$v -v 2>/dev/null 1>/dev/null
     exitCode=$(echo $?)
     test $exitCode -eq 0 && echo "ok" || echo "not found!"
