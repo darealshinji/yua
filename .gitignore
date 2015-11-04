@@ -1,10 +1,12 @@
 /src/Makefile
 /src/moc_*.cpp
 /src/qrc_*.cpp
+/src/helpers/tmp/
 /src/yua
 /yua
 
 /src/yua_static.pro
+/src/yua_static_qt4_external_weights.pro
 
 /fdk-aac/
 /x264/
