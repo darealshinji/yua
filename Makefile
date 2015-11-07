@@ -198,6 +198,7 @@ clean-download:
 	rm -rf fdk-aac x264 gpac* ffmpeg*
 
 install:
+	install -m755 -d $(DESTDIR)$(PREFIX)/bin
 	install -m755 -D yua $(DESTDIR)$(PREFIX)/bin
 	cp -rfv share $(DESTDIR)$(PREFIX)
 	gzip -f9 $(DESTDIR)$(PREFIX)/share/man/man1/yua.1
