@@ -1,0 +1,17 @@
+!linux-g++-32: {
+RESOURCES += \
+	helpers/nnedi3_weights.bin.1.qrc \
+	helpers/nnedi3_weights.bin.2.qrc \
+	helpers/nnedi3_weights.bin.3.qrc \
+	helpers/nnedi3_weights.bin.4.qrc \
+	helpers/nnedi3_weights.bin.5.qrc \
+	helpers/nnedi3_weights.bin.6.qrc \
+	helpers/nnedi3_weights.bin.7.qrc \
+	helpers/nnedi3_weights.bin.8.qrc \
+	helpers/nnedi3_weights.bin.9.qrc \
+	helpers/nnedi3_weights.bin.10.qrc \
+	helpers/nnedi3_weights.bin.11.qrc \
+	helpers/nnedi3_weights.bin.12.qrc \
+	helpers/nnedi3_weights.bin.13.qrc \
+	helpers/nnedi3_weights.bin.14.qrc
+}

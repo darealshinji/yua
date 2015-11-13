@@ -4,17 +4,10 @@ greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
 CONFIG += c++11
 
-
 TARGET = yua
 TEMPLATE = app
 
-
-DEFINES += YUA_VERSION=\'\"9\"\'
-
-
-# deactivate deinterlacing on 32 bit, as the build would fail
-linux-g++-64: DEFINES += WITH_NNEDI3
-
+DEFINES += 'YUA_VERSION=\'\"9\"\'' @EXTERNAL_NNEDI3_WEIGHTS@
 
 SOURCES += main.cpp\
     yua.cpp \
@@ -36,17 +29,20 @@ SOURCES += main.cpp\
     decoder_mothership.cpp \
     statid_generator.cpp \
     fps_conversion.cpp \
-    yua_util.cpp
-
-linux-g++-64 {
-SOURCES += \
+    yua_util.cpp \
     nnedi3.cpp \
     nnedi3_worker.cpp \
-    nnedi3_worker_step2.cpp
-}
+    nnedi3_worker_step2.cpp \
+    nnedi3/nnedi3_extract_m8_i16_SSE2_linux.s \
+    nnedi3/nnedi3_castScale_SSE_linux.s \
+    nnedi3/nnedi3_computeNetwork0new_SSE2_linux.s \
+    nnedi3/nnedi3_dotProd_m32_m16_i16_SSE2_linux.s \
+    nnedi3/nnedi3_e0_m16_SSE2_linux.s \
+    nnedi3/nnedi3_uc2s64_SSE2_linux.s \
+    nnedi3/nnedi3_weightedAvgElliottMul5_m16_SSE2_linux.s \
+    nnedi3/nnedi3_processLine0_SSE2_linux.s
 
-
-HEADERS  += yua.h \
+HEADERS += yua.h \
     common/webcam_display.h \
     common/rita.h \
     nasty_decoder.h \
@@ -69,37 +65,15 @@ HEADERS  += yua.h \
     decoder.h \
     common/threadsafequeue.h \
     fps_conversion.h \
-    yua_util.h
-
-linux-g++-64 {
-HEADERS += \
+    yua_util.h \
     nnedi3.h \
     nnedi3_worker.h \
     nnedi3/nnedi3_constants.h
-}
 
-
-INCLUDEPATH += common
-
-
-#this optimization breaks nnedi3's dotProd_m32_m16_i16_SSE2() - the vals argument is 0! (20130217)
-QMAKE_CXXFLAGS_RELEASE += -fno-caller-saves
-
-
-linux-g++-64 {
-SOURCES += \
-nnedi3/nnedi3_extract_m8_i16_SSE2_linux.s \
-nnedi3/nnedi3_castScale_SSE_linux.s \
-nnedi3/nnedi3_computeNetwork0new_SSE2_linux.s \
-nnedi3/nnedi3_dotProd_m32_m16_i16_SSE2_linux.s \
-nnedi3/nnedi3_e0_m16_SSE2_linux.s \
-nnedi3/nnedi3_uc2s64_SSE2_linux.s \
-nnedi3/nnedi3_weightedAvgElliottMul5_m16_SSE2_linux.s \
-nnedi3/nnedi3_processLine0_SSE2_linux.s
-}
-
+RC_FILE = yua.rc
 
 INCLUDEPATH += \
+common \
 ../ffmpeg \
 ../fdk-aac/libAACenc/include \
 ../fdk-aac/libSYS/include \
@@ -113,12 +87,10 @@ LIBS += \
 ../ffmpeg/libswresample/libswresample.a \
 ../ffmpeg/libswscale/libswscale.a \
 ../fdk-aac/.libs/libfdk-aac.a \
-../x264/libx264.a
-
-LIBS += -lz
+../x264/libx264.a \
+-lz
 
 QMAKE_CXXFLAGS += -D__STDC_CONSTANT_MACROS #for libavcodec/avcodec.h
 
+RESOURCES += statid.qrc
 
-RESOURCES += \
-statid.qrc \

@@ -3,7 +3,11 @@
 exitCode=1
 
 printf "NNEDI3 deinterlacing available? ... "
-test $(uname -p) = "x86_64" && echo "yes" || echo "no"
+if [ $(uname) = Linux ] && [ $(uname -p) != x86_64 ]; then
+    echo "no"
+else
+    echo "yes"
+fi
 
 printf "check for qmake ... "
 test "x$(qmake -v | grep 'Qt version')" != "x" && \
@@ -25,7 +29,7 @@ do
     test $exitCode -eq 0 && echo "ok" || echo "not found!"
 done
 
-for c in make automake ffmpeg MP4Box upx-ucl git pkg-config ;
+for c in make autoreconf automake libtoolize upx-ucl git pkg-config ;
 do
     printf "check for $c ... "
     which $c 2>/dev/null 1>/dev/null
@@ -37,8 +41,7 @@ which pkg-config 2>/dev/null 1>/dev/null
 exitCode=$(echo $?)
 test $exitCode -eq 0 && true || exit 0
 
-for l in zlib gl fdk-aac libavcodec libavformat libavresample libavutil libswscale \
-    QtDBus QtOpenGL QtGui QtCore Qt5DBus Qt5OpenGL Qt5Gui Qt5Core ;
+for l in zlib gl QtDBus QtOpenGL QtGui QtCore Qt5DBus Qt5OpenGL Qt5Gui Qt5Core ;
 do
     printf "check for library $l ... "
     pkg-config --libs $l 2>/dev/null 1>/dev/null
