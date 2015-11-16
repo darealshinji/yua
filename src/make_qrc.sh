@@ -11,7 +11,6 @@ if [ -f ffmpeg.exe ] && [ -f mp4box.exe ]; then
 fi
 
 for bin in ffmpeg$exeext mp4box$exeext nnedi3_weights.bin ; do
-for bin in nnedi3_weights.bin ; do
 	rm -f $bin.*
 
 	split -b 1000000 $bin $bin.
