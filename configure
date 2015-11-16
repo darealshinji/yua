@@ -1,0 +1,349 @@
+#!/bin/sh
+
+if test x"$1" = x"-h" -o x"$1" = x"--help" ; then
+cat << EOF
+Usage: ./configure [options]
+
+Options:
+  -h, --help              display this help and exit
+
+  --prefix=PREFIX         install files into PREFIX [/usr/local]
+  --bindir=DIR            user executables [EPREFIX/bin]
+  --datarootdir=DIR       read-only arch.-independent data root [PREFIX/share]
+
+  --build=BUILD           configure for building on BUILD [guessed]
+  --target=TARGET         cross-compile to build programs to run on TARGET [BUILD]
+  --cross-prefix=PREFIX   use PREFIX for compilation tools [none]
+
+  --disable-nnedi3        disable NNEDI3 deinterlacer
+  --external-weights      use external NNEDI3 weights file
+
+  --enable-debug          compile with debug symbols and never strip
+
+Some influential environment variables:
+  CC          C compiler command
+  CFLAGS      C compiler flags
+  CXX         C++ compiler command
+  CXXFLAGS    C++ compiler flags
+  LDFLAGS     linker flags, e.g. -L<lib dir> if you have libraries in a
+              nonstandard directory <lib dir>
+  LIBS        libraries to pass to the linker, e.g. -l<library>
+  CPPFLAGS    (Objective) C/C++ preprocessor flags, e.g. -I<include dir> if
+              you have headers in a nonstandard directory <include dir>
+  CPP         C preprocessor
+  LD          linker command
+  AR          ar command
+  QMAKE       qmake command
+EOF
+exit 1
+fi
+
+
+test -n "$CC" || CC="gcc"
+test -n "$CXX" || CXX="g++"
+test -n "$CPP" || CPP="cpp"
+test -n "$LD" || LD="ld"
+test -n "$AR" || AR="ar"
+test -n "$PKG_CONFIG" || PKG_CONFIG="pkg-config"
+test -n "$QMAKE" || QMAKE="qmake"
+
+
+nnedi3="enabled"
+external_weights="disabled"
+debug="disabled"
+for opt; do
+    optarg="${opt#*=}"
+    case "$opt" in
+        --prefix=*)
+            prefix="$optarg"
+            ;;
+        --bindir=*)
+            bindir="$optarg"
+            ;;
+        --datarootdir=*)
+            datarootdir="$optarg"
+            ;;
+        --build=*)
+            build="$optarg"
+            ;;
+        --target=*)
+            target="$optarg"
+            ;;
+        --cross-prefix=*)
+            cross="$optarg"
+            ;;
+        --disable-nnedi3)
+            nnedi3="disabled"
+            ;;
+        --external-weights)
+            external_weights="enabled"
+            ;;
+        --enable-debug)
+            debug="enabled"
+            ;;
+        *)
+            echo "warning: unknown option $opt"
+            ;;
+    esac
+done
+
+test -n "$prefix" || prefix="/usr/local"
+test -n "$bindir" || bindir='${prefix}/bin'
+test -n "$datarootdir" || datarootdir='${prefix}/share'
+
+
+for ext in guess sub; do
+    if [ ! -e "config.$ext" ]; then
+        echo "error: \`config.$ext' missing"
+        echo " You can get the latest version of this script from:"
+        echo " http://git.savannah.gnu.org/gitweb/?p=config.git;a=blob_plain;f=config.$ext;hb=HEAD"
+        exit 1
+    fi
+done
+
+
+yua_version="9"
+
+save_CFLAGS="$CFLAGS"
+save_CXXFLAGS="$CXXFLAGS"
+save_CPPFLAGS="$CPPFLAGS"
+save_LDFLAGS="$LDFLAGS"
+
+if [ "$debug" = "enabled" ]; then
+    CFLAGS="-g -O2"
+    CXXFLAGS="-g -O2"
+else
+    CFLAGS="-O3"
+    CXXFLAGS="-O3"
+    LDFLAGS="-s"
+fi
+
+if [ "x$build" = "x" ]; then
+    build_triplet=$(sh ./config.guess)
+else
+    target_triplet="$(sh ./config.sub $build)"
+fi
+if [ "x$target" = "x" ]; then
+    target_triplet="$build_triplet"
+else
+    target_triplet="$(sh ./config.sub $target)"
+fi
+
+arch="$(echo $target_triplet | cut -d- -f1)"
+case $arch in
+    x86_64)
+        bits="64"
+        ;;
+    i?86)
+        bits="32"
+        ;;
+    *)
+        echo "error: unsupported architecture: $arch"
+        exit 1
+esac
+
+if [ "$target_triplet" != "$build_triplet" ]; then
+    test -n "$cross" || cross="${target_triplet}-"
+    CROSS_BUILD="yes"
+    CFLAGS="-m$bits $CFLAGS"
+    CXXFLAGS="-m$bits $CXXFLAGS"
+    LDFLAGS="-m$bits $LDFLAGS"
+fi
+
+case $target_triplet in
+    *linux*)
+        TARGET_OS="linux"
+        CFLAGS="$CFLAGS -fstack-protector"
+        CXXFLAGS="$CXXFLAGS -fstack-protector"
+        LDFLAGS="$LDFLAGS -Wl,-z,relro"
+        asm_suffix="_linux"
+        if [ "$bits" = "64" ]; then
+            extra_qmake_cxxflags="-fno-caller-saves"
+        fi
+        ;;
+    *mingw*)
+        TARGET_OS="windows"
+        exeext=".exe"
+        asm_suffix="_32"
+        if [ "$bits" = "32" ]; then
+            LDFLAGS="$LDFLAGS -Wl,--large-address-aware"
+        fi
+        ;;
+    *darwin*)
+        TARGET_OS="mac"
+        mac_libs="-lbz2 -liconv -framework CoreFoundation -framework IOKit -framework AVFoundation"
+        mac_libs="$mac_libs -framework CoreVideo -framework CoreMedia -framework VideoDecodeAcceleration"
+        ;;
+esac
+
+if [ "${TARGET_OS}${bits}" = "linux32" ] || \
+   [ "${TARGET_OS}${bits}" = "windows64" ]; then
+    nnedi3="disabled"
+fi
+if [ "$nnedi3" = "enabled" ]; then
+    WITH_NNEDI3="'WITH_NNEDI3'"
+    if [ "$external_weights" = "enabled" ]; then
+        EXTERNAL_NNEDI3_WEIGHTS="'EXTERNAL_NNEDI3_WEIGHTS'"
+    fi
+fi
+
+
+cat <<__YUA_PRO > src/yua.pro.in
+QT += core gui opengl dbus
+
+greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
+
+CONFIG += c++11
+
+TARGET = yua
+TEMPLATE = app
+
+DEFINES += 'YUA_VERSION=\'\"$yua_version\"\'' $WITH_NNEDI3 $EXTERNAL_NNEDI3_WEIGHTS
+
+SOURCES += main.cpp\
+    yua.cpp \
+    common/webcam_display.cpp \
+    common/rita.cpp \
+    nasty_decoder.cpp \
+    deinterlacer.cpp \
+    audio_information.cpp \
+    video_encoder.cpp \
+    video_information.cpp \
+    job.cpp \
+    audio_encoder.cpp \
+    yv12toyuy2.c \
+    common/frame.cpp \
+    scaler.cpp \
+    common/throttle.cpp \
+    common/gtimer.cpp \
+    common/power_management.cpp \
+    decoder_mothership.cpp \
+    statid_generator.cpp \
+    fps_conversion.cpp \
+    yua_util.cpp
+
+HEADERS += yua.h \
+    common/webcam_display.h \
+    common/rita.h \
+    nasty_decoder.h \
+    deinterlacer.h \
+    audio_information.h \
+    video_encoder.h \
+    progress_type.h \
+    video_information.h \
+    job.h \
+    audio_encoder.h \
+    conversion.h \
+    yv12toyuy2.h \
+    common/frame.h \
+    scaler.h \
+    common/throttle.h \
+    common/gtimer.h \
+    common/power_management.h \
+    decoder_mothership.h \
+    statid_generator.h \
+    decoder.h \
+    common/threadsafequeue.h \
+    fps_conversion.h \
+    yua_util.h
+
+INCLUDEPATH += \
+    common \
+    ../ffmpeg \
+    ../fdk-aac/libAACenc/include \
+    ../fdk-aac/libSYS/include \
+    ../x264
+
+LIBS += \
+    ../ffmpeg/libavcodec/libavcodec.a \
+    ../ffmpeg/libavformat/libavformat.a \
+    ../ffmpeg/libavresample/libavresample.a \
+    ../ffmpeg/libavutil/libavutil.a \
+    ../ffmpeg/libswresample/libswresample.a \
+    ../ffmpeg/libswscale/libswscale.a \
+    ../fdk-aac/.libs/libfdk-aac.a \
+    ../x264/libx264.a \
+    -lz $mac_libs
+
+ICON = yua.icns
+RC_FILE = yua.rc
+
+QMAKE_CXXFLAGS += -D__STDC_CONSTANT_MACROS #for libavcodec/avcodec.h
+QMAKE_CXXFLAGS += -Wno-unused-result $extra_qmake_cxxflags
+QMAKE_CFLAGS   += -Wno-unused-parameter
+
+RESOURCES += statid.qrc yua_icon.qrc
+
+__YUA_PRO
+
+
+if [ "$nnedi3" = "enabled" ]; then
+    cat <<__YUA_PRO >> src/yua.pro.in
+SOURCES += nnedi3.cpp \
+    nnedi3_worker.cpp \
+    nnedi3_worker_step2.cpp \
+    nnedi3/nnedi3_extract_m8_i16_SSE2${asm_suffix}.s \
+    nnedi3/nnedi3_castScale_SSE${asm_suffix}.s \
+    nnedi3/nnedi3_computeNetwork0new_SSE2${asm_suffix}.s \
+    nnedi3/nnedi3_dotProd_m32_m16_i16_SSE2${asm_suffix}.s \
+    nnedi3/nnedi3_e0_m16_SSE2${asm_suffix}.s \
+    nnedi3/nnedi3_uc2s64_SSE2${asm_suffix}.s \
+    nnedi3/nnedi3_weightedAvgElliottMul5_m16_SSE2${asm_suffix}.s \
+    nnedi3/nnedi3_processLine0_SSE2${asm_suffix}.s
+
+HEADERS += nnedi3.h \
+    nnedi3_worker.h \
+    nnedi3/nnedi3_constants.h
+
+__YUA_PRO
+fi
+
+if [ "$nnedi3" = "enabled" ] && [ "$external_weights" = "disabled" ]; then
+    cat <<__YUA_PRO >> src/yua.pro.in
+RESOURCES += helpers/nnedi3_weights.bin.1.qrc \
+    helpers/nnedi3_weights.bin.2.qrc \
+    helpers/nnedi3_weights.bin.3.qrc \
+    helpers/nnedi3_weights.bin.4.qrc \
+    helpers/nnedi3_weights.bin.5.qrc \
+    helpers/nnedi3_weights.bin.6.qrc \
+    helpers/nnedi3_weights.bin.7.qrc \
+    helpers/nnedi3_weights.bin.8.qrc \
+    helpers/nnedi3_weights.bin.9.qrc \
+    helpers/nnedi3_weights.bin.10.qrc \
+    helpers/nnedi3_weights.bin.11.qrc \
+    helpers/nnedi3_weights.bin.12.qrc \
+    helpers/nnedi3_weights.bin.13.qrc \
+    helpers/nnedi3_weights.bin.14.qrc
+
+__YUA_PRO
+fi
+
+cat <<__CONFIG > config.mak
+BUILD       = $build_triplet
+TARGET      = $target_triplet
+TARGET_OS   = $TARGET_OS
+ARCH        = $arch
+CROSS       = $cross
+CROSS_BUILD = $CROSS_BUILD
+EXEEXT      = $exeext
+
+PREFIX      = "$prefix"
+BINDIR      = "$bindir"
+DATAROOTDIR = "$datarootdir"
+
+CC          = \$(CROSS)$CC
+CXX         = \$(CROSS)$CXX
+CPP         = \$(CROSS)$CPP
+LD          = \$(CROSS)$LD
+AR          = \$(CROSS)$AR
+PKG_CONFIG  = \$(CROSS)$PKG_CONFIG
+QMAKE       = \$(CROSS)$QMAKE
+
+CFLAGS      = $CFLAGS $save_CFLAGS
+CXXFLAGS    = $CXXFLAGS $save_CXXFLAGS
+CPPFLAGS    = $CPPFLAGS $save_CPPFLAGS
+LDFLAGS     = $LDFLAGS $save_LDFLAGS
+__CONFIG
+echo
+cat config.mak
+
