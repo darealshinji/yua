@@ -50,7 +50,7 @@ FFMPEG_CONFFLAGS = \
 		--enable-gpl \
 		--enable-libx264 \
 		--enable-nonfree \
-		--enable-libfdk-aac
+		--enable-libfdk-aac \
 		--disable-encoders \
 		--enable-encoder=libx264 \
 		--enable-encoder=libfdk_aac
