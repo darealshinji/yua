@@ -95,7 +95,6 @@ endif
 
 
 ifeq ($(TARGET_OS),windows)
-X264_CONFFLAGS   += --enable-win32thread
 FFMPEG_CONFFLAGS += --target-os=mingw32 \
 					--enable-memalign-hack \
 					--disable-pthreads \
