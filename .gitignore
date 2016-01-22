@@ -1,18 +1,23 @@
-/src/Makefile
+/config.mak
+/src/Makefile*
+/src/helpers/
+/src/yua.pro*
+/src/release/
+/src/debug/
+/src/object_script.*
+/src/yua_plugin_import.cpp
 /src/moc_*.cpp
 /src/qrc_*.cpp
-/src/helpers/tmp/
+
 /src/yua
 /yua
 
-/src/yua_static.pro
-/src/yua_static_qt4_external_weights.pro
-
 /fdk-aac/
 /x264/
-/gpac*/
-/ffmpeg*/
+/gpac/
+/ffmpeg/
 
+*.exe
 *.o
 *.so
 *.a
@@ -21,6 +26,3 @@
 .DS_Store
 Thumbs.db
 
-*.tar.bz2
-*.tar.gz
-*.tar.xz

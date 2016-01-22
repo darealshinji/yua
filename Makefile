@@ -57,7 +57,7 @@ FFMPEG_CONFFLAGS = \
 
 MP4BOX_CONFFLAGS = \
 		--extra-cflags='-Wall -Wno-unused-but-set-variable -Wno-maybe-uninitialized $(CFLAGS) $(CPPFLAGS)' \
-		--extra-ldflags='$(LDFLAGS)' \
+		--extra-ldflags='$(LDFLAGS) -Wl,--allow-multiple-definition' \
 		--static-modules \
 		--static-mp4box \
 		--strip \
@@ -107,10 +107,10 @@ endif
 
 
 ifeq ($(V),1)
-MAKE := make -j$(shell nproc) V=1
+MAKE := make V=1
 MP4BOX_CONFFLAGS += --verbose
 else
-MAKE := make -j$(shell nproc)
+MAKE := make
 endif
 
 
@@ -182,7 +182,13 @@ download:
 	[ -d x264 ] || git clone --depth 1 "git://git.videolan.org/x264.git"
 	[ -d ffmpeg ] || git clone -b release/2.8 --depth 1 "https://github.com/FFmpeg/FFmpeg" ffmpeg
 	[ -d fdk-aac ] || git clone --depth 1 "git://git.code.sf.net/p/opencore-amr/fdk-aac"
+ifeq ($(TARGET_OS),windows)
+	[ -d gpac ] || (git clone "https://github.com/gpac/gpac" && \
+		cd gpac && git checkout 2fcb2101dd47321879e50e5dedb3f6078e98ed19 && \
+		patch -p1 < ../gpac-mingw32.patch)
+else
 	[ -d gpac ] || git clone --depth 1 "https://github.com/gpac/gpac"
+endif
 
 
 CLEANFILES = yua *.exe src/yua src/*.exe src/*.o src/moc_*.cpp src/qrc_*.cpp \
