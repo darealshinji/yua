@@ -6,11 +6,7 @@
 
 cd helpers
 
-if [ -f ffmpeg.exe ] && [ -f mp4box.exe ]; then
-	exeext=".exe"
-fi
-
-for bin in ffmpeg$exeext mp4box$exeext nnedi3_weights.bin ; do
+for bin in ffmpeg mp4box nnedi3_weights.bin ; do
 	rm -f $bin.*
 
 	split -b 1000000 $bin $bin.

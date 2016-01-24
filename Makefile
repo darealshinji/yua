@@ -151,9 +151,9 @@ DEPS_TARGETS = \
 
 deps: $(DEPS_TARGETS)
 	mkdir -p src/helpers
-	cp -fv gpac/bin/gcc/mp4box$(EXEEXT) src/helpers
-	cp -fv ffmpeg/ffmpeg$(EXEEXT) src/helpers
-	$(STRIP) src/helpers/mp4box$(EXEEXT)
+	cp -fv gpac/bin/gcc/mp4box$(EXEEXT) src/helpers/mp4box
+	cp -fv ffmpeg/ffmpeg$(EXEEXT) src/helpers/ffmpeg
+	$(STRIP) src/helpers/mp4box
 ifeq ($(TARGET_OS),linux)
 	$(UPX) src/helpers/mp4box
 	$(UPX) src/helpers/ffmpeg
