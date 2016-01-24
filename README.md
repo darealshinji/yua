@@ -18,7 +18,8 @@ If you're cross-building you might have to run something like this:
 QMAKE=qmake-qt5 ./configure --build=x86_64-pc-linux-gnu \
   --target=i686-w64-mingw32.static \
   --cross-prefix=i686-w64-mingw32.static-
-make -j4```
+make -j4
+```
 
 
 Copyright
