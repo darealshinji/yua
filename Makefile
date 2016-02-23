@@ -119,7 +119,11 @@ UPX   := upx-ucl
 
 SIZES = 16 22 24 32 48 64 96 128 256 512
 
-define make_yua
+
+all: yua$(EXEEXT)
+
+yua$(EXEEXT): src/yua.pro
+	cd src && $(QMAKE) $(QMAKE_FLAGS) yua.pro
 	cd src && $(MAKE)
 	if [ -f src/release/yua$(EXEEXT) ]; then \
   cp -fv src/release/yua$(EXEEXT) yua$(EXEEXT); \
@@ -127,21 +131,16 @@ else \
   cp -fv src/yua$(EXEEXT) yua$(EXEEXT); \
 fi
 	$(STRIP) yua$(EXEEXT)
-endef
-
-
-
-all: yua$(EXEEXT)
-
-yua$(EXEEXT): src/yua.pro
-	cd src && $(QMAKE) $(QMAKE_FLAGS) yua.pro
-	$(make_yua)
+ifeq ($(NNEDI3),enabled)
+ifeq ($(EXTERNAL_NNEDI3_WEIGHTS),enabled)
+	cp -fv src/nnedi3_weights.bin .
+endif
+endif
 
 src/yua.pro: deps
 	cat $@.in > $@
 	echo 'RESOURCES += \' >> $@
 	cat src/helpers/qrc_list >> $@
-
 
 DEPS_TARGETS = \
 	x264/libx264.a \
@@ -154,7 +153,7 @@ deps: $(DEPS_TARGETS)
 	cp -fv gpac/bin/gcc/mp4box$(EXEEXT) src/helpers/mp4box
 	cp -fv ffmpeg/ffmpeg$(EXEEXT) src/helpers/ffmpeg
 	$(STRIP) src/helpers/mp4box
-ifeq ($(TARGET_OS),linux)
+ifneq ($(TARGET_OS),windows)
 	$(UPX) src/helpers/mp4box
 	$(UPX) src/helpers/ffmpeg
 endif
@@ -184,12 +183,13 @@ download:
 	[ -d fdk-aac ] || git clone --depth 1 "git://git.code.sf.net/p/opencore-amr/fdk-aac"
 	[ -d gpac ] || git clone --depth 1 "https://github.com/gpac/gpac"
 ifeq ($(TARGET_OS),windows)
-	cd gpac && patch -p1 < ../gpac-mingw32.patch
+	[ -f gpac/.patch_applied ] || (cd gpac && \
+		patch -p1 < ../gpac-mingw32.patch && touch .patch_applied)
 endif
 
-
 CLEANFILES = yua *.exe src/yua src/*.exe src/*.o src/moc_*.cpp src/qrc_*.cpp \
-	src/yua_plugin_import.cpp src/object_script.yua.* src/debug src/release
+	src/yua_plugin_import.cpp src/object_script.yua.* src/debug src/release \
+	nnedi3_weights.bin
 
 DISTCLEANFILES = config.mak ffmpeg/libs gpac/bin/gcc/mp4box* \
 	src/helpers src/yua.pro src/yua.pro.in src/Makefile* src/qrc_list
@@ -212,10 +212,20 @@ clean-download:
 	rm -rf fdk-aac x264 gpac ffmpeg
 
 install:
-	install -m755 -d $(DESTDIR)$(PREFIX)/bin
-	install -m755 -D yua $(DESTDIR)$(PREFIX)/bin
-	cp -rfv share $(DESTDIR)$(PREFIX)
-	gzip -f9 $(DESTDIR)$(PREFIX)/share/man/man1/yua.1
+	install -m755 -d $(DESTDIR)$(BINDIR)
+	install -m755 -D yua $(DESTDIR)$(BINDIR)
+	cp -rfv share/* $(DESTDIR)$(DATAROOTDIR)
+	gzip -f9 $(DESTDIR)$(DATAROOTDIR)/man/man1/yua.1
+ifeq ($(NNEDI3),enabled)
+ifeq ($(EXTERNAL_NNEDI3_WEIGHTS),enabled)
+ifeq ($(TARGET_OS),windows)
+	install -m644 -D src/nnedi3_weights.bin $(DESTDIR)$(BINDIR)
+else
+	install -m755 -d $(DESTDIR)$(DATAROOTDIR)/nnedi3
+	install -m644 -D src/nnedi3_weights.bin $(DESTDIR)$(DATAROOTDIR)/nnedi3
+endif
+endif
+endif
 
 config.mak:
 	./configure

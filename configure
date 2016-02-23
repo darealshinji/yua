@@ -49,7 +49,7 @@ test -n "$QMAKE" || QMAKE="qmake"
 
 
 nnedi3="enabled"
-external_weights="disabled"
+external_nnedi3_weights="disabled"
 debug="disabled"
 for opt; do
     optarg="${opt#*=}"
@@ -76,7 +76,7 @@ for opt; do
             nnedi3="disabled"
             ;;
         --external-weights)
-            external_weights="enabled"
+            external_nnedi3_weights="enabled"
             ;;
         --enable-debug)
             debug="enabled"
@@ -121,6 +121,7 @@ fi
 if [ "x$build" = "x" ]; then
     build_triplet=$(sh ./config.guess)
 else
+    build_triplet="$build"
     target_triplet="$(sh ./config.sub $build)"
 fi
 if [ "x$target" = "x" ]; then
@@ -182,9 +183,12 @@ if [ "${TARGET_OS}${bits}" = "linux32" ] || \
 fi
 if [ "$nnedi3" = "enabled" ]; then
     WITH_NNEDI3="'WITH_NNEDI3'"
-    if [ "$external_weights" = "enabled" ]; then
+    if [ "$external_nnedi3_weights" = "enabled" ]; then
         EXTERNAL_NNEDI3_WEIGHTS="'EXTERNAL_NNEDI3_WEIGHTS'"
+        DATAROOTDIR="'DATAROOTDIR'"
     fi
+else
+    external_nnedi3_weights="disabled"
 fi
 
 
@@ -198,7 +202,7 @@ CONFIG += c++11
 TARGET = yua
 TEMPLATE = app
 
-DEFINES += 'YUA_VERSION=\'\"$yua_version\"\'' $WITH_NNEDI3 $EXTERNAL_NNEDI3_WEIGHTS
+DEFINES += 'YUA_VERSION=\'\"$yua_version\"\'' $WITH_NNEDI3 $EXTERNAL_NNEDI3_WEIGHTS $DATAROOTDIR
 
 SOURCES += main.cpp\
     yua.cpp \
@@ -298,7 +302,7 @@ HEADERS += nnedi3.h \
 __YUA_PRO
 fi
 
-if [ "$nnedi3" = "enabled" ] && [ "$external_weights" = "disabled" ]; then
+if [ "$nnedi3" = "enabled" ] && [ "$external_nnedi3_weights" = "disabled" ]; then
     cat <<__YUA_PRO >> src/yua.pro.in
 RESOURCES += helpers/nnedi3_weights.bin.1.qrc \
     helpers/nnedi3_weights.bin.2.qrc \
@@ -330,6 +334,9 @@ EXEEXT      = $exeext
 PREFIX      = "$prefix"
 BINDIR      = "$bindir"
 DATAROOTDIR = "$datarootdir"
+
+NNEDI3      = $nnedi3
+EXTERNAL_NNEDI3_WEIGHTS = $external_nnedi3_weights
 
 CC          = \$(CROSS)$CC
 CXX         = \$(CROSS)$CXX
