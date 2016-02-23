@@ -182,12 +182,9 @@ download:
 	[ -d x264 ] || git clone --depth 1 "git://git.videolan.org/x264.git"
 	[ -d ffmpeg ] || git clone -b release/2.8 --depth 1 "https://github.com/FFmpeg/FFmpeg" ffmpeg
 	[ -d fdk-aac ] || git clone --depth 1 "git://git.code.sf.net/p/opencore-amr/fdk-aac"
-ifeq ($(TARGET_OS),windows)
-	[ -d gpac ] || (git clone "https://github.com/gpac/gpac" && \
-		cd gpac && git checkout 2fcb2101dd47321879e50e5dedb3f6078e98ed19 && \
-		patch -p1 < ../gpac-mingw32.patch)
-else
 	[ -d gpac ] || git clone --depth 1 "https://github.com/gpac/gpac"
+ifeq ($(TARGET_OS),windows)
+	cd gpac && patch -p1 < ../gpac-mingw32.patch
 endif
 
 

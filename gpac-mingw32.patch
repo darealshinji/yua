@@ -1,53 +1,11 @@
---- a/src/utils/os_file.c
-+++ b/src/utils/os_file.c
-@@ -36,7 +36,7 @@
- #include <windows.h>
- #include <direct.h>
- #include <sys/stat.h>
--#include <Share.h>
-+#include <share.h>
- 
- #else
- 
 --- a/applications/mp4box/main.c
 +++ b/applications/mp4box/main.c
-@@ -4981,39 +4981,10 @@
+@@ -4993,7 +4993,7 @@ exit:
  	return 0;
  }
  
 -#ifdef WIN32
--int wmain( int argc, wchar_t** wargv )
--{
--	int i;
--	int res;
--	size_t len;
--	size_t res_len;
--	char **argv;
--	argv = (char **)malloc(argc*sizeof(wchar_t *));
--	for (i = 0; i < argc; i++) {
--		wchar_t *src_str = wargv[i];
--		len = 2*gf_utf8_wcslen(wargv[i]);
--		argv[i] = (char *)malloc(len + 1);
--		res_len = gf_utf8_wcstombs(argv[i], len, &src_str);
--		argv[i][res_len] = 0;
--		if (res_len > len) {
--			fprintf(stderr, "Length allocated for conversion of wide char to UTF-8 not sufficient\n");
--			return -1;
--		}
--	}
--	res = mp4boxMain(argc, argv);
--	for (i = 0; i < argc; i++) {
--		free(argv[i]);
--	}
--	free(argv);
--	return res;
--}
--#else
- int main(int argc, char** argv)
++#if defined(WIN32) && !defined(__MINGW32__)
+ int wmain( int argc, wchar_t** wargv )
  {
- 	return mp4boxMain( argc, argv );
- }
--#endif //win32
- 
- 
- #endif /*GPAC_DISABLE_ISOM*/
+ 	int i;
