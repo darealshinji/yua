@@ -213,6 +213,7 @@ clean-download:
 
 install:
 	install -m755 -d $(DESTDIR)$(BINDIR)
+	install -m755 -d $(DESTDIR)$(DATAROOTDIR)
 	install -m755 -D yua $(DESTDIR)$(BINDIR)
 	cp -rfv share/* $(DESTDIR)$(DATAROOTDIR)
 	gzip -f9 $(DESTDIR)$(DATAROOTDIR)/man/man1/yua.1

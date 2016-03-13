@@ -8,7 +8,7 @@ Options:
   -h, --help              display this help and exit
 
   --prefix=PREFIX         install files into PREFIX [/usr/local]
-  --bindir=DIR            user executables [EPREFIX/bin]
+  --bindir=DIR            user executables [PREFIX/bin]
   --datarootdir=DIR       read-only arch.-independent data root [PREFIX/share]
 
   --build=BUILD           configure for building on BUILD [guessed]
@@ -88,8 +88,8 @@ for opt; do
 done
 
 test -n "$prefix" || prefix="/usr/local"
-test -n "$bindir" || bindir='${prefix}/bin'
-test -n "$datarootdir" || datarootdir='${prefix}/share'
+test -n "$bindir" || bindir='${PREFIX}/bin'
+test -n "$datarootdir" || datarootdir='${PREFIX}/share'
 
 
 for ext in guess sub; do
@@ -331,9 +331,9 @@ CROSS       = $cross
 CROSS_BUILD = $CROSS_BUILD
 EXEEXT      = $exeext
 
-PREFIX      = "$prefix"
-BINDIR      = "$bindir"
-DATAROOTDIR = "$datarootdir"
+PREFIX      = $prefix
+BINDIR      = $bindir
+DATAROOTDIR = $datarootdir
 
 NNEDI3      = $nnedi3
 EXTERNAL_NNEDI3_WEIGHTS = $external_nnedi3_weights
