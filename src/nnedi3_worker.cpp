@@ -126,44 +126,35 @@ void NNEDI3_Worker::step_1() {
         const float *weights0 = pss->weights0;
         float *temp = pss->temp;
         unsigned char *tempu = (unsigned char*)temp;
-        const int opt = pss->opt;
+        //const int opt = pss->opt;
         const int pscrn = pss->pscrn;
         const int fapprox = pss->fapprox;
-//      void (*uc2s)(const unsigned char*, const int, float*);
-//      void (*computeNetwork0)(const float*, const float*, unsigned char *d);
+        void (*uc2s)(const unsigned char*, const int, float*);
+        void (*computeNetwork0)(const float*, const float*, unsigned char *d);
         int (*processLine0)(const unsigned char*, int, unsigned char*, const unsigned char*, const int);
-        if (opt == 1)
+#if NNEDI3_OPT == 1
                 processLine0 = processLine0_C;
-        else
+#else
                 processLine0 = processLine0_SSE2;
+#endif //NNEDI3_OPT
         if (pscrn < 2) { // original prescreener
                 if (fapprox&1) { // int16 dot products
-                        if (opt == 1) {
                                 uc2s = uc2s48_C;
                                 computeNetwork0 = computeNetwork0_i16_C;
-                        } else {
-//                                uc2s = uc2s48_SSE2;
-//                                computeNetwork0 = computeNetwork0_i16_SSE2;
-                        }
                 } else {
-                        if (opt == 1) {
                                 uc2s = uc2f48_C;
                                 computeNetwork0 = computeNetwork0_C;
-                        } else {
-//                                uc2s = uc2f48_SSE2;
-//                                computeNetwork0 = computeNetwork0_SSE2;
-                        }
                 }
         } else { // new prescreener
                 // only int16 dot products
                 //it uses this one
-                if (opt == 1) {
+#if NNEDI3_OPT == 1
                         uc2s = uc2s64_C;
                         computeNetwork0 = computeNetwork0new_C;
-                } else {
+#else
                         uc2s = uc2s64_SSE2;
                         computeNetwork0 = computeNetwork0new_SSE2;
-                }
+#endif //NNEDI3_OPT
         }
 
         for (int b=0; b<3; ++b) {

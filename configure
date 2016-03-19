@@ -16,6 +16,7 @@ Options:
   --cross-prefix=PREFIX   use PREFIX for compilation tools [none]
 
   --disable-nnedi3        disable NNEDI3 deinterlacer
+  --disable-nnedi3-asm    don't compile NNEDI3 deinterlacer assembler code
   --external-weights      use external NNEDI3 weights file
 
   --enable-debug          compile with debug symbols and never strip
@@ -49,6 +50,7 @@ test -n "$QMAKE" || QMAKE="qmake"
 
 
 nnedi3="enabled"
+nnedi3_asm="enabled"
 external_nnedi3_weights="disabled"
 debug="disabled"
 for opt; do
@@ -74,6 +76,9 @@ for opt; do
             ;;
         --disable-nnedi3)
             nnedi3="disabled"
+            ;;
+        --disable-nnedi3-asm)
+            nnedi3_asm="disabled"
             ;;
         --external-weights)
             external_nnedi3_weights="enabled"
@@ -179,7 +184,8 @@ esac
 
 if [ "${TARGET_OS}${bits}" = "linux32" ] || \
    [ "${TARGET_OS}${bits}" = "windows64" ]; then
-    nnedi3="disabled"
+    nnedi3_asm="disabled"
+    NNEDI3_OPT="'NNEDI3_OPT=1'"
 fi
 if [ "$nnedi3" = "enabled" ]; then
     WITH_NNEDI3="'WITH_NNEDI3'"
@@ -202,7 +208,8 @@ CONFIG += c++11
 TARGET = yua
 TEMPLATE = app
 
-DEFINES += 'YUA_VERSION=\'\"$yua_version\"\'' $WITH_NNEDI3 $EXTERNAL_NNEDI3_WEIGHTS $DATAROOTDIR
+DEFINES += 'YUA_VERSION=\'\"$yua_version\"\'' $DATAROOTDIR
+DEFINES += $WITH_NNEDI3 $EXTERNAL_NNEDI3_WEIGHTS $NNEDI3_OPT
 
 SOURCES += main.cpp\
     yua.cpp \
@@ -285,8 +292,18 @@ if [ "$nnedi3" = "enabled" ]; then
     cat <<__YUA_PRO >> src/yua.pro.in
 SOURCES += nnedi3.cpp \
     nnedi3_worker.cpp \
-    nnedi3_worker_step2.cpp \
-    nnedi3/nnedi3_extract_m8_i16_SSE2${asm_suffix}.s \
+    nnedi3_worker_step2.cpp
+
+HEADERS += nnedi3.h \
+    nnedi3_worker.h \
+    nnedi3/nnedi3_constants.h
+
+__YUA_PRO
+fi
+
+if [ "$nnedi3" = "enabled" ] && [ "$nnedi3_asm" = "enabled" ]; then
+    cat <<__YUA_PRO >> src/yua.pro.in
+SOURCES += nnedi3/nnedi3_extract_m8_i16_SSE2${asm_suffix}.s \
     nnedi3/nnedi3_castScale_SSE${asm_suffix}.s \
     nnedi3/nnedi3_computeNetwork0new_SSE2${asm_suffix}.s \
     nnedi3/nnedi3_dotProd_m32_m16_i16_SSE2${asm_suffix}.s \
@@ -294,11 +311,6 @@ SOURCES += nnedi3.cpp \
     nnedi3/nnedi3_uc2s64_SSE2${asm_suffix}.s \
     nnedi3/nnedi3_weightedAvgElliottMul5_m16_SSE2${asm_suffix}.s \
     nnedi3/nnedi3_processLine0_SSE2${asm_suffix}.s
-
-HEADERS += nnedi3.h \
-    nnedi3_worker.h \
-    nnedi3/nnedi3_constants.h
-
 __YUA_PRO
 fi
 

@@ -57,7 +57,6 @@ FFMPEG_CONFFLAGS = \
 
 MP4BOX_CONFFLAGS = \
 		--extra-cflags='-Wall -Wno-unused-but-set-variable -Wno-maybe-uninitialized $(CFLAGS) $(CPPFLAGS)' \
-		--extra-ldflags='$(LDFLAGS) -Wl,--allow-multiple-definition' \
 		--static-modules \
 		--static-mp4box \
 		--strip \
@@ -100,9 +99,11 @@ FFMPEG_CONFFLAGS += --target-os=mingw32 \
 					--disable-pthreads \
 					--enable-w32threads
 MP4BOX_CONFFLAGS += --use-zlib=internal \
+					--extra-ldflags='$(LDFLAGS) -municode -Wl,--allow-multiple-definition' \
 					--extra-libs="-lz -lws2_32 -lwinmm"
 else
-MP4BOX_CONFFLAGS += --extra-libs="-lz -lm"
+MP4BOX_CONFFLAGS += --extra-ldflags='$(LDFLAGS) -Wl,--allow-multiple-definition' \
+					--extra-libs="-lz -lm"
 endif
 
 
@@ -182,10 +183,6 @@ download:
 	[ -d ffmpeg ] || git clone -b release/2.8 --depth 1 "https://github.com/FFmpeg/FFmpeg" ffmpeg
 	[ -d fdk-aac ] || git clone --depth 1 "git://git.code.sf.net/p/opencore-amr/fdk-aac"
 	[ -d gpac ] || git clone --depth 1 "https://github.com/gpac/gpac"
-ifeq ($(TARGET_OS),windows)
-	[ -f gpac/.patch_applied ] || (cd gpac && \
-		patch -p1 < ../gpac-mingw32.patch && touch .patch_applied)
-endif
 
 CLEANFILES = yua *.exe src/yua src/*.exe src/*.o src/moc_*.cpp src/qrc_*.cpp \
 	src/yua_plugin_import.cpp src/object_script.yua.* src/debug src/release \
