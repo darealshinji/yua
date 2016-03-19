@@ -58,9 +58,9 @@ void NNEDI3_Worker::step_2() {
                                         wae5(temp,nns,mstd);
                                 }
 #if NNEDI3_OPT > 1
-                                        castScale_SSE(mstd,&scale,dstp+x);
+                                castScale_SSE(mstd,&scale,dstp+x);
 #else
-                                        dstp[x] = std::min(std::max((int)(mstd[3]*scale+0.5f),0),255);
+                                dstp[x] = std::min(std::max((int)(mstd[3]*scale+0.5f),0),255);
 #endif //NNEDI3_OPT
                         }
                         srcpp += src_pitch*2;

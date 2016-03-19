@@ -8,10 +8,10 @@
 #include "nnedi3/nnedi3_constants.h"
 
 #ifndef NNEDI3_OPT
-// 0 autodetect
-// 1 no assembly (c only)
-// 2 SSE2
-#define NNEDI3_OPT 2
+        // 0 autodetect
+        // 1 no assembly (c only)
+        // 2 SSE2
+        #define NNEDI3_OPT 2
 #endif
 
 

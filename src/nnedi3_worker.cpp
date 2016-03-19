@@ -133,27 +133,27 @@ void NNEDI3_Worker::step_1() {
         void (*computeNetwork0)(const float*, const float*, unsigned char *d);
         int (*processLine0)(const unsigned char*, int, unsigned char*, const unsigned char*, const int);
 #if NNEDI3_OPT == 1
-                processLine0 = processLine0_C;
+        processLine0 = processLine0_C;
 #else
-                processLine0 = processLine0_SSE2;
+        processLine0 = processLine0_SSE2;
 #endif //NNEDI3_OPT
         if (pscrn < 2) { // original prescreener
                 if (fapprox&1) { // int16 dot products
-                                uc2s = uc2s48_C;
-                                computeNetwork0 = computeNetwork0_i16_C;
+                        uc2s = uc2s48_C;
+                        computeNetwork0 = computeNetwork0_i16_C;
                 } else {
-                                uc2s = uc2f48_C;
-                                computeNetwork0 = computeNetwork0_C;
+                        uc2s = uc2f48_C;
+                        computeNetwork0 = computeNetwork0_C;
                 }
         } else { // new prescreener
                 // only int16 dot products
                 //it uses this one
 #if NNEDI3_OPT == 1
-                        uc2s = uc2s64_C;
-                        computeNetwork0 = computeNetwork0new_C;
+                uc2s = uc2s64_C;
+                computeNetwork0 = computeNetwork0new_C;
 #else
-                        uc2s = uc2s64_SSE2;
-                        computeNetwork0 = computeNetwork0new_SSE2;
+                uc2s = uc2s64_SSE2;
+                computeNetwork0 = computeNetwork0new_SSE2;
 #endif //NNEDI3_OPT
         }
 

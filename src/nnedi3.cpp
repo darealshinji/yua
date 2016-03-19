@@ -216,13 +216,13 @@ NNEDI3::NNEDI3(int width, int half_height, QObject *parent)
                         memcpy(wf+4,bdata+4*48,(dims0-4*48)*sizeof(float));
 #if NNEDI3_OPT > 1
                         // shuffle weight order for asm
-                                short *rs = (short*)malloc(dims0*sizeof(float));
-                                memcpy(rs,weights0,dims0*sizeof(float));
-                                for (int j=0; j<4; ++j)
-                                        for (int k=0; k<48; ++k)
-                                                ws[(k>>3)*32+j*8+(k&7)] = rs[j*48+k];
-                                shufflePreScrnL2L3(wf+8,((float*)&rs[4*48])+8);
-                                free(rs);
+                        short *rs = (short*)malloc(dims0*sizeof(float));
+                        memcpy(rs,weights0,dims0*sizeof(float));
+                        for (int j=0; j<4; ++j)
+                                for (int k=0; k<48; ++k)
+                                        ws[(k>>3)*32+j*8+(k&7)] = rs[j*48+k];
+                        shufflePreScrnL2L3(wf+8,((float*)&rs[4*48])+8);
+                        free(rs);
 #endif //NNEDI3_OPT
                 } else { // use float dot products in first layer
 			// Factor mean removal and 1.0/127.5 scaling 
@@ -233,14 +233,14 @@ NNEDI3::NNEDI3(int width, int half_height, QObject *parent)
 			memcpy(weights0+4*48,bdata+4*48,(dims0-4*48)*sizeof(float));
 #if NNEDI3_OPT > 1
                         // shuffle weight order for asm
-                                float *wf = weights0;
-                                float *rf = (float*)malloc(dims0*sizeof(float));
-                                memcpy(rf,weights0,dims0*sizeof(float));
-                                for (int j=0; j<4; ++j)
-                                        for (int k=0; k<48; ++k)
-                                                wf[(k>>2)*16+j*4+(k&3)] = rf[j*48+k];
-                                shufflePreScrnL2L3(wf+4*49,rf+4*49);
-                                free(rf);
+                        float *wf = weights0;
+                        float *rf = (float*)malloc(dims0*sizeof(float));
+                        memcpy(rf,weights0,dims0*sizeof(float));
+                        for (int j=0; j<4; ++j)
+                                for (int k=0; k<48; ++k)
+                                        wf[(k>>2)*16+j*4+(k&3)] = rf[j*48+k];
+                        shufflePreScrnL2L3(wf+4*49,rf+4*49);
+                        free(rf);
 #endif //NNEDI3_OPT
                 }
 	}
@@ -293,12 +293,12 @@ NNEDI3::NNEDI3(int width, int half_height, QObject *parent)
 			}
 #if NNEDI3_OPT > 1
                         // shuffle weight order for asm
-                                short *rs = (short*)malloc(nnst*2*asize*sizeof(short));
-                                memcpy(rs,ws,nnst*2*asize*sizeof(short));
-                                for (int j=0; j<nnst*2; ++j)
-                                        for (int k=0; k<asize; ++k)
-                                                ws[(j>>2)*asize*4+(k>>3)*32+(j&3)*8+(k&7)] = rs[j*asize+k];
-                                free(rs);
+                        short *rs = (short*)malloc(nnst*2*asize*sizeof(short));
+                        memcpy(rs,ws,nnst*2*asize*sizeof(short));
+                        for (int j=0; j<nnst*2; ++j)
+                                for (int k=0; k<asize; ++k)
+                                        ws[(j>>2)*asize*4+(k>>3)*32+(j&3)*8+(k&7)] = rs[j*asize+k];
+                        free(rs);
 #endif //NNEDI3_OPT
                 } else { // use float dot products
 			// Factor mean removal into weights, and remove global
@@ -308,10 +308,10 @@ NNEDI3::NNEDI3(int width, int half_height, QObject *parent)
 					const double q = j < nnst ? mean[k] : 0.0;
 #if NNEDI3_OPT > 1
                                         // shuffle weight order for asm
-                                                weights1[i][(j>>2)*asize*4+(k>>2)*16+(j&3)*4+(k&3)] =
-                                                        bdataT[j*asize+k]-mean[asize+1+j]-q;
+                                        weights1[i][(j>>2)*asize*4+(k>>2)*16+(j&3)*4+(k&3)] =
+                                                bdataT[j*asize+k]-mean[asize+1+j]-q;
 #else
-                                                weights1[i][j*asize+k] = bdataT[j*asize+k]-mean[asize+1+j]-q;
+                                        weights1[i][j*asize+k] = bdataT[j*asize+k]-mean[asize+1+j]-q;
 #endif //NNEDI3_OPT
 				}
 				weights1[i][boff+j] = bdataT[boff+j]-(j<nnst?mean[asize]:0.0);
