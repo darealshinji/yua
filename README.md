@@ -7,7 +7,7 @@ Homepage: https://forum.speeddemosarchive.com/post/yua3.html
 
 Build
 -----
-Install build dependencies: `sudo apt-get install build-essential autoconf automake libtool git upx-ucl zlib1g-dev`<br>
+Install build dependencies: `sudo apt-get install build-essential autoconf automake libtool git upx-ucl yasm zlib1g-dev`<br>
 `qtbase5-dev libqt5opengl5-dev` (Qt5)<br>
 `libqt4-dev libqt4-opengl-dev` (Qt4)
 

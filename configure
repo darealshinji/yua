@@ -16,25 +16,29 @@ Options:
   --cross-prefix=PREFIX   use PREFIX for compilation tools [none]
 
   --disable-nnedi3        disable NNEDI3 deinterlacer
-  --disable-nnedi3-asm    don't compile NNEDI3 deinterlacer assembler code
+  --disable-nnedi3-asm    disable NNEDI3 assembly optimizations
   --external-weights      use external NNEDI3 weights file
 
-  --enable-debug          compile with debug symbols and never strip
+  --disable-asm           disable all assembly optimizations (affects x264,
+                          ffmpeg and NNEDI3)
+  --enable-debug          compile with debugging enabled and never strip
 
 Some influential environment variables:
-  CC          C compiler command
-  CFLAGS      C compiler flags
-  CXX         C++ compiler command
-  CXXFLAGS    C++ compiler flags
-  LDFLAGS     linker flags, e.g. -L<lib dir> if you have libraries in a
-              nonstandard directory <lib dir>
-  LIBS        libraries to pass to the linker, e.g. -l<library>
-  CPPFLAGS    (Objective) C/C++ preprocessor flags, e.g. -I<include dir> if
-              you have headers in a nonstandard directory <include dir>
-  CPP         C preprocessor
-  LD          linker command
-  AR          ar command
-  QMAKE       qmake command
+  CC              C compiler command
+  CFLAGS          C compiler flags
+  CXX             C++ compiler command
+  CXXFLAGS        C++ compiler flags
+  LDFLAGS         linker flags, e.g. -L<lib dir> if you have libraries in a
+                  nonstandard directory <lib dir>
+  LIBS            libraries to pass to the linker, e.g. -l<library>
+  CPPFLAGS        (Objective) C/C++ preprocessor flags, e.g. -I<include dir> if
+                  you have headers in a nonstandard directory <include dir>
+  CPP             C preprocessor
+  LD              linker command
+  AR              ar command
+  PKG_CONFIG      pkg-config tool
+  QMAKE           qmake command
+  YASM            yasm assembler
 EOF
 exit 1
 fi
@@ -47,11 +51,13 @@ test -n "$LD" || LD="ld"
 test -n "$AR" || AR="ar"
 test -n "$PKG_CONFIG" || PKG_CONFIG="pkg-config"
 test -n "$QMAKE" || QMAKE="qmake"
+test -n "$YASM" || YASM="yasm"
 
 
 nnedi3="enabled"
 nnedi3_asm="enabled"
 external_nnedi3_weights="disabled"
+asm="enabled"
 debug="disabled"
 for opt; do
     optarg="${opt#*=}"
@@ -83,6 +89,10 @@ for opt; do
         --external-weights)
             external_nnedi3_weights="enabled"
             ;;
+        --disable-asm)
+            nnedi3_asm="disabled"
+            asm="disabled"
+            ;;
         --enable-debug)
             debug="enabled"
             ;;
@@ -95,6 +105,12 @@ done
 test -n "$prefix" || prefix="/usr/local"
 test -n "$bindir" || bindir='${PREFIX}/bin'
 test -n "$datarootdir" || datarootdir='${PREFIX}/share'
+
+yasm --version 2>/dev/null >/dev/null
+if [ $? -ne 0 ]; then
+    nnedi3_asm="disabled"
+    asm="disabled"
+fi
 
 
 for ext in guess sub; do
@@ -148,7 +164,9 @@ case $arch in
         exit 1
 esac
 
-if [ "$target_triplet" != "$build_triplet" ]; then
+if [ "$target_triplet" = "$build_triplet" ]; then
+    CROSS_BUILD="no"
+else
     test -n "$cross" || cross="${target_triplet}-"
     CROSS_BUILD="yes"
     CFLAGS="-m$bits $CFLAGS"
@@ -161,6 +179,7 @@ case $target_triplet in
         TARGET_OS="linux"
         CFLAGS="$CFLAGS -fstack-protector"
         CXXFLAGS="$CXXFLAGS -fstack-protector"
+        CPPFLAGS="$CPPFLAGS -D_FORTIFY_SOURCE=2"
         LDFLAGS="$LDFLAGS -Wl,-z,relro"
         asm_suffix="_linux"
         if [ "$bits" = "64" ]; then
@@ -350,6 +369,8 @@ DATAROOTDIR = $datarootdir
 NNEDI3      = $nnedi3
 EXTERNAL_NNEDI3_WEIGHTS = $external_nnedi3_weights
 
+ASM         = $asm
+
 CC          = \$(CROSS)$CC
 CXX         = \$(CROSS)$CXX
 CPP         = \$(CROSS)$CPP
@@ -357,12 +378,44 @@ LD          = \$(CROSS)$LD
 AR          = \$(CROSS)$AR
 PKG_CONFIG  = \$(CROSS)$PKG_CONFIG
 QMAKE       = \$(CROSS)$QMAKE
+YASM        = \$(CROSS)$YASM
 
 CFLAGS      = $CFLAGS $save_CFLAGS
 CXXFLAGS    = $CXXFLAGS $save_CXXFLAGS
 CPPFLAGS    = $CPPFLAGS $save_CPPFLAGS
 LDFLAGS     = $LDFLAGS $save_LDFLAGS
 __CONFIG
-echo
-cat config.mak
+
+cat <<EOL
+build triplet...............: $build_triplet
+target (host) triplet.......: $target_triplet
+cross building..............: $CROSS_BUILD
+cross prefix................: $cross
+exe extension...............: $exeext
+
+install prefix..............: $prefix
+user executables............: $bindir
+arch-indep. data root files.: $datarootdir
+
+NNEDI3 deinterlacing........: $nnedi3
+external NNEDI3 weights file: $external_nnedi3_weights
+NEDI3 assembly optimizations: $nnedi3_asm
+
+debugging symbols...........: $debug
+assembly optimizations......: $asm
+
+C compiler..................: $CROSS$CC
+C++ compiler................: $CROSS$CXX
+C preprocessor..............: $CROSS$CPP
+linker......................: $CROSS$LD
+ar command..................: $CROSS$AR
+pkg-config tool.............: $CROSS$PKG_CONFIG
+qmake command...............: $CROSS$QMAKE
+yasm assembler..............: $CROSS$YASM
+
+C compiler flags............: $CFLAGS $save_CFLAGS
+C++ compiler flags..........: $CXXFLAGS $save_CXXFLAGS
+C/C++ preprocessor flags....: $CPPFLAGS $save_CPPFLAGS
+linker flags................: $LDFLAGS $save_LDFLAGS
+EOL
 

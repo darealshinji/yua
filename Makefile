@@ -79,6 +79,12 @@ MP4BOX_CONFFLAGS = \
 		--use-a52=no
 
 
+ifeq ($(ASM),disabled)
+X264_CONFFLAGS   += --disable-asm
+FFMPEG_CONFFLAGS += --disable-asm
+endif
+
+
 ifeq ($(CROSS_BUILD),yes)
 FDK_CONFFLAGS    += --host=$(TARGET) \
 					--build=$(BUILD)
