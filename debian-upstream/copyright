@@ -4,13 +4,13 @@ Upstream-Contact: https://forum.speeddemosarchive.com/post/yua3.html
 Source: https://github.com/darealshinji/yua
 
 Files: src/*
-Copyright: 2013-2015 Taiga Software LLC
+Copyright: 2013-2016 Taiga Software LLC
 License: GPL-2+
 
 Files: *
        share/*
-Copyright: 2013-2015 Taiga Software LLC
-           2014-2015 djcj <djcj@gmx.de>
+Copyright: 2013-2016 Taiga Software LLC
+           2014-2016 djcj <djcj@gmx.de>
 License: GPL-2+
 
 Files: src/helpers/nnedi3_weights.bin
@@ -22,7 +22,7 @@ Comment:
  He doesn't claim any copyright.
 
 Files: debian/*
-Copyright: 2014-2015 djcj <djcj@gmx.de>
+Copyright: 2014-2016 djcj <djcj@gmx.de>
 License: GPL-2+
 
 License: GPL-2+

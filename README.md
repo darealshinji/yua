@@ -8,8 +8,8 @@ Homepage: https://forum.speeddemosarchive.com/post/yua3.html
 Build
 -----
 Install build dependencies: `sudo apt-get install build-essential autoconf automake libtool git upx-ucl yasm zlib1g-dev`<br>
-`qtbase5-dev libqt5opengl5-dev` (Qt5)<br>
-`libqt4-dev libqt4-opengl-dev` (Qt4)
+`qt5-default qtbase5-dev libqt5opengl5-dev` (Qt5)<br>
+`qt4-default libqt4-dev libqt4-opengl-dev` (Qt4)
 
 In most cases a simple `./configure && make && make install` should do it.
 
@@ -24,7 +24,7 @@ make -j4
 
 Copyright
 ---------
-Copyright (C) 2013-2015 Taiga Software LLC
+Copyright (C) 2013-2016 Taiga Software LLC
 
 Authors are Nathan 'nate' Jahnke and partially djcj <djcj@gmx.de>.
 
