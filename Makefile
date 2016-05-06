@@ -184,8 +184,9 @@ gpac/bin/gcc/mp4box$(EXEEXT): download
 ffmpeg/ffmpeg$(EXEEXT): x264/libx264.a fdk-aac/.libs/libfdk-aac.a
 	[ -f $@ ] || (cd ffmpeg && ./configure $(FFMPEG_CONFFLAGS) && $(MAKE))
 
+# checkout x264 w/o `--depth 1' to get the full revision
 download:
-	[ -d x264 ] || git clone --depth 1 "git://git.videolan.org/x264.git"
+	[ -d x264 ] || git clone "git://git.videolan.org/x264.git"
 	[ -d ffmpeg ] || git clone -b release/2.8 --depth 1 "https://github.com/FFmpeg/FFmpeg" ffmpeg
 	[ -d fdk-aac ] || git clone --depth 1 "git://git.code.sf.net/p/opencore-amr/fdk-aac"
 	[ -d gpac ] || git clone --depth 1 "https://github.com/gpac/gpac"
